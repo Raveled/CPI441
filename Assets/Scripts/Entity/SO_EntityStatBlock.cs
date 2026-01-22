@@ -11,7 +11,7 @@ public class SO_EntityStatBlock : ScriptableObject
     [SerializeField] float baseDefaultAttackCooldown;
 
     //Getters (Ex. x = statblock.BaseHitPoints;)
-    public int goldReward { get { return goldReward; } }
+    public int GoldReward { get { return goldReward; } }
     public int BaseHitPoints { get { return baseHitPoints; } }
     public float BaseMoveSpeed { get { return baseMoveSpeed; } }
     public int BaseAttackPower { get { return baseAttackPower; } }
