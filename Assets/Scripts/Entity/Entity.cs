@@ -27,7 +27,7 @@ public class Entity : MonoBehaviour
     //Assigns stats to GameObject based on the SO_EntityStatBlock
     private void SetupStats() {
         statBlock = Object.Instantiate(statBlock);
-        goldReward = statBlock.goldReward;
+        goldReward = statBlock.GoldReward;
         maximumHitPoints = statBlock.BaseHitPoints;
         currentHitPoints = maximumHitPoints;
         moveSpeed = statBlock.BaseMoveSpeed;
