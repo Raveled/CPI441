@@ -2,23 +2,24 @@ using UnityEngine;
 
 public class Entity : MonoBehaviour
 {
+    public enum Team : int { NULL = 0, TEAM1 = 1, TEAM2 = 2, NEUTRAL = 3 };
+    //Required Setup when script is added to an object
+    [Header("Setup")]
+    [SerializeField] protected string entityName = "";
+    [SerializeField] protected SO_EntityStatBlock statBlock = null;
+    [SerializeField] protected Team team = Team.NULL;
+    [SerializeField] protected bool canMove = true;
+    [SerializeField] protected bool canDefaultAttack = true;
+    [Space]
     //Stats that are visible in editor
-    [Header("DEBUG - DON'T SET IN EDITOR")]
+    [Header("Entity Debug")]
     [SerializeField] protected int goldReward = 0;
     [SerializeField] protected int maximumHitPoints = 0;
     [SerializeField] protected int currentHitPoints = 0;
     [SerializeField] protected float moveSpeed = 0;
     [SerializeField] protected int attackPower = 0;
     [SerializeField] protected float defaultAttackCooldown = 0;
-    [Space]
-    //Required Setup when script is added to an object
-    [Header("Setup")]
-    [SerializeField] protected string entityName = "";
-    [SerializeField] protected SO_EntityStatBlock statBlock = null;
-    public enum Team : int { NULL = 0, Team1 = 1, Team2 = 2, Neutral = 3 };
-    [SerializeField] protected Team team = Team.NULL;
-    [SerializeField] protected bool canMove = true;
-    [SerializeField] protected bool canDefaultAttack = true;
+    [SerializeField] protected bool isDead = false;
 
     //In subclasses, must use "base.Start()" line to call this
     protected virtual void Start() {
@@ -35,14 +36,14 @@ public class Entity : MonoBehaviour
         defaultAttackCooldown = statBlock.BaseDefaultAttackCooldown;
     }
     //Basic logic for entity taking damage
-    protected virtual void TakeDamage(int damage, GameObject damageOrigin) {
+    protected virtual void TakeDamage(int damage, Entity damageOrigin) {
         currentHitPoints -= damage;
         if(currentHitPoints <= 0) {
             DestroyThis(damageOrigin);
         }
     }
     //Basic logic for dying/destroying self
-    protected virtual void DestroyThis(GameObject damageOrigin) {
+    protected virtual void DestroyThis(Entity damageOrigin) {
         Destroy(gameObject);
     }
     #region Getters
@@ -51,6 +52,9 @@ public class Entity : MonoBehaviour
     }
     public string GetName() {
         return name;
+    }
+    public bool GetIsDead() {
+        return isDead;
     }
     #endregion
 }

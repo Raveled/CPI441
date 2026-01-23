@@ -1,0 +1,79 @@
+using UnityEngine;
+
+public class Creep : NonPlayerEntity 
+{
+    [Header("Creep Setup")]
+    [SerializeField] Transform patrolOrigin = null; //assigned by spawner
+    [SerializeField] float patrolRange = 10f;
+    [Space]
+    [Header("Creep Debug")]
+    [SerializeField] bool showPatrolRange = false;
+    [Space]
+    [SerializeField] bool isActive = false;
+    [SerializeField] CreepSpawner connectedSpawner = null;
+    protected override void Start() {
+        base.Start();
+    }
+    void Update()
+    {
+        Move();
+        CheckPatrolRange();
+        CheckTargetRange();
+        AttackTimer();
+        Attack();
+    }
+    //Continuously check to see if in patrol range
+    void CheckPatrolRange() {
+        //WIP
+        if(Vector3.Distance(transform.position, patrolOrigin.position) > patrolRange) {
+            //return to patrol
+        }
+    }
+    void CheckTargetRange() {
+        if (target) {
+            if (Vector3.Distance(attackRangeOrigin.position, target.position) > attackRange) {
+                target = null;
+                isActive = false;
+            }
+        }
+    }
+    protected override void Move() {
+        //WIP
+        if(isActive && target) {
+            //move
+        }
+    }
+    protected override void Attack() {
+        //WIP
+        if(isActive && target && attackCooldownTimer <= 0) {
+            //attack
+        }
+    }
+    protected override void DistributeGoldReward() {
+        //WIP
+    }
+    protected override void TakeDamage(int damage, Entity damageOrigin) {
+        isActive = true;
+        //if origin is of type player, then: target is = to that player
+        base.TakeDamage(damage, damageOrigin);
+    }
+    protected override void DestroyThis(Entity damageOrigin) {
+        connectedSpawner.CreepDied();
+        base.DestroyThis(damageOrigin);
+    }
+    protected override void OnDrawGizmos() {
+        base.OnDrawGizmos();
+        if (showPatrolRange) {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawWireSphere(patrolOrigin.position, patrolRange);
+        }
+    }
+    #region Setters
+    public void SetPatrolOrigin(Transform origin) {
+        patrolOrigin = origin;
+    }
+    public void SetConnectedSpawner(CreepSpawner spawner) {
+        connectedSpawner = spawner;
+    }
+    #endregion
+}
