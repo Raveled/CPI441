@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db0902f963f2b9c47b983059c623f1b0, type: 3}
   m_Name: Test Minion
   m_EditorClassIdentifier: Assembly-CSharp::SO_EntityStatBlock
-  baseHitPoints: 0
-  baseMoveSpeed: 0
-  baseAttackPower: 0
-  baseDefaultAttackSpeed: 0
+  goldReward: 20
+  baseHitPoints: 100
+  baseMoveSpeed: 10
+  baseAttackPower: 10
+  baseDefaultAttackCooldown: 5

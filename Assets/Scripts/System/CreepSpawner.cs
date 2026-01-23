@@ -21,6 +21,7 @@ public class CreepSpawner : MonoBehaviour
         }
 
         SpawnCreeps();
+        currentCampTimer = maxCampTimer;
     }
     private void Update() {
         CampTimer();

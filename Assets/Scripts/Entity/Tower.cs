@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 
 public class Tower : NonPlayerEntity
 {
@@ -15,19 +16,52 @@ public class Tower : NonPlayerEntity
         AttackTimer();
     }
     protected override void FindTarget() {
-        //WIP
         if (!target) {
-            /*
-             * 1. target closest minion within range
-             * 2. target closest player within range
-             * 3. otherwise null
-             */
+            Entity t = FindClosestEntity<Entity>();
+            if (t) target = t.transform;
         }
     }
+    //Takes general Entity type and returns either closest Minion or Player, prioritizing Minion
+    public T FindClosestEntity<T>() where T : Entity
+    {
+        //WIP-------------------------------------------------------------------------------------------------------
+        T[] found = FindObjectsByType<T>(FindObjectsSortMode.None);
+
+        T closestMinion = null;
+        float minDistanceMinion = Mathf.Infinity;
+        T closestPlayer = null;
+        float minDistancePlayer = Mathf.Infinity;
+
+        for (int i = 0; i < found.Length; i++)
+        {
+            var e = found[i];
+            if (e.GetTeam() != enemyTeam) continue;
+            float distance = Vector3.Distance(attackRangeOrigin.position, e.transform.position);
+            if(e is Minion)
+            {
+                if (distance < minDistanceMinion && distance < attackRange)
+                {
+                    minDistanceMinion = distance;
+                    closestMinion = e;
+                }
+            } else if(e is Entity) //THIS SHOULD BE PLAYER
+            {
+                if (distance < minDistancePlayer && distance < attackRange)
+                {
+                    minDistancePlayer = distance;
+                    closestPlayer = e;
+                }
+            } 
+        }
+        if (closestMinion) return closestMinion;
+        else if (closestPlayer) return closestPlayer;
+        else return null;
+    }
     protected override void Attack() {
-        //WIP
+        //WIP-------------------------------------------------------------------------------------------------------
         if (target && attackCooldownTimer <= 0) {
-            //attack
+            Debug.Log("Is attacking: " + target.gameObject.name);
+            //instantiate bullet
             attackCooldownTimer = defaultAttackCooldown;
         }
     }
@@ -38,11 +72,13 @@ public class Tower : NonPlayerEntity
     }
     //When a player attacks another player within the range of the tower
     public void OverrideTarget(Entity harmedPlayer, Entity damageOrigin) {
-        //WIP
-        /*
-         * ***when a player on same team takes damage, its damage script should call this
-         * 1. if damageOrigin is in tower range, the target immediately becomes them
-         */
+        //WIP-------------------------------------------------------------------------------------------------------
+        //*when player takes damage, find closest tower on same team and call this method on it
+        float distance = Vector3.Distance(harmedPlayer.transform.position, damageOrigin.transform.position);
+        if(distance < attackRange)
+        {
+            target = damageOrigin.transform;
+        }
     }
     //Continuously check if the target is within range or not
     void CheckTargetRange() {
