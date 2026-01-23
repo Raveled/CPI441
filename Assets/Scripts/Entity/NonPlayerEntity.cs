@@ -10,7 +10,9 @@ public class NonPlayerEntity : Entity
     [Space]
     //Debug fields
     [Header("NPE Debug")]
+    [Tooltip("Yellow Circle")]
     [SerializeField] bool showRewardRange = false;
+    [Tooltip("Red Circle")]
     [SerializeField] protected bool showAttackRange = true;
     [Space]
     [SerializeField] protected Transform target;

@@ -7,6 +7,7 @@ public class Creep : NonPlayerEntity
     [SerializeField] float patrolRange = 10f;
     [Space]
     [Header("Creep Debug")]
+    [Tooltip("Blue Circle")]
     [SerializeField] bool showPatrolRange = false;
     [Space]
     [SerializeField] bool isActive = false;

@@ -4,7 +4,8 @@ using UnityEngine.TextCore.Text;
 public class Tower : NonPlayerEntity
 {
     [Header("Tower Setup")]
-    [Tooltip("Only Core & Guardian Tower need this")][SerializeField] Entity protector;
+    [Tooltip("Only Core & Guardian Tower need this")]
+    [SerializeField] Entity protector;
     protected override void Start() {
         base.Start();
     }
