@@ -380,7 +380,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1012119486691316765, guid: 0cf209a00f3d0c14cbfac040977949ab, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 10.51
+      value: 23.32
       objectReference: {fileID: 0}
     - target: {fileID: 1012119486691316765, guid: 0cf209a00f3d0c14cbfac040977949ab, type: 3}
       propertyPath: m_LocalPosition.y
@@ -388,7 +388,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1012119486691316765, guid: 0cf209a00f3d0c14cbfac040977949ab, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 9.47
+      value: 20.66
       objectReference: {fileID: 0}
     - target: {fileID: 1012119486691316765, guid: 0cf209a00f3d0c14cbfac040977949ab, type: 3}
       propertyPath: m_LocalRotation.w
@@ -421,6 +421,14 @@ PrefabInstance:
     - target: {fileID: 3861177414995866693, guid: 0cf209a00f3d0c14cbfac040977949ab, type: 3}
       propertyPath: team
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3861177414995866693, guid: 0cf209a00f3d0c14cbfac040977949ab, type: 3}
+      propertyPath: effectiveTargetRange
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3861177414995866693, guid: 0cf209a00f3d0c14cbfac040977949ab, type: 3}
+      propertyPath: showEffectiveTargetRange
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7434539554110800588, guid: 0cf209a00f3d0c14cbfac040977949ab, type: 3}
       propertyPath: m_Name

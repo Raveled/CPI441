@@ -65,6 +65,13 @@ public class Minion : NonPlayerEntity
             else if (closestMinion) target = closestMinion;
             else if (closestPlayer) target = closestPlayer;
             else target = null; //THIS WOULD BE NEXT POINT ON PATH INSTEAD
+        } else
+        {
+            ////Check to see if target is still in effective range
+            //if (Vector3.Distance(transform.position, target.position) > effectiveTargetRange)
+            //{
+            //    target = null;
+            //}
         }
     }
     protected override void Attack() {
@@ -84,7 +91,7 @@ public class Minion : NonPlayerEntity
         if (showEffectiveTargetRange)
         {
             Gizmos.color = Color.purple;
-            Gizmos.DrawWireSphere(attackRangeOrigin.position, attackRange);
+            Gizmos.DrawWireSphere(transform.position, effectiveTargetRange);
         }
     }
 }
