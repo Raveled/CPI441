@@ -7,6 +7,7 @@ public class Creep : NonPlayerEntity
     [SerializeField] float patrolRange = 10f;
     [Space]
     [Header("Creep Debug")]
+    [Tooltip("Blue Circle")]
     [SerializeField] bool showPatrolRange = false;
     [Space]
     [SerializeField] bool isActive = false;
@@ -24,8 +25,8 @@ public class Creep : NonPlayerEntity
     }
     //Continuously check to see if in patrol range
     void CheckPatrolRange() {
-        //WIP
-        if(Vector3.Distance(transform.position, patrolOrigin.position) > patrolRange) {
+        //WIP-------------------------------------------------------------------------------------------------------
+        if (Vector3.Distance(transform.position, patrolOrigin.position) > patrolRange) {
             //return to patrol
         }
     }
@@ -38,23 +39,28 @@ public class Creep : NonPlayerEntity
         }
     }
     protected override void Move() {
-        //WIP
-        if(isActive && target) {
+        //WIP-------------------------------------------------------------------------------------------------------
+        if (isActive && target) {
             //move
         }
     }
     protected override void Attack() {
-        //WIP
-        if(isActive && target && attackCooldownTimer <= 0) {
+        //WIP-------------------------------------------------------------------------------------------------------
+        if (isActive && target && attackCooldownTimer <= 0) {
             //attack
         }
     }
     protected override void DistributeGoldReward() {
-        //WIP
+        //WIP-------------------------------------------------------------------------------------------------------
+
     }
     protected override void TakeDamage(int damage, Entity damageOrigin) {
+        //WIP-------------------------------------------------------------------------------------------------------
         isActive = true;
-        //if origin is of type player, then: target is = to that player
+        if(damageOrigin is Entity) //THIS SHOULD BE PLAYER
+        {
+            target = damageOrigin.gameObject.transform;
+        }
         base.TakeDamage(damage, damageOrigin);
     }
     protected override void DestroyThis(Entity damageOrigin) {

@@ -10,15 +10,14 @@ public class NonPlayerEntity : Entity
     [Space]
     //Debug fields
     [Header("NPE Debug")]
+    [Tooltip("Yellow Circle")]
     [SerializeField] bool showRewardRange = false;
+    [Tooltip("Red Circle")]
     [SerializeField] protected bool showAttackRange = true;
     [Space]
     [SerializeField] protected Transform target;
     [SerializeField] protected float attackCooldownTimer = 0;
     [SerializeField] protected Team enemyTeam = Team.NULL;
-    [SerializeField] protected Entity closestPlayer = null;
-    [SerializeField] protected Entity closestMinion = null;
-    [SerializeField] protected Entity closestTower = null;
 
     protected override void Start() {
         if (team == Team.TEAM1) {
@@ -37,7 +36,7 @@ public class NonPlayerEntity : Entity
     //Give the gold reward to the closest players in range
     protected virtual void DistributeGoldReward() {
         /*
-         * WIP
+         * WIP-------------------------------------------------------------------------------------------------------
          * ***Use this for minions, maybe do a full split among nearest players for towers/creeps
          * 1. get array of all players in range
          * 2. find up to two closest players within range that is not the damageOrigin
