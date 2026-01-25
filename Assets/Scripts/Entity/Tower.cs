@@ -4,6 +4,8 @@ using UnityEngine.TextCore.Text;
 public class Tower : NonPlayerEntity
 {
     [Header("Tower Setup")]
+    [SerializeField] TowerProjectile towerProjectile = null;
+    [SerializeField] float projectileSpeed = 5f;
     [Tooltip("Only Core & Guardian Tower need this")]
     [SerializeField] Entity protector;
     protected override void Start() {
@@ -59,14 +61,17 @@ public class Tower : NonPlayerEntity
         else return null;
     }
     protected override void Attack() {
-        //WIP-------------------------------------------------------------------------------------------------------
         if (target && attackCooldownTimer <= 0) {
-            Debug.Log("Is attacking: " + target.gameObject.name);
-            //instantiate bullet
             attackCooldownTimer = defaultAttackCooldown;
+            Debug.Log("Is attacking: " + target.gameObject.name);
+            Vector3 direction = (target.position - attackRangeOrigin.position).normalized;
+            Debug.Log("dir vec: " + direction);
+            TowerProjectile proj = Instantiate(towerProjectile, attackRangeOrigin.position, transform.rotation, this.transform);
+            Entity e = new Entity();
+            proj.SpawnSetup(e, 0, Vector3.up, 1  );
         }
     }
-    protected override void TakeDamage(int damage, Entity damageOrigin) {
+    public override void TakeDamage(int damage, Entity damageOrigin) {
         if (!protector || protector.GetIsDead()) {
             base.TakeDamage(damage, damageOrigin);
         }

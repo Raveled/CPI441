@@ -54,7 +54,7 @@ public class Creep : NonPlayerEntity
         //WIP-------------------------------------------------------------------------------------------------------
 
     }
-    protected override void TakeDamage(int damage, Entity damageOrigin) {
+    public override void TakeDamage(int damage, Entity damageOrigin) {
         //WIP-------------------------------------------------------------------------------------------------------
         isActive = true;
         if(damageOrigin is Entity) //THIS SHOULD BE PLAYER

@@ -36,7 +36,7 @@ public class Entity : MonoBehaviour
         defaultAttackCooldown = statBlock.BaseDefaultAttackCooldown;
     }
     //Basic logic for entity taking damage
-    protected virtual void TakeDamage(int damage, Entity damageOrigin) {
+    public virtual void TakeDamage(int damage, Entity damageOrigin) {
         currentHitPoints -= damage;
         if(currentHitPoints <= 0) {
             DestroyThis(damageOrigin);

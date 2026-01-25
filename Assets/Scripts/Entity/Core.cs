@@ -10,7 +10,7 @@ public class Core : NonPlayerEntity
         gameManager = FindFirstObjectByType<GameManager>();
         base.Start();
     }
-    protected override void TakeDamage(int damage, Entity damageOrigin) {
+    public override void TakeDamage(int damage, Entity damageOrigin) {
         if (!protector || protector.GetIsDead()) {
             base.TakeDamage(damage, damageOrigin);
         }
