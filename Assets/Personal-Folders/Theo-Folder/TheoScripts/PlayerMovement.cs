@@ -45,6 +45,12 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         MoveInput = move.action.ReadValue<Vector2>();
+
+        // Debug visualization using collider center
+        Collider col = GetComponent<Collider>();
+        Vector3 origin = col.bounds.center + Vector3.down * (col.bounds.extents.y + distanceOffset);
+        bool grounded = Physics.Raycast(origin, Vector3.down, groundCheckDistance, groundLayer);
+        Debug.DrawRay(origin, Vector3.down * groundCheckDistance, grounded ? Color.green : Color.red);
     }
 
     void FixedUpdate()
@@ -81,8 +87,10 @@ public class PlayerMovement : MonoBehaviour
 
     public bool IsGrounded()
     {
-        Debug.Log("IsGrounded!");
-        Vector3 origin = transform.position + Vector3.down * distanceOffset;
+        // Use collider bounds center instead of transform.position
+        Collider col = GetComponent<Collider>();
+        Vector3 origin = col.bounds.center + Vector3.down * (col.bounds.extents.y + distanceOffset);
+
         bool grounded = Physics.Raycast(origin, Vector3.down, groundCheckDistance, groundLayer);
         Debug.DrawRay(origin, Vector3.down * groundCheckDistance, grounded ? Color.green : Color.red);
         return grounded;
