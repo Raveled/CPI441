@@ -41,7 +41,6 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-
         //testing
         Vector3 origin = transform.position + Vector3.down * distanceOffset;
         bool grounded = Physics.Raycast(origin, Vector3.down, groundCheckDistance, groundLayer);

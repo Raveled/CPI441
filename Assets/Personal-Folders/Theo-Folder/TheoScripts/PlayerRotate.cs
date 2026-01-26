@@ -1,5 +1,5 @@
 // ******************************************* //
-// ****** THEO XENAKIS - 2026 - CPI441 ****** //
+// ****** THEO XENAKIS - 2026 - CPI 441 ****** //
 // ******************************************* //
 
 using UnityEngine;
@@ -26,7 +26,7 @@ public class PlayerRotate : MonoBehaviour
         rb.freezeRotation = true;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
     }
-    private void FixedUpdate()
+    private void Update()
     {
         if (mainCamera != null)
         {
