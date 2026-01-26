@@ -32,46 +32,40 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        rb.freezeRotation = true; // Ensures the rigidbody does not topple over at the start
+        rb.freezeRotation = true;
+        rb.interpolation = RigidbodyInterpolation.Interpolate; // Keep Interpolate, NOT Extrapolate
 
-        // Lock the cursor to the center of the screen & Hide it
+        // Add these physics settings
+        rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
     void Update()
     {
-        //testing
-        Vector3 origin = transform.position + Vector3.down * distanceOffset;
-        bool grounded = Physics.Raycast(origin, Vector3.down, groundCheckDistance, groundLayer);
-        Debug.DrawRay(origin, Vector3.down * groundCheckDistance, grounded ? Color.green : Color.red);
-        //testing done
-
         MoveInput = move.action.ReadValue<Vector2>();
+    }
 
-        // Get the velocity and input direction in local space, transform into world space and then set the final horizontal velocity
-        Vector3 currentVel = rb.linearVelocity;
-
+    void FixedUpdate()
+    {
         Vector3 inputDir = new Vector3(MoveInput.x, 0f, MoveInput.y);
-
         Vector3 worldDir = transform.TransformDirection(inputDir.normalized);
 
-        Vector3 horizontalVel = worldDir * moveSpeed;
-
-        // Apply the velocity values to the rigidbody
+        // CRITICAL: Set velocity directly, don't modify existing velocity
         rb.linearVelocity = new Vector3(
-            horizontalVel.x,
-            currentVel.y,   // keep gravity / jump
-            horizontalVel.z
+            worldDir.x * moveSpeed,
+            rb.linearVelocity.y, // Preserve vertical velocity for gravity/jumping
+            worldDir.z * moveSpeed
         );
 
         if (jumpQueued && IsGrounded())
         {
-            Debug.Log("Jumping!");
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
             jumpQueued = false;
         }
     }
+
 
     // **************************************************** //
     // *** Jump Action *** //
