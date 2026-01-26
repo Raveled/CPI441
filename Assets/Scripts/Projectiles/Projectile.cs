@@ -16,19 +16,20 @@ public class Projectile : MonoBehaviour
     protected Rigidbody rb;
     protected virtual void Start()
     {
+        //Init
         rb = GetComponent<Rigidbody>();
         enemyTeams = new List<Entity.Team>();
     }
     //Called by the script that spawns this object
     public virtual void SpawnSetup(Entity owner, int damage, Vector3 direction, float speed)
     {
-        Debug.Log(owner.name);
-
+        //Setup
         this.owner = owner;
         this.damage = damage;
         team = owner.GetTeam();
         rb.linearVelocity = direction.normalized * speed;
 
+        //Set Enemy Team
         if (team == Entity.Team.TEAM1)
         {
             enemyTeams.Add(Entity.Team.TEAM2);

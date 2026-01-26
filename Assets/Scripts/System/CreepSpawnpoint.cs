@@ -10,6 +10,7 @@ public class CreepSpawnpoint : MonoBehaviour
     [Header("Creep Spawnpoint Debug")]
     [SerializeField] bool disableVisualOnStart = true;
     private void Start() {
+        //Disable visual (used for editor only)
         if (disableVisualOnStart) {
             TryGetComponent<MeshRenderer>(out MeshRenderer m);
             m.enabled = false;

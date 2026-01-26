@@ -9,6 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5200355125836496265}
+  - component: {fileID: 5426260684124222954}
+  - component: {fileID: 5055006070050696865}
   m_Layer: 0
   m_Name: Attack Origin
   m_TagString: Untagged
@@ -31,6 +33,43 @@ Transform:
   m_Children: []
   m_Father: {fileID: 52383368268841401}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5426260684124222954
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1436622436811561127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f165c045aa6846428600e6786508a51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NPEDetectLogic
+  showDetectRange: 1
+  detectRange: 5
+  enemyTeams: 
+  enemiesInRange: []
+--- !u!135 &5055006070050696865
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1436622436811561127}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 3
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2166498419418047786
 GameObject:
   m_ObjectHideFlags: 0
@@ -59,7 +98,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -6.21, y: 2.84, z: 10.76}
-  m_LocalScale: {x: 3, y: 3, z: 3}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5200355125836496265}
@@ -85,8 +124,8 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5000001
-  m_Height: 2
+  m_Radius: 1.5
+  m_Height: 6
   m_Direction: 1
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
 --- !u!114 &5180604451610894363
@@ -104,6 +143,7 @@ MonoBehaviour:
   entityName: Tower
   statBlock: {fileID: 11400000, guid: 8cd4546f662ed25459b1a18e4281bdd0, type: 2}
   team: 1
+  enemyTeams: 
   canMove: 0
   canDefaultAttack: 1
   goldReward: 0
@@ -116,12 +156,12 @@ MonoBehaviour:
   rewardRange: 50
   attackRangeOrigin: {fileID: 5200355125836496265}
   attackRange: 10
+  npeDetectLogic: {fileID: 5426260684124222954}
   showRewardRange: 0
-  showAttackRange: 0
+  showAttackRange: 1
   target: {fileID: 0}
   attackCooldownTimer: 0
-  enemyTeam: 0
-  towerProjectile: {fileID: 0}
+  towerProjectile: {fileID: 8089092169863178650, guid: 6ff1fabe97157dd4793400b1e1905ffb, type: 3}
   projectileSpeed: 5
   protector: {fileID: 0}
 --- !u!1 &7460104353030816946
@@ -152,7 +192,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 52383368268841401}

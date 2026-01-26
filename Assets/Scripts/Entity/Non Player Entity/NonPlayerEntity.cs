@@ -7,6 +7,7 @@ public class NonPlayerEntity : Entity
     [SerializeField] float rewardRange = 50f;
     [SerializeField] protected Transform attackRangeOrigin = null;
     [SerializeField] protected float attackRange = 10f;
+    [SerializeField] protected NPEDetectLogic npeDetectLogic = null;
     [Space]
     //Debug fields
     [Header("NPE Debug")]
@@ -17,27 +18,25 @@ public class NonPlayerEntity : Entity
     [Space]
     [SerializeField] protected Transform target;
     [SerializeField] protected float attackCooldownTimer = 0;
-    [SerializeField] protected Team enemyTeam = Team.NULL;
 
     protected override void Start() {
-        if (team == Team.TEAM1) {
-            enemyTeam = Team.TEAM2;
-        } else if (team == Team.TEAM2) {
-            enemyTeam = Team.TEAM1;
-        }
         base.Start();
+        npeDetectLogic.SetEnemyTeams(enemyTeams);
     }
     //Overrided Destroy method
     protected override void DestroyThis(Entity damageOrigin) {
         isDead = true;
+
+        //Give gold to the closest players
         DistributeGoldReward();
+
         base.DestroyThis(damageOrigin);
     }
     //Give the gold reward to the closest players in range
     protected virtual void DistributeGoldReward() {
         /*
          * WIP-------------------------------------------------------------------------------------------------------
-         * ***Use this for minions, maybe do a full split among nearest players for towers/creeps
+         * ***Use this for minions and towers
          * 1. get array of all players in range
          * 2. find up to two closest players within range that is not the damageOrigin
          * 3. Give the 1 or 2 selected players the gold reward
