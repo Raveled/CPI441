@@ -5,6 +5,7 @@ public class NPEDetectLogic : MonoBehaviour
 {
     [Header("Debug")]
     [Tooltip("Green Circle")]
+    [SerializeField] NonPlayerEntity npe = null;
     [SerializeField] bool showDetectRange = false;
     [Tooltip("Always equal to the range of the sphere collider")]
     [SerializeField] float detectRange = 0f;
@@ -12,6 +13,7 @@ public class NPEDetectLogic : MonoBehaviour
     [SerializeField] List<Entity> enemiesInRange = null;
     private void Start() {
         //Init
+        npe = gameObject.transform.parent.GetComponent<NonPlayerEntity>();
         enemiesInRange = new List<Entity>();
         detectRange = GetComponent<SphereCollider>().radius;
     }
@@ -26,7 +28,12 @@ public class NPEDetectLogic : MonoBehaviour
     private void OnTriggerExit(Collider other) {
         //If collision is an enemy entity in range, remove it from the list enemiesInRange
         if (other.gameObject.TryGetComponent<Entity>(out Entity e)) {
-            if (enemiesInRange.Contains(e)) enemiesInRange.Remove(e);
+            if (enemiesInRange.Contains(e)) {
+                enemiesInRange.Remove(e);
+                if(npe.GetTarget() == e) {
+                    npe.ResetTarget();
+                }
+            }
         }
     }
     private void OnDrawGizmos() {

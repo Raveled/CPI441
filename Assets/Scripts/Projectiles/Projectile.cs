@@ -6,19 +6,17 @@ using System.Collections.Generic;
 //Superclass for all projectiles
 public class Projectile : MonoBehaviour
 {
-    //Info when spawned
-    protected Entity owner;
-    protected int damage;
-    protected Entity.Team team;
-    protected List<Entity.Team> enemyTeams;
+    [Header("Projectile Setup")]
+    [Tooltip("Must be set in inspector")]
+    [SerializeField] protected Rigidbody rb;
 
-    //Components
-    protected Rigidbody rb;
-    protected virtual void Start()
-    {
-        //Init
+    //Info when spawned
+    [Header("Projectile Debug")]
+    [SerializeField] protected Entity owner;
+    [SerializeField] protected int damage;
+    [SerializeField] protected List<Entity.Team> enemyTeams;
+    protected virtual void Start() {
         rb = GetComponent<Rigidbody>();
-        enemyTeams = new List<Entity.Team>();
     }
     //Called by the script that spawns this object
     public virtual void SpawnSetup(Entity owner, int damage, Vector3 direction, float speed)
@@ -26,22 +24,7 @@ public class Projectile : MonoBehaviour
         //Setup
         this.owner = owner;
         this.damage = damage;
-        team = owner.GetTeam();
+        enemyTeams = owner.GetEnemyTeams();
         rb.linearVelocity = direction.normalized * speed;
-
-        //Set Enemy Team
-        if (team == Entity.Team.TEAM1)
-        {
-            enemyTeams.Add(Entity.Team.TEAM2);
-            enemyTeams.Add(Entity.Team.NEUTRAL);
-        } else if(team == Entity.Team.TEAM2)
-        {
-            enemyTeams.Add(Entity.Team.TEAM1);
-            enemyTeams.Add(Entity.Team.NEUTRAL);
-        } else if(team == Entity.Team.NEUTRAL)
-        {
-            enemyTeams.Add(Entity.Team.TEAM1);
-            enemyTeams.Add(Entity.Team.TEAM2);
-        }
     }
 }

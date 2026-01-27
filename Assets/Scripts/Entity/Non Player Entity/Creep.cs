@@ -33,7 +33,7 @@ public class Creep : NonPlayerEntity
     //Check if target is still in range. If not, become inactive
     void CheckTargetRange() {
         if (target) {
-            if (Vector3.Distance(attackRangeOrigin.position, target.position) > attackRange) {
+            if (Vector3.Distance(attackRangeOrigin.position, target.transform.position) > attackRange) {
                 target = null;
                 isActive = false;
             }
@@ -61,7 +61,7 @@ public class Creep : NonPlayerEntity
         isActive = true;
         if(damageOrigin is Entity) //THIS SHOULD BE PLAYER
         {
-            target = damageOrigin.gameObject.transform;
+            target = damageOrigin;
         }
 
         base.TakeDamage(damage, damageOrigin);

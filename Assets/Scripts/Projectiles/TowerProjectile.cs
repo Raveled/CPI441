@@ -2,41 +2,44 @@ using UnityEngine;
 
 public class TowerProjectile : Projectile
 {
-    //Setup
-    [Header("Tower Projectile Setup")]
-    [SerializeField] float hitRadius = 1f;
-    [Space]
     //Debug
     [Header("Tower Projectile Debug")]
     [Tooltip("Red Circle")]
     [SerializeField] bool showHitRadius = false;
+    [Space]
+    [Tooltip("This will be equal to the spherecollider radius")]
+    [SerializeField] float hitRadius = 1f;
 
     protected override void Start()
     {
         base.Start();
+        hitRadius = GetComponent<SphereCollider>().radius;
     }
     private void OnTriggerEnter(Collider other)
     {
-        if(!other.gameObject.TryGetComponent<Tower>(out Tower t))
+        //If collision is not a tower or NPEDetectLogic, detonate
+        if(!other.gameObject.GetComponent<Tower>() && !other.gameObject.GetComponent<NPEDetectLogic>())
         {
-            Debug.Log("detonating from: " + other.gameObject.name);
             Detonate();
         }
     }
     void Detonate()
     {
+        //Get all hit colliders
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, hitRadius);
         foreach(Collider c in hitColliders)
         {
             if(c.gameObject.TryGetComponent<Entity>(out Entity e))
             {
+                //If collider is entity on enemy team, deal damage to it
                 if (enemyTeams.Contains(e.GetTeam()))
                 {
-                    Debug.Log(owner.GetName() + "'s projectile is dealing damage to: " + e.GetName());
                     e.TakeDamage(damage, owner);
                 }
             }
         }
+
+        //Destroy object upon damage dealt
         Destroy(gameObject);
     }
 

@@ -5,13 +5,14 @@ public class Entity : MonoBehaviour
 {
     public enum Team : int { NULL = 0, TEAM1 = 1, TEAM2 = 2, NEUTRAL = 3 };
     //Required Setup when script is added to an object
-    [Header("Setup")]
+    [Header("Entity Setup")]
     [SerializeField] protected string entityName = "";
     [SerializeField] protected SO_EntityStatBlock statBlock = null;
     [SerializeField] protected Team team = Team.NULL;
-    [SerializeField] protected List<Team> enemyTeams = null;
     [SerializeField] protected bool canMove = true;
     [SerializeField] protected bool canDefaultAttack = true;
+    [Tooltip("Only Core & Guardian Tower need this")]
+    [SerializeField] Entity protector;
     [Space]
     //Stats that are visible in editor
     [Header("Entity Debug")]
@@ -21,7 +22,9 @@ public class Entity : MonoBehaviour
     [SerializeField] protected float moveSpeed = 0;
     [SerializeField] protected int attackPower = 0;
     [SerializeField] protected float defaultAttackCooldown = 0;
+    [Space]
     [SerializeField] protected bool isDead = false;
+    [SerializeField] protected List<Team> enemyTeams = null;
 
     //In subclasses, MUST use "base.Start()" line to call this
     protected virtual void Start() {
@@ -52,9 +55,11 @@ public class Entity : MonoBehaviour
     //Basic logic for entity taking damage
     public virtual void TakeDamage(int damage, Entity damageOrigin) {
         //Lower health by damage amount. If it is 0 or below, it is destroyed
-        currentHitPoints -= damage;
-        if(currentHitPoints <= 0) {
-            DestroyThis(damageOrigin);
+        if (!protector || protector.GetIsDead()) {
+            currentHitPoints -= damage;
+            if (currentHitPoints <= 0) {
+                DestroyThis(damageOrigin);
+            }
         }
     }
     //Basic logic for dying/destroying self

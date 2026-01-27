@@ -1,97 +1,126 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using System.Collections.Generic;
 
 public class Minion : NonPlayerEntity
 {
-    //Fields
-    Transform closestTower = null;
-    float minDistanceTower = Mathf.Infinity;
-    Transform closestMinion = null;
-    float minDistanceMinion = Mathf.Infinity;
-    Transform closestPlayer = null;
-    float minDistancePlayer = Mathf.Infinity;
-
     [Header("Minion Setup")]
-    [Tooltip("If multiple types of Entity in this range, will choose in order: Tower, Minion, Player")]
-    [SerializeField] float effectiveTargetRange = 5f;
-    [Space]
+    [SerializeField] float attackHeight = 10f;
     [Header("Minion Debug")]
     [Tooltip("Purple Circle")]
-    [SerializeField] bool showEffectiveTargetRange = false;
+    [SerializeField] bool showAttackBounds = false;
+    Vector3 p0 = new Vector3();
+    Vector3 p1 = new Vector3();
+    Vector3 halfHeight;
+    public enum MinionState : int { FOLLOW_ENEMY = 0, FOLLOW_CORE = 1};
+    MinionState minionState = MinionState.FOLLOW_CORE;
 
+    [SerializeField] Transform followObject = null;
 
     protected override void Start()
     {
         base.Start();
-    }
 
+        //Set the half height of attack cylinder
+        halfHeight = Vector3.up * (attackHeight / 2f);
+
+    }
     void Update()
     {
-        //FindTarget();
+        FindTarget();
         Move();
         AttackTimer();
         Attack();
+
+        if (target) minionState = MinionState.FOLLOW_ENEMY;
+
+        //Update the cylinder points for attack
+        p0 = attackRangeOrigin.position + halfHeight;
+        p1 = attackRangeOrigin.position - halfHeight;
+
+        //Debug for showing attackrange distance as a line
+        if (showAttackBounds && target) {
+            if (CheckTargetInAttackRange()) {
+                Vector3 thisbasepos = new Vector3(attackRangeOrigin.position.x, 0, attackRangeOrigin.position.z);
+                Vector3 targetbasepos = new Vector3(target.transform.position.x, 0, target.transform.position.z);
+                Debug.DrawLine(targetbasepos, thisbasepos, Color.green);
+            } else {
+                Vector3 thisbasepos = new Vector3(attackRangeOrigin.position.x, 0, attackRangeOrigin.position.z);
+                Vector3 targetbasepos = new Vector3(target.transform.position.x, 0, target.transform.position.z);
+                Debug.DrawLine(targetbasepos, thisbasepos, Color.red);
+            }
+        }
+    }
+    protected override void FindTarget() {
+        if(minionState == MinionState.FOLLOW_CORE || !target) {
+            base.FindTarget();
+        }
     }
     protected override void Move() {
+        base.Move();
         //WIP-------------------------------------------------------------------------------------------------------
         //A* pathfinding towards target
+
+        if (target) { //Move towards target
+
+        } else { //Move towards waypoint
+
+        }
     }
-    //protected override void FindTarget() {
-    //    //WIP-------------------------------------------------------------------------------------------------------
-    //    //Only check if theres no current target
-    //    if (!target) {
-    //        //Get all possible entities
-    //        Entity[] entities = FindObjectsByType<Entity>(FindObjectsSortMode.None);
-
-    //        foreach (Entity e in entities) {
-    //            //If entity is not on the enemy team, ignore
-    //            if (e.GetTeam() != enemyTeam) continue;
-
-    //            //For Tower, Minion, Player, check for the closest ones
-    //            float distance = Vector3.Distance(e.transform.position, transform.position);
-    //            if (e is Tower && distance < minDistanceTower && distance < effectiveTargetRange) {
-    //                closestTower = e.transform;
-    //                minDistanceTower = distance;
-    //            } else if (e is Minion && distance < minDistanceMinion && distance < effectiveTargetRange) {
-    //                closestMinion = e.transform;
-    //                minDistanceMinion = distance;
-    //            } else if (e is Entity && distance < minDistancePlayer && distance < effectiveTargetRange) { //THIS SHOULD BE PLAYER
-    //                closestPlayer = e.transform;
-    //                minDistancePlayer = distance;
-    //            }   
-    //        }
-
-    //        //In order of Tower > Minion > Player > None, set the target
-    //        if (closestTower) target = closestTower;
-    //        else if (closestMinion) target = closestMinion;
-    //        else if (closestPlayer) target = closestPlayer;
-    //        else target = null; //THIS WOULD BE NEXT POINT ON PATH INSTEAD
-    //    } else
-    //    {
-    //        //Check to see if target is still in effective range
-    //        if (Vector3.Distance(transform.position, target.position) > effectiveTargetRange) {
-    //            target = null;
-    //        }
-    //    }
-    //}
     protected override void Attack() {
-        //WIP-------------------------------------------------------------------------------------------------------
-        if (target && CheckTargetInAttackRange()) {
-            //attack
+        base.Attack();
+        //If there is a target and it is within attack range
+        if (target && CheckTargetInAttackRange() && attackCooldownTimer <= 0) {
+            Debug.Log(GetName() + " is attacking " + target.GetName());
+            //Reset attack cooldown
+            attackCooldownTimer = defaultAttackCooldown;
+
+            //Spawn overlapsphere and check for enemy entities to deal damage to
+            //Collider[] hits = Physics.OverlapSphere(attackRangeOrigin.position, attackSphereRadius);
+
+
+            Collider[] hits = Physics.OverlapCapsule(p0, p1, attackRange);
+
+
+            foreach (Collider hit in hits) {
+                //if collider is an entity on enemy team, deal damage to it
+                if(hit.gameObject.TryGetComponent<Entity>(out Entity e)){
+                    if (GetEnemyTeams().Contains(e.GetTeam())) {
+                        e.TakeDamage(attackPower, this); 
+                        Debug.Log(GetName() + " dealt damage to " + e.GetName());
+                    }
+                }
+            }
         }
     }
     //Make sure target is in range
     bool CheckTargetInAttackRange() {
-        if (Vector3.Distance(attackRangeOrigin.position, target.position) < attackRange) return true;
+        if (target) {
+            Vector3 thisbasepos = new Vector3(attackRangeOrigin.position.x, 0, attackRangeOrigin.position.z);
+            Vector3 targetbasepos = new Vector3(target.transform.position.x, 0, target.transform.position.z);
+            if (Vector3.Distance(targetbasepos, thisbasepos) <= attackRange) return true;
+        }
         return false;
     }
     protected override void OnDrawGizmos()
     {
         base.OnDrawGizmos();
-        if (showEffectiveTargetRange)
+        if (showAttackBounds)
         {
             Gizmos.color = Color.purple;
-            Gizmos.DrawWireSphere(transform.position, effectiveTargetRange);
+
+            Gizmos.DrawWireSphere(p0, attackRange);
+            Gizmos.DrawWireSphere(p1, attackRange);
+
+            // Connect the sides
+            Gizmos.DrawLine(p0 + Vector3.right * attackRange,
+                            p1 + Vector3.right * attackRange);
+            Gizmos.DrawLine(p0 - Vector3.right * attackRange,
+                            p1 - Vector3.right * attackRange);
+            Gizmos.DrawLine(p0 + Vector3.forward * attackRange,
+                            p1 + Vector3.forward * attackRange);
+            Gizmos.DrawLine(p0 - Vector3.forward * attackRange,
+                            p1 - Vector3.forward * attackRange);
         }
     }
 }

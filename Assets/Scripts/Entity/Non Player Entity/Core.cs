@@ -8,19 +8,11 @@ public class Core : NonPlayerEntity
     [SerializeField] int numMinionsInWave = 5;
     [SerializeField] float timeBetweenMinionsInWave = 1f;
     [SerializeField] Transform[] waveSpawnOrigins = null;
-    [Space]
-    [SerializeField] Entity protector = null;
 
     GameManager gameManager;
     protected override void Start() {
         gameManager = FindFirstObjectByType<GameManager>();
         base.Start();
-    }
-    public override void TakeDamage(int damage, Entity damageOrigin) {
-        //If protector tower is alive, then take no damage
-        if (!protector || protector.GetIsDead()) {
-            base.TakeDamage(damage, damageOrigin);
-        }
     }
     protected override void DestroyThis(Entity damageOrigin) {
         gameManager.CoreDestroyed((int)team);
