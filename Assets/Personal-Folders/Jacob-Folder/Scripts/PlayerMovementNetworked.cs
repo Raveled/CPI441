@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 using Object = System.Object;
 
 [RequireComponent(typeof(PlayerInput))]
-public class PlayerMovementNetwork : NetworkIdentity
+public class PlayerMovementNetworked : NetworkIdentity
 {
     [SerializeField] private float _speed = 3f;
     public Vector3 movementInputVector;

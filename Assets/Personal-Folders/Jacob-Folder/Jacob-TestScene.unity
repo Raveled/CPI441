@@ -585,7 +585,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1989336825}
-  - component: {fileID: 1989336824}
+  - component: {fileID: 1989336826}
   m_Layer: 0
   m_Name: TestSpawner
   m_TagString: Untagged
@@ -593,63 +593,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1989336824
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1989336823}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2b22cd81507e53241868b842148eec3e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TestNetwork
-  _isSetup: 0
-  _prefabId: -2147483648
-  _componentIndex: -2147483648
-  _shouldBePooled: 0
-  _parent: {fileID: 0}
-  _invertedPathToNearestParent: 
-  _directChildren: []
-  _networkRules: {fileID: 0}
-  _visitiblityRules: {fileID: 0}
-  networkIdentity: {fileID: 9218932994542452949, guid: 54d1d9c299d5d32438cd71b50bf72f0e, type: 3}
-  _color: {r: 1, g: 0, b: 0, a: 0}
-  interactAction1:
-    m_Name: Interact Action 1
-    m_Type: 0
-    m_ExpectedControlType: 
-    m_Id: c361fe52-2518-4bed-94bd-5cd50f85b225
-    m_Processors: 
-    m_Interactions: 
-    m_SingletonActionBindings:
-    - m_Name: 
-      m_Id: af90a4bc-a8e0-411a-afd2-ec1334f02a6a
-      m_Path: <Keyboard>/e
-      m_Interactions: 
-      m_Processors: 
-      m_Groups: 
-      m_Action: Interact Action 1
-      m_Flags: 0
-    m_Flags: 0
-  interactAction2:
-    m_Name: Interact Action 2
-    m_Type: 0
-    m_ExpectedControlType: 
-    m_Id: 832adfe1-cce4-441c-8669-e76e661397b9
-    m_Processors: 
-    m_Interactions: 
-    m_SingletonActionBindings:
-    - m_Name: 
-      m_Id: 5dbaa2a2-42cc-4f96-8616-e953067abf76
-      m_Path: <Keyboard>/q
-      m_Interactions: 
-      m_Processors: 
-      m_Groups: 
-      m_Action: Interact Action 2
-      m_Flags: 0
-    m_Flags: 0
 --- !u!4 &1989336825
 Transform:
   m_ObjectHideFlags: 0
@@ -665,6 +608,63 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1989336826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1989336823}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b22cd81507e53241868b842148eec3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TestCubePrefabNetworkRef
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  networkIdentity: {fileID: 9218932994542452949, guid: 54d1d9c299d5d32438cd71b50bf72f0e, type: 3}
+  _color: {r: 1, g: 0, b: 0, a: 0}
+  interactAction1:
+    m_Name: Interact Action 1
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 48f0a59c-2732-4cf5-bc9b-4b115f816285
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: a9aa30c7-e3dd-4c81-aa9d-2579f89d9987
+      m_Path: <Keyboard>/e
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Interact Action 1
+      m_Flags: 0
+    m_Flags: 0
+  interactAction2:
+    m_Name: Interact Action 2
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 88262cf4-602b-4075-9564-5bf72383e9b6
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: 2d1cc9b6-ef86-4829-acd2-15f1858b512a
+      m_Path: <Keyboard>/q
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Interact Action 2
+      m_Flags: 0
+    m_Flags: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

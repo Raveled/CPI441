@@ -2,7 +2,7 @@ using PurrNet;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class TestNetwork : NetworkIdentity
+public class TestCubePrefabNetworkRef : NetworkIdentity
 {
     [SerializeField] private NetworkIdentity networkIdentity;
     [SerializeField] private Color _color;
@@ -66,21 +66,29 @@ public class TestNetwork : NetworkIdentity
     
     private void OnInteract2(InputAction.CallbackContext context)
     {
+        // Does Object Exist
+        if (_spawnedInstance == null)
+        {
+            Debug.Log("No spawned instance to damage");
+            return;
+        }
+
+        // Request damage
         RequestDamage(10);
     }
     
     [ObserversRpc(bufferLast:true)]
     private void RequestColorChange(Color newColor)
     {
-        Debug.Log("Color change request");
+        Debug.Log("Client: Color change request");
         
         // Tell the spawned object to change color
         if (_spawnedInstance != null)
         {
-            var objectNetworkTest = _spawnedInstance.GetComponent<NetworkedObjectTest>();
-            if (objectNetworkTest != null)
+            var colorChangeNetworked = _spawnedInstance.GetComponent<ColorChangeNetworked>();
+            if (colorChangeNetworked != null)
             {
-                objectNetworkTest.ChangeColor(newColor);
+                colorChangeNetworked.ChangeColor(newColor);
             }
         }
     }
@@ -88,20 +96,38 @@ public class TestNetwork : NetworkIdentity
     [ServerRpc]
     private void RequestDamage(int dmg)
     {
-        Debug.Log("Damage request");
+        Debug.Log("Server: Damage request");
         
         // Tell the spawned object to take damage
         if (_spawnedInstance != null)
         {
-            var objectNetworkTest = _spawnedInstance.GetComponent<NetworkedObjectTest>();
-            if (objectNetworkTest != null)
+            var healthNetworked = _spawnedInstance.GetComponent<HealthNetworked>();
+            if (healthNetworked != null)
             {
-                objectNetworkTest.takeDamage(dmg);
+                healthNetworked.takeDamage(dmg);
+
+                // What Health is Now
+                if (healthNetworked.getHealth() == 0)
+                {
+                    RequestDestroy();
+                    SyncSpawnedInstanceObserversRpc(null);
+                }
             }
         }
     }
+
+    [ServerRpc]
+    private void RequestDestroy()
+    {
+        Debug.Log("Server: Destroy request");
+        
+        // Tell the spawned object to take damage
+        if (_spawnedInstance != null)
+        {
+            Destroy(_spawnedInstance);
+        }
+    }
     
-    // CHANGE COLOR
     /*
      * ServerRPC = Client (Server) -> Server
      * ObserversRPC = Server (Client) -> All Clients
