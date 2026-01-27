@@ -16,4 +16,4 @@ MonoBehaviour:
   baseHitPoints: 100
   baseMoveSpeed: 10
   baseAttackPower: 10
-  baseDefaultAttackCooldown: 5
+  baseDefaultAttackCooldown: 3

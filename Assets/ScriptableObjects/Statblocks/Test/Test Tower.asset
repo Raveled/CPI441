@@ -15,5 +15,5 @@ MonoBehaviour:
   goldReward: 20
   baseHitPoints: 100
   baseMoveSpeed: 0
-  baseAttackPower: 10
-  baseDefaultAttackCooldown: 5
+  baseAttackPower: 35
+  baseDefaultAttackCooldown: 2
