@@ -30,9 +30,10 @@ public class Creep : NonPlayerEntity
             //return to patrol
         }
     }
+    //Check if target is still in range. If not, become inactive
     void CheckTargetRange() {
         if (target) {
-            if (Vector3.Distance(attackRangeOrigin.position, target.position) > attackRange) {
+            if (Vector3.Distance(attackRangeOrigin.position, target.transform.position) > attackRange) {
                 target = null;
                 isActive = false;
             }
@@ -54,16 +55,19 @@ public class Creep : NonPlayerEntity
         //WIP-------------------------------------------------------------------------------------------------------
 
     }
-    protected override void TakeDamage(int damage, Entity damageOrigin) {
+    public override void TakeDamage(int damage, Entity damageOrigin) {
         //WIP-------------------------------------------------------------------------------------------------------
+        //On Damage, become active with damager as the target
         isActive = true;
         if(damageOrigin is Entity) //THIS SHOULD BE PLAYER
         {
-            target = damageOrigin.gameObject.transform;
+            target = damageOrigin;
         }
+
         base.TakeDamage(damage, damageOrigin);
     }
     protected override void DestroyThis(Entity damageOrigin) {
+        //Lower activeCreepCount of connected CreepSpawner
         connectedSpawner.CreepDied();
         base.DestroyThis(damageOrigin);
     }
