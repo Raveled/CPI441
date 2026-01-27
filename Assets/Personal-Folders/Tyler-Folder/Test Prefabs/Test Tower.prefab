@@ -45,10 +45,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f165c045aa6846428600e6786508a51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPEDetectLogic
-  npe: {fileID: 0}
   showDetectRange: 0
   detectRange: 10
-  enemyTeams: 
   enemiesInRange: []
 --- !u!135 &5055006070050696865
 SphereCollider:
@@ -145,7 +143,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Tower
   entityName: Tower
   statBlock: {fileID: 11400000, guid: 8cd4546f662ed25459b1a18e4281bdd0, type: 2}
-  team: 1
+  team: 2
   canMove: 0
   canDefaultAttack: 0
   protector: {fileID: 0}
@@ -166,7 +164,7 @@ MonoBehaviour:
   canTargetMinion: 1
   canTargetPlayer: 1
   showRewardRange: 0
-  showAttackRange: 0
+  showAttackRange: 1
   showForwardDirection: 1
   target: {fileID: 0}
   attackCooldownTimer: 0

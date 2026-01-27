@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class DisableVisualOnStart : MonoBehaviour
 {
-    //Disables Mesh Renderer on start
-    void Start()
+    void Awake()
     {
+        //Disables Mesh Renderer on Awake
         Renderer m = GetComponent<Renderer>();
         m.enabled = false;
     }

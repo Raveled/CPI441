@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using Unity.AI.Navigation;
 
 public class GameManager : MonoBehaviour
 {
@@ -7,16 +8,27 @@ public class GameManager : MonoBehaviour
     [Header("GameManager Setup")]
     [Tooltip("Time In Seconds")]
     [SerializeField] float minionWaveSpawnInterval = 5f;
-    //[SerializeField] CreepSpawner[] creepSpawners = null; //Collected for map info
+    [SerializeField] NavMeshSurface navMeshSurface = null;
+    [Tooltip("Set to -1 for infinite waves default")]
+    [SerializeField] int maxWaves = -1;
     [Space]
-    [Header("GameState Debug")]
+    [SerializeField] bool spawnWaveOnStart = false;
+    [Space]
+    [Header("GameManager Debug")]
+    [SerializeField] bool bakeOnStart = false;
+    [Space]
     [SerializeField] GameState gameState = GameState.NULL;
-    [SerializeField] float gameTimer = 0;
     [SerializeField] string timerString = "";
     [Space]
     [Header("Minion Spawning Debug")]
     [SerializeField] float currentMinionWaveSpawnTimer = 0;
-    [SerializeField] Core[] cores = null;
+    
+    //Game Timer
+    float gameTimer = 0;
+    
+    //For wave spawning
+    Core[] cores = null;
+    int currentWaves = 0;
     void Start()
     {
         //Init
@@ -24,6 +36,9 @@ public class GameManager : MonoBehaviour
         gameTimer = 0;
         cores = FindObjectsByType<Core>(FindObjectsSortMode.None);
         currentMinionWaveSpawnTimer = minionWaveSpawnInterval;
+
+        if(bakeOnStart) navMeshSurface.BuildNavMesh();
+        if (spawnWaveOnStart) SpawnWave();
     }
 
     void Update()
@@ -45,15 +60,25 @@ public class GameManager : MonoBehaviour
     }
     //Handle minion wave spawn timer
     void MinionWaveSpawnTimer() {
+        //If using max # of waves for debug
+        if(maxWaves != -1) {
+            if (currentWaves >= maxWaves) return;
+        }
+
         //Update timer
         currentMinionWaveSpawnTimer -= Time.deltaTime;
 
         //If timer is 0 or below, spawn a new wave at each core and reset timer
         if (currentMinionWaveSpawnTimer <= 0) {
             currentMinionWaveSpawnTimer = minionWaveSpawnInterval;
-            for(int i = 0; i < cores.Length; i++) {
-                cores[i].SpawnWave();
-            }
+            SpawnWave();
+            currentWaves++;
+        }
+    }
+    //Spawn a Wave
+    void SpawnWave() {
+        for (int i = 0; i < cores.Length; i++) {
+            cores[i].SpawnWave();
         }
     }
     //When a core is destroyed, this will be called, ending the game

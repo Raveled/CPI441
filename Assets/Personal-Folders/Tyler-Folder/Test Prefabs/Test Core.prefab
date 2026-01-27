@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 574811933204359548}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3, y: -4, z: 5}
+  m_LocalPosition: {x: 6, y: -4.5, z: 5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -169,7 +169,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1e25c216e9638bd4cb3051e83b9d8c08, type: 2}
+  - {fileID: 2100000, guid: 94e6c3a7543fcb4488bb8878ca87e3bf, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -267,7 +267,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Core
   entityName: Core
   statBlock: {fileID: 11400000, guid: 1b9f3dc4380eca440af0c4294dc006fb, type: 2}
-  team: 1
+  team: 2
   canMove: 0
   canDefaultAttack: 0
   protector: {fileID: 0}
@@ -292,7 +292,7 @@ MonoBehaviour:
   showForwardDirection: 1
   target: {fileID: 0}
   attackCooldownTimer: 0
-  minionPrefab: {fileID: 3861177414995866693, guid: 0cf209a00f3d0c14cbfac040977949ab, type: 3}
+  minionPrefab: {fileID: 3861177414995866693, guid: c0ad892041217224ea91130f0f8a5204, type: 3}
   numMinionsInWave: 5
   timeBetweenMinionsInWave: 1
   waveSpawnOrigins:
@@ -326,7 +326,7 @@ Transform:
   m_GameObject: {fileID: 5153168693522856397}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3, y: -4, z: 5}
+  m_LocalPosition: {x: -6, y: -4.5, z: 5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -582,11 +582,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f165c045aa6846428600e6786508a51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPEDetectLogic
-  npe: {fileID: 0}
   showDetectRange: 0
   detectRange: 0
-  enemyTeams: 
   enemiesInRange: []
+  enemyTeams: 
 --- !u!135 &1677431700280378734
 SphereCollider:
   m_ObjectHideFlags: 0

@@ -24,6 +24,8 @@ public class Entity : MonoBehaviour
     [SerializeField] protected float defaultAttackCooldown = 0;
     [Space]
     [SerializeField] protected bool isDead = false;
+    
+    //Setup
     [SerializeField] protected List<Team> enemyTeams = null;
 
     //In subclasses, MUST use "base.Start()" line to call this
@@ -41,6 +43,7 @@ public class Entity : MonoBehaviour
         attackPower = statBlock.BaseAttackPower;
         defaultAttackCooldown = statBlock.BaseDefaultAttackCooldown;
 
+        //Enemy Team Setup
         if (team == Entity.Team.TEAM1) {
             enemyTeams.Add(Entity.Team.TEAM2);
             enemyTeams.Add(Entity.Team.NEUTRAL);
