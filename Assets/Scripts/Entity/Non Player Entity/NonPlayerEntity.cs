@@ -98,7 +98,7 @@ public class NonPlayerEntity : Entity
                 if (e is Minion && dist < minDistanceMinion) {
                     closestMinion = e;
                     minDistanceMinion = dist;
-                } else if (e is Entity && dist < minDistancePlayer) {//THIS SHOULD BE PLAYER
+                } else if (e is Player && dist < minDistancePlayer) {
                     closestPlayer = e;
                     minDistancePlayer = dist;
                 }
