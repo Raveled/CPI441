@@ -13,6 +13,7 @@
     "com.unity.timeline": "1.8.10",
     "com.unity.ugui": "2.0.0",
     "com.unity.visualscripting": "1.9.9",
+    "dev.purrnet.purrdiction": "https://github.com/PurrNet/PurrDiction.git?path=/Assets/PurrDiction#dev",
     "dev.purrnet.purrnet": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#dev",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.adaptiveperformance": "1.0.0",
