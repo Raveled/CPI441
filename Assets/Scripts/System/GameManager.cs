@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using Unity.AI.Navigation;
 using TMPro;
+using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
@@ -49,6 +50,15 @@ public class GameManager : MonoBehaviour
     [SerializeField] Player[] team1_Players = null;
     [SerializeField] Player[] team2_Players = null;
 
+    //JSON
+    SaveMatchData saveMatchData = null;
+    int match_id = 0;
+    string timestamp = "";
+    string mapName = "m_TwoLane";
+    string winnerStr = "";
+    int towersDestroyed_Team1 = 0; //how many of Team 2's towers Team 1 destroyed
+    int towersDestroyed_Team2 = 0;
+
 
     void Start() {
         //Init
@@ -56,6 +66,8 @@ public class GameManager : MonoBehaviour
         gameTimer = 0;
         cores = FindObjectsByType<Core>(FindObjectsSortMode.None);
         currentMinionWaveSpawnTimer = minionWaveSpawnInterval;
+
+        saveMatchData = GetComponent<SaveMatchData>();
 
         if (bakeOnStart) navMeshSurface.BuildNavMesh();
         if (spawnWaveOnStart) SpawnWave();
@@ -86,10 +98,14 @@ public class GameManager : MonoBehaviour
             MinionWaveSpawnTimer();
         }
 
+        //Debug
         if (canPause) {
-            if (Input.GetKeyDown(KeyCode.P)) {
+            if (Keyboard.current.pKey.wasPressedThisFrame) {
                 TogglePauseGame();
             }
+        }
+        if (Keyboard.current.lKey.wasPressedThisFrame) {
+            GenerateMatchJSON();
         }
     }
     //Handle the game timer
@@ -125,12 +141,24 @@ public class GameManager : MonoBehaviour
         }
     }
     //When a core is destroyed, this will be called, ending the game
-    public void CoreDestroyed(int team) {
-        gameState = GameState.END;
-        if(team == 1) {
-            //team 2 wins
-        }else if(team == 2) {
-            //team 1 wins
+    public void GameEnd(Entity.Team team) {
+        if(team == Entity.Team.TEAM1) {
+            winnerStr = "Team1";
+        }else if(team == Entity.Team.TEAM2) {
+            winnerStr = "Team2";
+        }
+        ChangeGameState(GameState.END);
+        GenerateMatchJSON();
+    }
+
+    //When a Tower is destroyed, this is called for JSON
+    public void TowerDestroyed(Entity.Team team) {
+        //WIP-----------------------------------------------------------
+        //announce to game
+        if(team == Entity.Team.TEAM1) {
+            towersDestroyed_Team2++;
+        }else if(team == Entity.Team.TEAM2) {
+            towersDestroyed_Team1++;
         }
     }
     //Pause or unpause game
@@ -174,6 +202,31 @@ public class GameManager : MonoBehaviour
             e.Freeze(freeze);
         }
     }
+    #region JSON
+    //Get A Team's total killcount
+    public int ComputeTeamKillTotal(Player[] team) {
+        int killCount = 0;
+        for(int i = 0; i < team.Length; i++) {
+            if (!team[i]) continue;
+            killCount += team[i].GetPlayerInfo().KillCount;
+        }
+        return killCount;
+    }
+    void GenerateMatchJSON() {
+        saveMatchData.ImportMatchData(
+            match_id,
+            DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+            mapName,
+            winnerStr,
+            (int)gameTimer,
+            ComputeTeamKillTotal(team1_Players),
+            ComputeTeamKillTotal(team2_Players),
+            towersDestroyed_Team1,
+            towersDestroyed_Team2
+            );
+        saveMatchData.SaveToJSON();
+    }
+    #endregion
     #region WORK IN PROGRESS
     void FreezeAllPCs(bool freeze) {
         //WIP---------------------------------------------------------------------

@@ -15,7 +15,7 @@ public class Core : NonPlayerEntity
         base.Start();
     }
     protected override void Die(Entity damageOrigin) {
-        gameManager.CoreDestroyed((int)team);
+        gameManager.GameEnd(team);
         Destroy(gameObject);
     }
     public void SpawnWave() {

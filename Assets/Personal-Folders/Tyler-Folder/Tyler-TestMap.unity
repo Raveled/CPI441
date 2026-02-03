@@ -1398,7 +1398,10 @@ MonoBehaviour:
   canMove: 1
   canDefaultAttack: 1
   protector: {fileID: 0}
-  goldReward: 0
+  reward_Gold: 0
+  reward_XP: 0
+  rewardRange: 50
+  showRewardRange: 0
   maximumHitPoints: 0
   currentHitPoints: 0
   moveSpeed: 0
@@ -1406,7 +1409,10 @@ MonoBehaviour:
   defaultAttackCooldown: 0
   isDead: 0
   enemyTeams: 
-  playerStats: {fileID: 0}
+  playerInfo: {fileID: 0}
+  playerLevel: 1
+  goldTotal: 0
+  xpTotal: 0
 --- !u!1001 &867732295
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3361,25 +3367,9 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 3604123774642722008, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
-      propertyPath: maxWaves
-      value: -1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3604123774642722008, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
-      propertyPath: bakeOnStart
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3604123774642722008, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: navMeshSurface
       value: 
       objectReference: {fileID: 121665945}
-    - target: {fileID: 3604123774642722008, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
-      propertyPath: spawnWaveOnStart
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3604123774642722008, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
-      propertyPath: minionWaveSpawnInterval
-      value: 10
-      objectReference: {fileID: 0}
     - target: {fileID: 8154089200534231921, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: m_Name
       value: Test GameManager
@@ -3488,6 +3478,10 @@ PrefabInstance:
     - target: {fileID: 3921032179608766505, guid: 999f5cd1ecb707840bce0ab3150103ba, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 3921032179608766505, guid: 999f5cd1ecb707840bce0ab3150103ba, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 4180152989988615847, guid: 999f5cd1ecb707840bce0ab3150103ba, type: 3}

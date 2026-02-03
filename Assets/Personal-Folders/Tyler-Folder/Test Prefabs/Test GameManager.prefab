@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9218709570853150868}
   - component: {fileID: 3604123774642722008}
+  - component: {fileID: 4236823861627369861}
   m_Layer: 0
   m_Name: Test GameManager
   m_TagString: Untagged
@@ -44,9 +45,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d13bb63be8dadbe4b92d1432bfce9bd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  minionWaveSpawnInterval: 30
+  minionWaveSpawnInterval: 10
+  navMeshSurface: {fileID: 0}
+  maxWaves: -1
+  spawnWaveOnStart: 1
+  bakeOnStart: 0
   gameState: 0
-  gameTimer: 0
   timerString: 
   currentMinionWaveSpawnTimer: 0
-  cores: []
+  canPause: 1
+  teamSize: 3
+  team1_Players: []
+  team2_Players: []
+--- !u!114 &4236823861627369861
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8154089200534231921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f91c9dfeafd999f41a76347ee4172571, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SaveMatchData
+  match:
+    match_id: 0
+    timestamp: a
+    map: a
+    winner: a
+    duration_seconds: 0

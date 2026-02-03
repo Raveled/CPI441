@@ -31,6 +31,10 @@ public class Tower : NonPlayerEntity
             proj.SpawnSetup(this, attackPower, direction, projectileSpeed, target);
         }
     }
+    protected override void Die(Entity damageOrigin) {
+        FindFirstObjectByType<GameManager>().TowerDestroyed(GetTeam());
+        base.Die(damageOrigin);
+    }
     //When a player attacks another player within the range of the tower
     public void OverrideTarget(Entity damageOrigin) {
         //WIP-------------------------------------------------------------------------------------------------------
