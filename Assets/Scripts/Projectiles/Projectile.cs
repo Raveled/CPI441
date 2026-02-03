@@ -15,15 +15,17 @@ public class Projectile : MonoBehaviour
     [SerializeField] protected Entity owner;
     [SerializeField] protected int damage;
     [SerializeField] protected List<Entity.Team> enemyTeams;
+    [SerializeField] protected Entity target;
     protected virtual void Start() {
         rb = GetComponent<Rigidbody>();
     }
     //Called by the script that spawns this object
-    public virtual void SpawnSetup(Entity owner, int damage, Vector3 direction, float speed)
+    public virtual void SpawnSetup(Entity owner, int damage, Vector3 direction, float speed, Entity target)
     {
         //Setup
         this.owner = owner;
         this.damage = damage;
+        this.target = target;
         enemyTeams = owner.GetEnemyTeams();
         rb.linearVelocity = direction.normalized * speed;
     }

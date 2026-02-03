@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using Unity.AI.Navigation;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -11,7 +12,6 @@ public class GameManager : MonoBehaviour
     [Tooltip("Time In Seconds")]
     [SerializeField] float minionWaveSpawnInterval = 5f;
     [SerializeField] NavMeshSurface navMeshSurface = null;
-    [SerializeField] GameObject endGameVisual = null;
     [Tooltip("Set to -1 for infinite waves default")]
     [SerializeField] int maxWaves = -1;
     [Space]
@@ -27,6 +27,11 @@ public class GameManager : MonoBehaviour
     [Space]
     [Header("Minion Spawning Debug")]
     [SerializeField] float currentMinionWaveSpawnTimer = 0;
+
+    //Pausing
+    [Space]
+    [Header("Pausing Debug")]
+    [SerializeField] bool canPause = true;
     
     //Game Timer
     float gameTimer = 0;
@@ -36,6 +41,7 @@ public class GameManager : MonoBehaviour
     int currentWaves = 0;
 
     //Players
+    [Space]
     [Header("Player/Team Setup")]
     [SerializeField] int teamSize = 3;
     [Space]
@@ -70,8 +76,6 @@ public class GameManager : MonoBehaviour
                 t2Idx++;
             }
         }
-
-        endGameVisual.SetActive(false);
     }
 
     void Update()
@@ -80,6 +84,12 @@ public class GameManager : MonoBehaviour
         if(gameState == GameState.INPROGRESS) {
             GameTimer();
             MinionWaveSpawnTimer();
+        }
+
+        if (canPause) {
+            if (Input.GetKeyDown(KeyCode.P)) {
+                TogglePauseGame();
+            }
         }
     }
     //Handle the game timer
@@ -139,29 +149,38 @@ public class GameManager : MonoBehaviour
                 break;
             case GameState.INPROGRESS:
                 gameState = GameState.INPROGRESS;
-                FreezeNPE(false);
+                FreezeAllNPE(false);
+                FreezeAllPCs(false);
                 break;
             case GameState.PAUSED:
                 gameState = GameState.PAUSED;
-                FreezeNPE(true);
+                FreezeAllNPE(true);
+                FreezeAllPCs(true);
                 break;
             case GameState.END:
                 gameState = GameState.END;
+                FreezeAllNPE(true);
+                ShowEndGameVisual();
                 break;
         }
     }
     //Stop all enemy movement/attacking/target searching
-    void FreezeNPE(bool freeze) {
+    void FreezeAllNPE(bool freeze) {
         //WIP--------------------------------------------------------------
-        if (freeze) {
+        NonPlayerEntity[] NPEs = FindObjectsByType<NonPlayerEntity>(FindObjectsSortMode.None);
 
-        } else {
-
+        //Loop through all NPEs and freeze them
+        foreach (NonPlayerEntity e in NPEs) {
+            e.Freeze(freeze);
         }
+    }
+    #region WORK IN PROGRESS
+    void FreezeAllPCs(bool freeze) {
+        //WIP---------------------------------------------------------------------
     }
     void ShowEndGameVisual() {
         //WIP---------------------------------------------------------------------
-        //update text based on team winning/losing
+        //for each player, display their end game visual with win/lose respectively
     }
     //When a Player Dies (Called by player death) ***Uses playerIdx
     public void PlayerDeath(Entity player_Killed, Entity player_Killer) {
@@ -169,6 +188,7 @@ public class GameManager : MonoBehaviour
         //Sends a Message to the players that a player has died based on their names.
         // also updates the scoreboard based on their player stats using the player[] arrays and playerinfo 
     }
+    #endregion
 
 
 }

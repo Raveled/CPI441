@@ -51,11 +51,11 @@ public class Creep : NonPlayerEntity
             //attack
         }
     }
-    protected override void DistributeGoldReward() {
+    protected override void DistributeReward() {
         //WIP-------------------------------------------------------------------------------------------------------
 
     }
-    public override void TakeDamage(int damage, Entity damageOrigin) {
+    public override bool TakeDamage(int damage, Entity damageOrigin) {
         //WIP-------------------------------------------------------------------------------------------------------
         //On Damage, become active with damager as the target
         isActive = true;
@@ -65,6 +65,7 @@ public class Creep : NonPlayerEntity
         }
 
         base.TakeDamage(damage, damageOrigin);
+        return true;
     }
     protected override void Die(Entity damageOrigin) {
         //Lower activeCreepCount of connected CreepSpawner

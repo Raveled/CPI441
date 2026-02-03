@@ -28,7 +28,7 @@ public class Tower : NonPlayerEntity
 
             //Instantiate new projectile and set it's properties
             TowerProjectile proj = Instantiate(towerProjectilePrefab, attackRangeOrigin.position, attackRangeOrigin.rotation, attackRangeOrigin);
-            proj.SpawnSetup(this, attackPower, direction, projectileSpeed);
+            proj.SpawnSetup(this, attackPower, direction, projectileSpeed, target);
         }
     }
     //When a player attacks another player within the range of the tower

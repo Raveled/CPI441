@@ -5,7 +5,6 @@ public class NonPlayerEntity : Entity
 {
     //Setup fields
     [Header("NPE Setup")]
-    [SerializeField] float rewardRange = 50f;
     [SerializeField] protected Transform attackRangeOrigin = null;
     [SerializeField] protected float attackRange = 10f;
     [SerializeField] protected NPEDetectLogic npeDetectLogic = null;
@@ -16,48 +15,40 @@ public class NonPlayerEntity : Entity
     [Space]
     //Debug fields
     [Header("NPE Debug")]
-    [Tooltip("Yellow Circle")]
-    [SerializeField] bool showRewardRange = false;
     [Tooltip("Red Circle")]
     [SerializeField] bool showAttackRange = true;
     [Tooltip("Blue Line")]
     [SerializeField] bool showForwardDirection = true;
     [Space]
     [SerializeField] protected Entity target;
+    [SerializeField] protected bool hasTarget = false;
     [SerializeField] protected float attackCooldownTimer = 0;
+    [SerializeField] bool canSearchForTarget = true;
+    [SerializeField] bool canAttackTimer = true;
+    [SerializeField] List<Entity> entitiesInRange; //for debug purposes, used in FindTarget()
+
 
     //Targeting fields
-    protected Entity closestMinion = null;
-    protected float minDistanceMinion = Mathf.Infinity;
-    protected Entity closestPlayer = null;
-    protected float minDistancePlayer = Mathf.Infinity;
-    protected Entity closestTower = null;
-    protected float minDistanceTower = Mathf.Infinity;
-    protected Entity closestCore = null;
-    protected float minDistanceCore = Mathf.Infinity;
+    [SerializeField] protected Entity closestMinion = null;
+    [SerializeField] protected float minDistanceMinion = Mathf.Infinity;
+    [SerializeField] protected Entity closestPlayer = null;
+    [SerializeField] protected float minDistancePlayer = Mathf.Infinity;
+    [SerializeField] protected Entity closestTower = null;
+    [SerializeField] protected float minDistanceTower = Mathf.Infinity;
+    [SerializeField] protected Entity closestCore = null;
+    [SerializeField] protected float minDistanceCore = Mathf.Infinity;
 
     protected override void Start() {
         base.Start();
         npeDetectLogic.SetEnemyTeams(enemyTeams);
+        entitiesInRange = new List<Entity>();
     }
     //Overrided Destroy method
     protected override void Die(Entity damageOrigin) {
-        isDead = true;
-
-        //Give gold to the closest players
-        DistributeGoldReward();
-
         base.Die(damageOrigin);
-    }
-    //Give the gold reward to the closest players in range
-    protected virtual void DistributeGoldReward() {
-        /*
-         * WIP-------------------------------------------------------------------------------------------------------
-         * ***Use this for minions and towers
-         * 1. get array of all players in range
-         * 2. find up to two closest players within range that is not the damageOrigin
-         * 3. Give the 1 or 2 selected players the gold reward
-         */
+
+        //Destroy self
+        Destroy(gameObject);
     }
     //Move
     protected virtual void Move() {
@@ -74,15 +65,19 @@ public class NonPlayerEntity : Entity
     }
     //Cooldown for attacks
     protected void AttackTimer() {
+        if (!canAttackTimer) return;
+
         if (attackCooldownTimer >= 0) {
             attackCooldownTimer -= Time.deltaTime;
         }
     }
     //Gets the closest entity in detect range and sets it as target
     protected virtual void FindTarget() {
+        if (!canSearchForTarget) return;
+
         if (!target) {
             //Get List of entities in range
-            List<Entity> entitiesInRange = npeDetectLogic.GetEnemiesInRange();
+            entitiesInRange = npeDetectLogic.GetEnemiesInRange();
             if (entitiesInRange.Count <= 0) {
                 target = null;
                 return;
@@ -101,6 +96,12 @@ public class NonPlayerEntity : Entity
                 } else if (e is Player && dist < minDistancePlayer) {
                     closestPlayer = e;
                     minDistancePlayer = dist;
+                } else if (e is Tower && dist < minDistanceTower) {
+                    closestTower = e;
+                    minDistanceTower = dist;
+                } else if (e is Core && dist < minDistanceCore) {
+                    closestCore = e;
+                    minDistanceCore = dist;
                 }
             }
 
@@ -110,6 +111,8 @@ public class NonPlayerEntity : Entity
             else if (canTargetMinion && closestMinion) target = closestMinion;
             else if (canTargetPlayer && closestPlayer) target = closestPlayer;
             else target = null;
+
+            if (target != null) hasTarget = true;
         }
     }
     //Resets the target, called from NPEDetectLogic
@@ -126,11 +129,8 @@ public class NonPlayerEntity : Entity
         target = null;
     }
     //Visualization for ranges using Gizmos
-    protected virtual void OnDrawGizmos() {
-        if (showRewardRange) {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(transform.position, rewardRange);
-        }
+    protected override void OnDrawGizmos() {
+        base.OnDrawGizmos();
         if (showAttackRange) {
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(attackRangeOrigin.position, attackRange);
@@ -139,5 +139,12 @@ public class NonPlayerEntity : Entity
             Gizmos.color = Color.blue;
             Gizmos.DrawLine(transform.position, transform.position + transform.forward * 5f);
         }
+    }
+    //For pausing the game
+    public void Freeze(bool freezeNPE) {
+        canMove = !freezeNPE;
+        canDefaultAttack = !freezeNPE;
+        canAttackTimer = !freezeNPE;
+        canSearchForTarget = !freezeNPE;
     }
 }

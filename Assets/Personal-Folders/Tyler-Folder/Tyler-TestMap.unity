@@ -1406,6 +1406,7 @@ MonoBehaviour:
   defaultAttackCooldown: 0
   isDead: 0
   enemyTeams: 
+  playerStats: {fileID: 0}
 --- !u!1001 &867732295
 PrefabInstance:
   m_ObjectHideFlags: 0

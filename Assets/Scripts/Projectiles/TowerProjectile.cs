@@ -27,10 +27,16 @@ public class TowerProjectile : Projectile
     {
         //Get all hit colliders
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, hitRadius);
+
+        bool onlyHitTarget = target ? true : false;
+
         foreach(Collider c in hitColliders)
         {
             if(c.gameObject.TryGetComponent<Entity>(out Entity e))
             {
+                //If not AOE attack, only hit target
+                if (onlyHitTarget && e != target) continue;
+
                 //If collider is entity on enemy team, deal damage to it
                 if (enemyTeams.Contains(e.GetTeam()))
                 {

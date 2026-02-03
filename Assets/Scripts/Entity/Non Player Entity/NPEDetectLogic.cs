@@ -21,6 +21,7 @@ public class NPEDetectLogic : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other) {
         //If collision is an enemy entity, add it to the list enemiesInRange 
+        enemiesInRange.RemoveAll(e => e == null);
         if (enemyTeams.Count <= 0) return;
         if(other.gameObject.TryGetComponent<Entity>(out Entity e)) {
             if(enemyTeams.Contains(e.GetTeam())) {

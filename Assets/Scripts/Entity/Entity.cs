@@ -14,15 +14,20 @@ public class Entity : MonoBehaviour
     [Tooltip("Only Core & Guardian Tower need this")]
     [SerializeField] Entity protector;
     [Space]
+    [SerializeField] protected int reward_Gold = 0;
+    [SerializeField] protected int reward_XP = 0;
+    [SerializeField] float rewardRange = 50f;
+    [Space]
     //Stats that are visible in editor
     [Header("Entity Debug")]
-    [SerializeField] protected int goldReward = 0;
+    [Tooltip("Yellow Circle")]
+    [SerializeField] bool showRewardRange = false;
+    [Space]
     [SerializeField] protected int maximumHitPoints = 0;
     [SerializeField] protected int currentHitPoints = 0;
     [SerializeField] protected float moveSpeed = 0;
     [SerializeField] protected int attackPower = 0;
     [SerializeField] protected float defaultAttackCooldown = 0;
-    [Space]
     [SerializeField] protected bool isDead = false;
     
     //Setup
@@ -36,7 +41,6 @@ public class Entity : MonoBehaviour
     private void Setup() {
         //Init
         statBlock = Object.Instantiate(statBlock);
-        goldReward = statBlock.GoldReward;
         maximumHitPoints = statBlock.BaseHitPoints;
         currentHitPoints = maximumHitPoints;
         moveSpeed = statBlock.BaseMoveSpeed;
@@ -55,23 +59,58 @@ public class Entity : MonoBehaviour
             enemyTeams.Add(Entity.Team.TEAM2);
         }
     }
-    //Basic logic for entity taking damage
-    public virtual void TakeDamage(int damage, Entity damageOrigin) {
+    //Basic logic for entity taking damage. Returns true on death, false on no death
+    public virtual bool TakeDamage(int damage, Entity damageOrigin) {
         //Lower health by damage amount. If it is 0 or below, it is destroyed
         if (!protector || protector.GetIsDead()) {
             currentHitPoints -= damage;
             if (currentHitPoints <= 0) {
                 Die(damageOrigin);
+                return true;
             }
         }
+        return false;
     }
     //Basic logic for dying/destroying self
     protected virtual void Die(Entity damageOrigin) {
-        //WIP ---------------------------------
-        //players should disable+disappear until respawned
-        //NPEs should just be destroyed
-        Destroy(gameObject);
+        isDead = true;
+        DistributeReward();
     }
+
+    //Give the gold+xp reward to the closest players in range. Only called on death
+    protected virtual void DistributeReward() {
+        //Get All Possible Players
+        Player[] players = FindObjectsByType<Player>(FindObjectsSortMode.None);
+        List<Player> enemyPlayersInRange = new List<Player>();
+
+        //Get the enemy team players that are in reward range
+        foreach (Player p in players) {
+            if (GetEnemyTeams().Contains(p.GetTeam())) {
+                float distance = Vector3.Distance(p.gameObject.transform.position, transform.position);
+                if(distance < rewardRange) {
+                    enemyPlayersInRange.Add(p);
+                }
+            }
+        }
+
+        //If 3+ players in range, split the reward amount
+        if(enemyPlayersInRange.Count > 2) {
+            reward_Gold = (int)Mathf.Floor((float)reward_Gold / 3);
+            reward_XP = (int)Mathf.Floor((float)reward_XP / 3);
+        }
+        //give the reward amount to each player in range
+        foreach (Player p in enemyPlayersInRange) {
+            p.IncreaseGoldTotal(reward_Gold);
+            p.IncreaseXPTotal(reward_XP);
+        }
+    }
+    protected virtual void OnDrawGizmos() {
+        if (showRewardRange) {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, rewardRange);
+        }
+    }
+
     #region Setters
     public void SetTeam(Team t) {
         team = t;
