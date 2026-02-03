@@ -8,7 +8,7 @@ public class SaveMatchData : MonoBehaviour
     public Match match = new Match();
     //Load in the data from GameManager
     public void ImportMatchData(int match_id, string timestamp, string map, string winner, int duration_seconds,
-                                int team1Kills, int team2Kills, int team1TowersDestroyed, int team2TowersDestroyed) {
+                                int team1Kills, int team2Kills, int team1Deaths, int team2Deaths, int team1TowersDestroyed, int team2TowersDestroyed) {
         match.match_id = match_id;
         match.timestamp = timestamp;
         match.map = map;
@@ -16,6 +16,8 @@ public class SaveMatchData : MonoBehaviour
         match.duration_seconds = duration_seconds;
         match.kills["Team1"] = team1Kills;
         match.kills["Team2"] = team2Kills;
+        match.deaths["Team1"] = team1Deaths;
+        match.deaths["Team2"] = team2Deaths;
         match.towers_destroyed["Team1"] = team1TowersDestroyed;
         match.towers_destroyed["Team2"] = team2TowersDestroyed;
     }
@@ -49,5 +51,6 @@ public class Match {
     public int duration_seconds = 0;
 
     public Dictionary<string, int> kills = new Dictionary<string, int>();
+    public Dictionary<string, int> deaths = new Dictionary<string, int>();
     public Dictionary<string, int> towers_destroyed = new Dictionary<string, int>();
 }

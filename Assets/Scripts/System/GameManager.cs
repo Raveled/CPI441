@@ -212,6 +212,14 @@ public class GameManager : MonoBehaviour
         }
         return killCount;
     }
+    public int ComputeTeamDeathTotal(Player[] team) {
+        int deathCount = 0;
+        for (int i = 0; i < team.Length; i++) {
+            if (!team[i]) continue;
+            deathCount += team[i].GetPlayerInfo().DeathCount;
+        }
+        return deathCount;
+    }
     void GenerateMatchJSON() {
         saveMatchData.ImportMatchData(
             match_id,
@@ -221,6 +229,8 @@ public class GameManager : MonoBehaviour
             (int)gameTimer,
             ComputeTeamKillTotal(team1_Players),
             ComputeTeamKillTotal(team2_Players),
+            ComputeTeamDeathTotal(team1_Players),
+            ComputeTeamDeathTotal(team2_Players),
             towersDestroyed_Team1,
             towersDestroyed_Team2
             );

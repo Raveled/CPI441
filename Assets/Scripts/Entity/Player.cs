@@ -47,6 +47,7 @@ public class Player : Entity
     //Check for player level up
     void CheckLevelUp() {
         //WIP-----------------------------------------------------------
+        if (xpTotal == 100) playerLevel++;
     }
     //Getts
     public SO_PlayerInfo GetPlayerInfo() {
