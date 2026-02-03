@@ -5,10 +5,13 @@ using Unity.AI.Navigation;
 public class GameManager : MonoBehaviour
 {
     public enum GameState : int { NULL = 0, INPROGRESS = 1, PAUSED = 2, END = 3}
+
+    //GameManager
     [Header("GameManager Setup")]
     [Tooltip("Time In Seconds")]
     [SerializeField] float minionWaveSpawnInterval = 5f;
     [SerializeField] NavMeshSurface navMeshSurface = null;
+    [SerializeField] GameObject endGameVisual = null;
     [Tooltip("Set to -1 for infinite waves default")]
     [SerializeField] int maxWaves = -1;
     [Space]
@@ -19,6 +22,8 @@ public class GameManager : MonoBehaviour
     [Space]
     [SerializeField] GameState gameState = GameState.NULL;
     [SerializeField] string timerString = "";
+
+    //Minion Spawning
     [Space]
     [Header("Minion Spawning Debug")]
     [SerializeField] float currentMinionWaveSpawnTimer = 0;
@@ -29,16 +34,44 @@ public class GameManager : MonoBehaviour
     //For wave spawning
     Core[] cores = null;
     int currentWaves = 0;
-    void Start()
-    {
+
+    //Players
+    [Header("Player/Team Setup")]
+    [SerializeField] int teamSize = 3;
+    [Space]
+    [Header("Player/Team Debug")]
+    [SerializeField] Player[] team1_Players = null;
+    [SerializeField] Player[] team2_Players = null;
+
+
+    void Start() {
         //Init
         gameState = GameState.INPROGRESS;
         gameTimer = 0;
         cores = FindObjectsByType<Core>(FindObjectsSortMode.None);
         currentMinionWaveSpawnTimer = minionWaveSpawnInterval;
 
-        if(bakeOnStart) navMeshSurface.BuildNavMesh();
+        if (bakeOnStart) navMeshSurface.BuildNavMesh();
         if (spawnWaveOnStart) SpawnWave();
+
+        //Get All Players
+        team1_Players = new Player[teamSize];
+        team2_Players = new Player[teamSize];
+        Player[] getPlayers = FindObjectsByType<Player>(FindObjectsSortMode.None);
+        int t1Idx = 0;
+        int t2Idx = 0;
+        foreach(Player p in getPlayers) {
+            if(p.GetTeam() == Entity.Team.TEAM1) {
+                team1_Players[t1Idx] = p;
+                t1Idx++;
+            }
+            else if (p.GetTeam() == Entity.Team.TEAM2) {
+                team2_Players[t2Idx] = p;
+                t2Idx++;
+            }
+        }
+
+        endGameVisual.SetActive(false);
     }
 
     void Update()
@@ -93,9 +126,49 @@ public class GameManager : MonoBehaviour
     //Pause or unpause game
     public void TogglePauseGame() {
         if (gameState == GameState.INPROGRESS) { //Pause if unpaused
-            gameState = GameState.PAUSED;
+            ChangeGameState(GameState.PAUSED);
         } else if (gameState == GameState.PAUSED) { //Unpause if paused
-            gameState = GameState.INPROGRESS;
+            ChangeGameState(GameState.INPROGRESS);
         }
     }
+    //Change Game State
+    void ChangeGameState(GameState state) {
+        switch (state) {
+            case GameState.NULL:
+                gameState = GameState.NULL;
+                break;
+            case GameState.INPROGRESS:
+                gameState = GameState.INPROGRESS;
+                FreezeNPE(false);
+                break;
+            case GameState.PAUSED:
+                gameState = GameState.PAUSED;
+                FreezeNPE(true);
+                break;
+            case GameState.END:
+                gameState = GameState.END;
+                break;
+        }
+    }
+    //Stop all enemy movement/attacking/target searching
+    void FreezeNPE(bool freeze) {
+        //WIP--------------------------------------------------------------
+        if (freeze) {
+
+        } else {
+
+        }
+    }
+    void ShowEndGameVisual() {
+        //WIP---------------------------------------------------------------------
+        //update text based on team winning/losing
+    }
+    //When a Player Dies (Called by player death) ***Uses playerIdx
+    public void PlayerDeath(Entity player_Killed, Entity player_Killer) {
+        //WIP-----------------------------------------------------------------
+        //Sends a Message to the players that a player has died based on their names.
+        // also updates the scoreboard based on their player stats using the player[] arrays and playerinfo 
+    }
+
+
 }

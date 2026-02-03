@@ -66,10 +66,10 @@ public class Creep : NonPlayerEntity
 
         base.TakeDamage(damage, damageOrigin);
     }
-    protected override void DestroyThis(Entity damageOrigin) {
+    protected override void Die(Entity damageOrigin) {
         //Lower activeCreepCount of connected CreepSpawner
         connectedSpawner.CreepDied();
-        base.DestroyThis(damageOrigin);
+        base.Die(damageOrigin);
     }
     protected override void OnDrawGizmos() {
         base.OnDrawGizmos();

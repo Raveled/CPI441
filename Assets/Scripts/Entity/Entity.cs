@@ -61,12 +61,15 @@ public class Entity : MonoBehaviour
         if (!protector || protector.GetIsDead()) {
             currentHitPoints -= damage;
             if (currentHitPoints <= 0) {
-                DestroyThis(damageOrigin);
+                Die(damageOrigin);
             }
         }
     }
     //Basic logic for dying/destroying self
-    protected virtual void DestroyThis(Entity damageOrigin) {
+    protected virtual void Die(Entity damageOrigin) {
+        //WIP ---------------------------------
+        //players should disable+disappear until respawned
+        //NPEs should just be destroyed
         Destroy(gameObject);
     }
     #region Setters

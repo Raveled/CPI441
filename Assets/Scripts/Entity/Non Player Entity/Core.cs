@@ -14,7 +14,7 @@ public class Core : NonPlayerEntity
         gameManager = FindFirstObjectByType<GameManager>();
         base.Start();
     }
-    protected override void DestroyThis(Entity damageOrigin) {
+    protected override void Die(Entity damageOrigin) {
         gameManager.CoreDestroyed((int)team);
         Destroy(gameObject);
     }

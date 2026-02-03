@@ -41,13 +41,13 @@ public class NonPlayerEntity : Entity
         npeDetectLogic.SetEnemyTeams(enemyTeams);
     }
     //Overrided Destroy method
-    protected override void DestroyThis(Entity damageOrigin) {
+    protected override void Die(Entity damageOrigin) {
         isDead = true;
 
         //Give gold to the closest players
         DistributeGoldReward();
 
-        base.DestroyThis(damageOrigin);
+        base.Die(damageOrigin);
     }
     //Give the gold reward to the closest players in range
     protected virtual void DistributeGoldReward() {
