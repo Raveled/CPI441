@@ -1,4 +1,5 @@
 ﻿<Solution>
+  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Unity.Timeline.csproj" />
   <Project Path="Unity.PlasticSCM.Editor.csproj" />
   <Project Path="Unity.Mathematics.csproj" />
@@ -45,7 +46,6 @@
   <Project Path="Unity.VisualScripting.SettingsProvider.Editor.csproj" />
   <Project Path="PurrNet.Edgegap.Runtime.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
-  <Project Path="ToolbarExtender.Editor.csproj" />
   <Project Path="ParrelSync.csproj" />
   <Project Path="PurrNet.Profiler.Deltas.Editor.csproj" />
   <Project Path="Unity.Settings.Editor.csproj" />
