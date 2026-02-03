@@ -48,6 +48,7 @@ MonoBehaviour:
   showDetectRange: 0
   detectRange: 10
   enemiesInRange: []
+  enemyTeams: 
 --- !u!135 &5055006070050696865
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -147,7 +148,10 @@ MonoBehaviour:
   canMove: 0
   canDefaultAttack: 0
   protector: {fileID: 0}
-  goldReward: 0
+  reward_Gold: 10
+  reward_XP: 10
+  rewardRange: 50
+  showRewardRange: 0
   maximumHitPoints: 0
   currentHitPoints: 0
   moveSpeed: 0
@@ -155,7 +159,6 @@ MonoBehaviour:
   defaultAttackCooldown: 0
   isDead: 0
   enemyTeams: 
-  rewardRange: 50
   attackRangeOrigin: {fileID: 2091050431416320281}
   attackRange: 10
   npeDetectLogic: {fileID: 5426260684124222954}
@@ -163,11 +166,12 @@ MonoBehaviour:
   canTargetCore: 0
   canTargetMinion: 1
   canTargetPlayer: 1
-  showRewardRange: 0
   showAttackRange: 1
   showForwardDirection: 1
   target: {fileID: 0}
   attackCooldownTimer: 0
+  canSearchForTarget: 1
+  canAttackTimer: 1
   towerProjectilePrefab: {fileID: 8089092169863178650, guid: 6ff1fabe97157dd4793400b1e1905ffb, type: 3}
   projectileSpeed: 10
 --- !u!54 &5377689714364696824

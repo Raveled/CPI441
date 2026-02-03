@@ -5,9 +5,9 @@ using UnityEngine.AI;
 
 public class Minion : NonPlayerEntity
 {
-    public enum MinionState : int { CHASE_ENEMY = 0, CHASE_CORE = 1};
     [Header("Minion Setup")]
     [SerializeField] float attackHeight = 10f;
+    [SerializeField] bool attackIsAOE = false;
     [Header("Minion Debug")]
     [Tooltip("Purple Circle")]
     [SerializeField] bool showAttackBounds = false;
@@ -50,12 +50,21 @@ public class Minion : NonPlayerEntity
             navMeshMoveTarget = enemyCore.transform;
             agent.SetDestination(enemyCore.transform.position);
             agent.isStopped = false;
+            agent.updateRotation = true;
         }
     }
     void Update()
     {
+        if(hasTarget && !target) {
+            hasTarget = false;
+            ResetTarget();
+        }
+
         FindTarget();
-        if(enemyCore) Move();
+        if (enemyCore) {
+            Move();
+            Rotate();
+        }
         AttackTimer();
         Attack();
 
@@ -103,7 +112,6 @@ public class Minion : NonPlayerEntity
         base.Attack();
         //If there is a target and it is within attack range
         if (target && CheckTargetInAttackRange() && attackCooldownTimer <= 0) {
-            Debug.Log(GetName() + " is attacking " + target.GetName());
             //Reset attack cooldown
             attackCooldownTimer = defaultAttackCooldown;
 
@@ -113,12 +121,36 @@ public class Minion : NonPlayerEntity
             foreach (Collider hit in hits) {
                 //if collider is an entity on enemy team, deal damage to it
                 if(hit.gameObject.TryGetComponent<Entity>(out Entity e)){
+
+                    //If not AOE attack, only hit target
+                    if (!attackIsAOE && e != target) continue;
+
+                    //Deal Damage if on enemy team
                     if (GetEnemyTeams().Contains(e.GetTeam())) {
-                        e.TakeDamage(attackPower, this); 
-                        Debug.Log(GetName() + " dealt damage to " + e.GetName());
+                        if (e.TakeDamage(attackPower, this)) ResetTarget();
                     }
                 }
             }
+        }
+    }
+    //Rotate the Transform based on the target
+    void Rotate() {
+        if (!target) {
+            //If no target, use agent rotation
+            agent.updateRotation = true;
+        } else {
+            //If target, use custom rotation
+            agent.updateRotation = false;
+
+            //Get rotate direction
+            Vector3 direction = target.transform.position - transform.position;
+            direction.y = 0f; // keep upright
+
+            if (direction.sqrMagnitude < 0.001f) return;
+
+            //Rotate
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, agent.angularSpeed / 2 * Time.deltaTime);
         }
     }
     //Make sure target is in range
