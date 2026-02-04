@@ -11,6 +11,8 @@ public class GameManager : MonoBehaviour
     //GameManager
     [Header("GameManager Setup")]
     [Tooltip("Time In Seconds")]
+    [SerializeField] Transform[] spawnpoints_Team1 = null;
+    [SerializeField] Transform[] spawnpoints_Team2 = null;
     [SerializeField] float minionWaveSpawnInterval = 5f;
     [SerializeField] NavMeshSurface navMeshSurface = null;
     [Tooltip("Set to -1 for infinite waves default")]
