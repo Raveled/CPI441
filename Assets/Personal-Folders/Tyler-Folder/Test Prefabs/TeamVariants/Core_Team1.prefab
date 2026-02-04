@@ -49,6 +49,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 357166304892261793, guid: e20ec55b79fd7db4b9bf7be096106784, type: 3}
+      propertyPath: team
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 357166304892261793, guid: e20ec55b79fd7db4b9bf7be096106784, type: 3}
       propertyPath: minionPrefab
       value: 
       objectReference: {fileID: 8299637077817607579, guid: b81d5a3aecb5571448a2978bae4d76a6, type: 3}
