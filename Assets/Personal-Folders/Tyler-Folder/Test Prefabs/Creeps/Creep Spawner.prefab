@@ -362,7 +362,7 @@ GameObject:
   - component: {fileID: 9055671403837494611}
   - component: {fileID: 8690670460906138155}
   m_Layer: 0
-  m_Name: Test Creep Spawner
+  m_Name: Creep Spawner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

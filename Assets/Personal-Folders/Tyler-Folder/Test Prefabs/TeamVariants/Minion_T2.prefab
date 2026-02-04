@@ -48,9 +48,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3861177414995866693, guid: 2591120a107ce4244b4c4c6e3db00828, type: 3}
+      propertyPath: team
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3861177414995866693, guid: 2591120a107ce4244b4c4c6e3db00828, type: 3}
+      propertyPath: statBlock
+      value: 
+      objectReference: {fileID: 11400000, guid: 2848ef0da7cdff742a7cc3eba9ec81d6, type: 2}
     - target: {fileID: 7434539554110800588, guid: 2591120a107ce4244b4c4c6e3db00828, type: 3}
       propertyPath: m_Name
-      value: Test Minion
+      value: Minion_T2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -52,9 +52,13 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 1e25c216e9638bd4cb3051e83b9d8c08, type: 2}
+    - target: {fileID: 3861177414995866693, guid: 2591120a107ce4244b4c4c6e3db00828, type: 3}
+      propertyPath: team
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7434539554110800588, guid: 2591120a107ce4244b4c4c6e3db00828, type: 3}
       propertyPath: m_Name
-      value: Test Minion Team2
+      value: Minion_T1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

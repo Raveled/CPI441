@@ -11,8 +11,8 @@ public class Entity : MonoBehaviour
     [SerializeField] protected Team team = Team.NULL;
     [SerializeField] protected bool canMove = true;
     [SerializeField] protected bool canDefaultAttack = true;
-    [Tooltip("Only Core & Guardian Tower need this")]
-    [SerializeField] Entity protector;
+    [Tooltip("Only Core & Guardian Tower need this set in inspector")]
+    [SerializeField] Entity[] protector = null;
     [Space]
     [SerializeField] protected int reward_Gold = 0;
     [SerializeField] protected int reward_XP = 0;
@@ -62,13 +62,31 @@ public class Entity : MonoBehaviour
     //Basic logic for entity taking damage. Returns true on death, false on no death
     public virtual bool TakeDamage(int damage, Entity damageOrigin) {
         //Lower health by damage amount. If it is 0 or below, it is destroyed
-        if (!protector || protector.GetIsDead()) {
+
+        //Check if it has a protector
+        bool protectorAlive = false;
+        foreach(Entity e in protector)
+        {
+            if (e == null) continue;
+            else if (!e.GetIsDead())
+            {
+                protectorAlive = true;
+            }
+        }
+
+        //Deal damage if no protector alive
+        if (!protectorAlive)
+        {
             currentHitPoints -= damage;
-            if (currentHitPoints <= 0) {
+
+            //If hp is <= 0, die
+            if (currentHitPoints <= 0)
+            {
                 Die(damageOrigin);
                 return true;
             }
         }
+
         return false;
     }
     public virtual void Heal(int healAmount)
