@@ -836,7 +836,7 @@ PrefabInstance:
     - target: {fileID: 357166304892261793, guid: e20ec55b79fd7db4b9bf7be096106784, type: 3}
       propertyPath: minionPrefab
       value: 
-      objectReference: {fileID: 1041369088382745406, guid: 102c7e858e0587744b85c064cffde853, type: 3}
+      objectReference: {fileID: 3861177414995866693, guid: 0cf209a00f3d0c14cbfac040977949ab, type: 3}
     - target: {fileID: 574811933204359548, guid: e20ec55b79fd7db4b9bf7be096106784, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -844,14 +844,6 @@ PrefabInstance:
     - target: {fileID: 1897508716671297189, guid: e20ec55b79fd7db4b9bf7be096106784, type: 3}
       propertyPath: m_Enabled
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2114472906830139636, guid: e20ec55b79fd7db4b9bf7be096106784, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2114472906830139636, guid: e20ec55b79fd7db4b9bf7be096106784, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4257815370024861000, guid: e20ec55b79fd7db4b9bf7be096106784, type: 3}
       propertyPath: m_Name
@@ -1128,10 +1120,6 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 357166304892261793, guid: e20ec55b79fd7db4b9bf7be096106784, type: 3}
-      propertyPath: minionPrefab
-      value: 
-      objectReference: {fileID: 8299637077817607579, guid: b81d5a3aecb5571448a2978bae4d76a6, type: 3}
-    - target: {fileID: 357166304892261793, guid: e20ec55b79fd7db4b9bf7be096106784, type: 3}
       propertyPath: showAttackRange
       value: 0
       objectReference: {fileID: 0}
@@ -1150,14 +1138,6 @@ PrefabInstance:
     - target: {fileID: 1897508716671297189, guid: e20ec55b79fd7db4b9bf7be096106784, type: 3}
       propertyPath: m_Enabled
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2114472906830139636, guid: e20ec55b79fd7db4b9bf7be096106784, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2114472906830139636, guid: e20ec55b79fd7db4b9bf7be096106784, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2511651471247310269, guid: e20ec55b79fd7db4b9bf7be096106784, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -1409,14 +1389,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Test Tower (3)
       objectReference: {fileID: 0}
-    - target: {fileID: 3896527652066004641, guid: c33c0bd8404863147bc7aabd2814f5f5, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3896527652066004641, guid: c33c0bd8404863147bc7aabd2814f5f5, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 5180604451610894363, guid: c33c0bd8404863147bc7aabd2814f5f5, type: 3}
       propertyPath: team
       value: 1
@@ -1550,14 +1522,6 @@ PrefabInstance:
     - target: {fileID: 2166498419418047786, guid: c33c0bd8404863147bc7aabd2814f5f5, type: 3}
       propertyPath: m_Name
       value: Test Tower (2)
-      objectReference: {fileID: 0}
-    - target: {fileID: 3896527652066004641, guid: c33c0bd8404863147bc7aabd2814f5f5, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3896527652066004641, guid: c33c0bd8404863147bc7aabd2814f5f5, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5180604451610894363, guid: c33c0bd8404863147bc7aabd2814f5f5, type: 3}
       propertyPath: team
@@ -2706,14 +2670,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Test Tower (1)
       objectReference: {fileID: 0}
-    - target: {fileID: 3896527652066004641, guid: c33c0bd8404863147bc7aabd2814f5f5, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3896527652066004641, guid: c33c0bd8404863147bc7aabd2814f5f5, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 5180604451610894363, guid: c33c0bd8404863147bc7aabd2814f5f5, type: 3}
       propertyPath: team
       value: 2
@@ -2778,14 +2734,6 @@ PrefabInstance:
     - target: {fileID: 2166498419418047786, guid: c33c0bd8404863147bc7aabd2814f5f5, type: 3}
       propertyPath: m_Name
       value: Test Tower
-      objectReference: {fileID: 0}
-    - target: {fileID: 3896527652066004641, guid: c33c0bd8404863147bc7aabd2814f5f5, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3896527652066004641, guid: c33c0bd8404863147bc7aabd2814f5f5, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5180604451610894363, guid: c33c0bd8404863147bc7aabd2814f5f5, type: 3}
       propertyPath: team

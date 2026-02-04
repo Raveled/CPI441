@@ -7,7 +7,7 @@ public class NPEDetectLogic : MonoBehaviour
     [Tooltip("Green Circle")]
     [SerializeField] bool showDetectRange = false;
     [Tooltip("Always equal to the range of the sphere collider")]
-    [SerializeField] float detectRange = 0f;
+    float detectRange = 0f;
     [SerializeField] List<Entity> enemiesInRange = null;
 
     //Setup

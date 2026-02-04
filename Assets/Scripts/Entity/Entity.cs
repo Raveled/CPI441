@@ -71,6 +71,16 @@ public class Entity : MonoBehaviour
         }
         return false;
     }
+    public virtual void Heal(int healAmount)
+    {
+        currentHitPoints += healAmount;
+        if (currentHitPoints > maximumHitPoints) currentHitPoints = maximumHitPoints;
+    }
+    public virtual void GainMaxHealth(int maxHealthAmount)
+    {
+        maximumHitPoints += maxHealthAmount;
+        currentHitPoints += maxHealthAmount;
+    }
     //Basic logic for dying/destroying self
     protected virtual void Die(Entity damageOrigin) {
         isDead = true;

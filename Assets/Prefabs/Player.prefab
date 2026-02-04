@@ -137,7 +137,10 @@ MonoBehaviour:
   canMove: 1
   canDefaultAttack: 1
   protector: {fileID: 0}
-  goldReward: 0
+  reward_Gold: 0
+  reward_XP: 0
+  rewardRange: 50
+  showRewardRange: 0
   maximumHitPoints: 0
   currentHitPoints: 0
   moveSpeed: 0
@@ -196,6 +199,7 @@ MonoBehaviour:
   _rigidbody: {fileID: 8069894609849645937}
   moveSpeed: 10
   jumpForce: 5
+  jumpCooldownTime: 1
   acceleration: 20
   planarDamping: 10
   groundCheckDistance: 0.1
