@@ -13,9 +13,6 @@ public class Entity : MonoBehaviour
     [SerializeField] protected bool canDefaultAttack = true;
     [Tooltip("Only Core & Guardian Tower need this set in inspector")]
     [SerializeField] Entity[] protector = null;
-    [Space]
-    [SerializeField] protected int reward_Gold = 0;
-    [SerializeField] protected int reward_XP = 0;
     [SerializeField] float rewardRange = 50f;
     [Space]
     //Stats that are visible in editor
@@ -28,6 +25,8 @@ public class Entity : MonoBehaviour
     [SerializeField] protected float moveSpeed = 0;
     [SerializeField] protected int attackPower = 0;
     [SerializeField] protected float defaultAttackCooldown = 0;
+    [SerializeField] protected int reward_Gold = 0;
+    [SerializeField] protected int reward_XP = 0;
     [SerializeField] protected bool isDead = false;
     
     //Setup
@@ -61,6 +60,8 @@ public class Entity : MonoBehaviour
         moveSpeed = statBlock.BaseMoveSpeed;
         attackPower = statBlock.BaseAttackPower;
         defaultAttackCooldown = statBlock.BaseDefaultAttackCooldown;
+        reward_Gold = statBlock.RewardGold;
+        reward_XP = statBlock.RewardXP;
     }
     //Basic logic for entity taking damage. Returns true on death, false on no death
     public virtual bool TakeDamage(int damage, Entity damageOrigin) {

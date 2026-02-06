@@ -712,9 +712,9 @@ MonoBehaviour:
   timerString: 
   chosenCharacters_Team1: 01000000
   chosenCharacters_Team2: 
-  beetle_Character: {fileID: 3921032179608766505, guid: 999f5cd1ecb707840bce0ab3150103ba, type: 3}
-  mosquito_Character: {fileID: 0}
-  butterfly_Character: {fileID: 0}
+  beetle_Prefab: {fileID: 0}
+  mosquito_Prefab: {fileID: 0}
+  butterfly_Prefab: {fileID: 0}
   currentMinionWaveSpawnTimer: 0
   canPause: 1
   teamSize: 3
@@ -745,7 +745,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f91c9dfeafd999f41a76347ee4172571, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SaveMatchData
-  loadInJSON: {fileID: 4900000, guid: bb6f4ae51bf499946a1a7559fda46953, type: 3}
+  loadInJSON: {fileID: 4900000, guid: 0e35fd6439640a5498f1ad7022a94192, type: 3}
   match:
     match_id: 0
     timestamp: a
@@ -764,7 +764,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1adb6afcdf213c448907baaf54322f00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::JSON_PlayerData
-  loadInJSON: {fileID: 4900000, guid: 8bac6df6ed12f0f4ab04536d939b0ddb, type: 3}
+  loadInJSON: {fileID: 4900000, guid: de372e052fd64bd4f841de1d4ec93e2b, type: 3}
 --- !u!1 &8661443751703141602
 GameObject:
   m_ObjectHideFlags: 0

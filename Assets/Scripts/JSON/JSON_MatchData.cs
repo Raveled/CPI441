@@ -26,9 +26,6 @@ public class JSON_MatchData : MonoBehaviour
     }
     //Save as JSON file
     public void SaveToJSON() {
-        //Convert to text
-        //string matchData = JsonUtility.ToJson(match);
-
         //For saving to pc
         string filePath = Application.persistentDataPath + "/MatchData.json";
 

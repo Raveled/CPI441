@@ -18199,6 +18199,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3604123774642722008, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+      propertyPath: beetle_Prefab
+      value: 
+      objectReference: {fileID: 3921032179608766505, guid: 999f5cd1ecb707840bce0ab3150103ba, type: 3}
     - target: {fileID: 8154089200534231921, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: m_Name
       value: GameManager
@@ -32594,7 +32598,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1066278650
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -49034,7 +49038,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1643989588
 MonoBehaviour:
   m_ObjectHideFlags: 0

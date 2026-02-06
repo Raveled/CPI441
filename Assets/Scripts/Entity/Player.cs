@@ -5,10 +5,10 @@ using System.Collections.Generic;
 public class Player : Entity
 {
     [Header("Player Debug")]
-    [SerializeField] SO_PlayerInfo playerInfo = null;
     [SerializeField] int playerLevel = 1;
     [SerializeField] int goldTotal = 0;
     [SerializeField] int xpTotal = 0;
+    SO_PlayerInfo playerInfo = null;
     List<Tower> friendlyTowers;
     protected override void Start() {
         base.Start();

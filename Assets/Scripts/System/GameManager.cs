@@ -10,13 +10,11 @@ public class GameManager : MonoBehaviour
 
     //GameManager
     [Header("GameManager Setup")]
-    [Tooltip("Time In Seconds")]
     [SerializeField] Transform[] spawnpoints_Team1 = null;
     [SerializeField] Transform[] spawnpoints_Team2 = null;
-    [SerializeField] float minionWaveSpawnInterval = 5f;
+    [Tooltip("Time In Seconds")][SerializeField] float minionWaveSpawnInterval = 5f;
     [SerializeField] NavMeshSurface navMeshSurface = null;
-    [Tooltip("Set to -1 for infinite waves default")]
-    [SerializeField] int maxWaves = -1;
+    [Tooltip("Set to -1 for infinite waves default")][SerializeField] int maxWaves = -1;
     [Space]
     [SerializeField] bool spawnWaveOnStart = false;
     [SerializeField] bool spawnCharactersOnStart = false;
@@ -34,9 +32,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] int[] chosenCharacters_Team1 = null;
     [Tooltip("0=NULL;1=Beetle;2=Mosquito;3=Butterfly")]
     [SerializeField] int[] chosenCharacters_Team2 = null;
-    [SerializeField] GameObject beetle_Character = null;
-    [SerializeField] GameObject mosquito_Character = null;
-    [SerializeField] GameObject butterfly_Character = null;
+    [Space]
+    [SerializeField] GameObject beetle_Prefab = null;
+    [SerializeField] GameObject mosquito_Prefab = null;
+    [SerializeField] GameObject butterfly_Prefab = null;
 
     //Minion Spawning
     [Space]
@@ -216,15 +215,15 @@ public class GameManager : MonoBehaviour
             case 0: // NULL
                 break;
             case 1: //Beetle
-                character = beetle_Character;
+                character = beetle_Prefab;
                 stats = stats_Char_Beetle;
                 break;
             case 2: //Mosquito
-                character = mosquito_Character;
+                character = mosquito_Prefab;
                 stats = stats_Char_Mosquito;
                 break;
             case 3: //Butterfly
-                character = butterfly_Character;
+                character = butterfly_Prefab;
                 stats = stats_Char_Butterfly;
                 break;
         }
@@ -372,6 +371,8 @@ public class GameManager : MonoBehaviour
         statBlock.BaseMoveSpeed = loadFrom.entityStats[entityType].baseMoveSpeed;
         statBlock.BaseAttackPower = loadFrom.entityStats[entityType].baseAttackPower;
         statBlock.BaseDefaultAttackCooldown = loadFrom.entityStats[entityType].baseDefaultAttackCooldown;
+        statBlock.RewardGold = loadFrom.entityStats[entityType].rewardGold;
+        statBlock.RewardXP = loadFrom.entityStats[entityType].rewardXP;
     }
     #endregion
     #region WORK IN PROGRESS

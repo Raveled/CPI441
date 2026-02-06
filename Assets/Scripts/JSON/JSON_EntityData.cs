@@ -39,12 +39,11 @@ public class JSON_EntityData : MonoBehaviour
         statblocks.entityStats[entityType].baseMoveSpeed = stats_Origin.BaseMoveSpeed;
         statblocks.entityStats[entityType].baseAttackPower = stats_Origin.BaseAttackPower;
         statblocks.entityStats[entityType].baseDefaultAttackCooldown = stats_Origin.BaseDefaultAttackCooldown;
+        statblocks.entityStats[entityType].rewardGold = stats_Origin.RewardGold;
+        statblocks.entityStats[entityType].rewardXP = stats_Origin.RewardXP;
     }
     //Save as JSON file
     public void SaveToJSON() {
-        //Convert to text
-        //string entityData = JsonUtility.ToJson(statblocks);
-
         //For saving to pc
         string filePath = Application.persistentDataPath + "/EntityData.json";
 
@@ -81,4 +80,6 @@ public class EntityStatblock {
     public float baseMoveSpeed = 0f;
     public int baseAttackPower = 0;
     public float baseDefaultAttackCooldown = 0f;
+    public int rewardGold = 0;
+    public int rewardXP = 0;
 }

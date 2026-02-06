@@ -1,0 +1,19 @@
+{
+  "match_id": 0,
+  "timestamp": "2026-02-06T02:14:13Z",
+  "map": "m_TwoLane",
+  "winner": "",
+  "duration_seconds": 0,
+  "kills": {
+    "Team1": 0,
+    "Team2": 0
+  },
+  "deaths": {
+    "Team1": 0,
+    "Team2": 0
+  },
+  "towers_destroyed": {
+    "Team1": 0,
+    "Team2": 0
+  }
+}
