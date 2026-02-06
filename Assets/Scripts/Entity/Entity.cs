@@ -23,6 +23,10 @@ public class Entity : MonoBehaviour
     [SerializeField] protected int maximumHitPoints = 0;
     [SerializeField] protected int currentHitPoints = 0;
     [SerializeField] protected float moveSpeed = 0;
+    [SerializeField] protected float acceleration = 0;
+    [SerializeField] protected float planarDamping = 0;
+    [SerializeField] protected float jumpForce = 0;
+    [SerializeField] protected float jumpCooldown = 0;
     [SerializeField] protected int attackPower = 0;
     [SerializeField] protected float defaultAttackCooldown = 0;
     [SerializeField] protected int reward_Gold = 0;
@@ -58,6 +62,10 @@ public class Entity : MonoBehaviour
         maximumHitPoints = statBlock.BaseHitPoints;
         currentHitPoints = maximumHitPoints;
         moveSpeed = statBlock.BaseMoveSpeed;
+        acceleration = statBlock.BaseAcceleration;
+        planarDamping = statBlock.BasePlanarDamping;
+        jumpForce = statBlock.BaseJumpForce;
+        jumpCooldown = statBlock.BaseJumpCooldown;
         attackPower = statBlock.BaseAttackPower;
         defaultAttackCooldown = statBlock.BaseDefaultAttackCooldown;
         reward_Gold = statBlock.RewardGold;
@@ -166,4 +174,8 @@ public class Entity : MonoBehaviour
         return isDead;
     }
     #endregion
+
+    public SO_EntityStatBlock GetEntityStatblock() {
+        return statBlock;
+    }
 }

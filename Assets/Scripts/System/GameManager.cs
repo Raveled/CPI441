@@ -3,6 +3,7 @@ using System;
 using Unity.AI.Navigation;
 using TMPro;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 
 public class GameManager : MonoBehaviour
 {
@@ -369,6 +370,10 @@ public class GameManager : MonoBehaviour
     void LoadEntityHelper(SO_EntityStatBlock statBlock, string entityType, Statblocks loadFrom) {
         statBlock.BaseHitPoints = loadFrom.entityStats[entityType].baseHitPoints;
         statBlock.BaseMoveSpeed = loadFrom.entityStats[entityType].baseMoveSpeed;
+        statBlock.BaseAcceleration = loadFrom.entityStats[entityType].baseAcceleration;
+        statBlock.BasePlanarDamping = loadFrom.entityStats[entityType].basePlanarDamping;
+        statBlock.BaseJumpForce = loadFrom.entityStats[entityType].baseJumpForce;
+        statBlock.BaseJumpCooldown = loadFrom.entityStats[entityType].baseJumpCooldown;
         statBlock.BaseAttackPower = loadFrom.entityStats[entityType].baseAttackPower;
         statBlock.BaseDefaultAttackCooldown = loadFrom.entityStats[entityType].baseDefaultAttackCooldown;
         statBlock.RewardGold = loadFrom.entityStats[entityType].rewardGold;

@@ -14,5 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SO_EntityStatBlock
   baseHitPoints: 100
   baseMoveSpeed: 10
+  baseAcceleration: 20
+  basePlanarDamping: 10
+  baseJumpForce: 15
+  baseJumpCooldown: 1
   baseAttackPower: 10
   baseDefaultAttackCooldown: 5
+  rewardGold: 30
+  rewardXP: 30
