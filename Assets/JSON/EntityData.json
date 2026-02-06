@@ -1,0 +1,52 @@
+{
+  "entityStats": {
+    "Core": {
+      "baseHitPoints": 350,
+      "baseMoveSpeed": 0.0,
+      "baseAttackPower": 10,
+      "baseDefaultAttackCooldown": 5.0,
+      "rewardGold": 0,
+      "rewardXP": 0
+    },
+    "Minion": {
+      "baseHitPoints": 100,
+      "baseMoveSpeed": 3.0,
+      "baseAttackPower": 10,
+      "baseDefaultAttackCooldown": 2.0,
+      "rewardGold": 10,
+      "rewardXP": 10
+    },
+    "Tower": {
+      "baseHitPoints": 100,
+      "baseMoveSpeed": 0.0,
+      "baseAttackPower": 50,
+      "baseDefaultAttackCooldown": 2.0,
+      "rewardGold": 50,
+      "rewardXP": 50
+    },
+    "Beetle": {
+      "baseHitPoints": 100,
+      "baseMoveSpeed": 10.0,
+      "baseAttackPower": 10,
+      "baseDefaultAttackCooldown": 5.0,
+      "rewardGold": 30,
+      "rewardXP": 30
+    },
+    "Mosquito": {
+      "baseHitPoints": 100,
+      "baseMoveSpeed": 10.0,
+      "baseAttackPower": 10,
+      "baseDefaultAttackCooldown": 5.0,
+      "rewardGold": 30,
+      "rewardXP": 30
+    },
+    "Butterfly": {
+      "baseHitPoints": 100,
+      "baseMoveSpeed": 10.0,
+      "baseAttackPower": 10,
+      "baseDefaultAttackCooldown": 5.0,
+      "rewardGold": 30,
+      "rewardXP": 30
+    }
+  }
+}

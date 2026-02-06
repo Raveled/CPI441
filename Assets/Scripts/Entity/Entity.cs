@@ -11,11 +11,8 @@ public class Entity : MonoBehaviour
     [SerializeField] protected Team team = Team.NULL;
     [SerializeField] protected bool canMove = true;
     [SerializeField] protected bool canDefaultAttack = true;
-    [Tooltip("Only Core & Guardian Tower need this")]
-    [SerializeField] Entity protector;
-    [Space]
-    [SerializeField] protected int reward_Gold = 0;
-    [SerializeField] protected int reward_XP = 0;
+    [Tooltip("Only Core & Guardian Tower need this set in inspector")]
+    [SerializeField] Entity[] protector = null;
     [SerializeField] float rewardRange = 50f;
     [Space]
     //Stats that are visible in editor
@@ -28,6 +25,8 @@ public class Entity : MonoBehaviour
     [SerializeField] protected float moveSpeed = 0;
     [SerializeField] protected int attackPower = 0;
     [SerializeField] protected float defaultAttackCooldown = 0;
+    [SerializeField] protected int reward_Gold = 0;
+    [SerializeField] protected int reward_XP = 0;
     [SerializeField] protected bool isDead = false;
     
     //Setup
@@ -39,13 +38,8 @@ public class Entity : MonoBehaviour
     }
     //Assigns stats to GameObject based on the SO_EntityStatBlock
     private void Setup() {
-        //Init
-        statBlock = Object.Instantiate(statBlock);
-        maximumHitPoints = statBlock.BaseHitPoints;
-        currentHitPoints = maximumHitPoints;
-        moveSpeed = statBlock.BaseMoveSpeed;
-        attackPower = statBlock.BaseAttackPower;
-        defaultAttackCooldown = statBlock.BaseDefaultAttackCooldown;
+        //In case not called from SetStats from spawning in
+        SetupStats();
 
         //Enemy Team Setup
         if (team == Entity.Team.TEAM1) {
@@ -59,17 +53,55 @@ public class Entity : MonoBehaviour
             enemyTeams.Add(Entity.Team.TEAM2);
         }
     }
+    //Load in stats from statblock
+    void SetupStats() {
+        maximumHitPoints = statBlock.BaseHitPoints;
+        currentHitPoints = maximumHitPoints;
+        moveSpeed = statBlock.BaseMoveSpeed;
+        attackPower = statBlock.BaseAttackPower;
+        defaultAttackCooldown = statBlock.BaseDefaultAttackCooldown;
+        reward_Gold = statBlock.RewardGold;
+        reward_XP = statBlock.RewardXP;
+    }
     //Basic logic for entity taking damage. Returns true on death, false on no death
     public virtual bool TakeDamage(int damage, Entity damageOrigin) {
         //Lower health by damage amount. If it is 0 or below, it is destroyed
-        if (!protector || protector.GetIsDead()) {
+
+        //Check if it has a protector
+        bool protectorAlive = false;
+        foreach(Entity e in protector)
+        {
+            if (e == null) continue;
+            else if (!e.GetIsDead())
+            {
+                protectorAlive = true;
+            }
+        }
+
+        //Deal damage if no protector alive
+        if (!protectorAlive)
+        {
             currentHitPoints -= damage;
-            if (currentHitPoints <= 0) {
+
+            //If hp is <= 0, die
+            if (currentHitPoints <= 0)
+            {
                 Die(damageOrigin);
                 return true;
             }
         }
+
         return false;
+    }
+    public virtual void Heal(int healAmount)
+    {
+        currentHitPoints += healAmount;
+        if (currentHitPoints > maximumHitPoints) currentHitPoints = maximumHitPoints;
+    }
+    public virtual void GainMaxHealth(int maxHealthAmount)
+    {
+        maximumHitPoints += maxHealthAmount;
+        currentHitPoints += maxHealthAmount;
     }
     //Basic logic for dying/destroying self
     protected virtual void Die(Entity damageOrigin) {
@@ -114,6 +146,10 @@ public class Entity : MonoBehaviour
     #region Setters
     public void SetTeam(Team t) {
         team = t;
+    }
+    public void SetStatblock(SO_EntityStatBlock stats) {
+        statBlock = Object.Instantiate(stats);
+        SetupStats();
     }
     #endregion
     #region Getters

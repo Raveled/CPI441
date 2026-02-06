@@ -43,10 +43,10 @@ GameObject:
   - component: {fileID: 2620513460872895128}
   - component: {fileID: 8053365526157884349}
   - component: {fileID: 4442215727534351921}
-  - component: {fileID: 4180152989988615847}
   - component: {fileID: 4998939629705637407}
   - component: {fileID: 8069894609849645937}
   - component: {fileID: 5579395928134298048}
+  - component: {fileID: 4751865395330377205}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -119,32 +119,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.6599617, y: 0.7590864, z: 1.659962}
   m_Center: {x: 0, y: 0.35, z: 0.24}
---- !u!114 &4180152989988615847
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3921032179608766505}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bdd212e5871d38e48829d38a0bb3726f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Entity
-  entityName: Player
-  statBlock: {fileID: 11400000, guid: 1b9f3dc4380eca440af0c4294dc006fb, type: 2}
-  team: 1
-  canMove: 1
-  canDefaultAttack: 1
-  protector: {fileID: 0}
-  goldReward: 0
-  maximumHitPoints: 0
-  currentHitPoints: 0
-  moveSpeed: 0
-  attackPower: 0
-  defaultAttackCooldown: 0
-  isDead: 0
-  enemyTeams: 
 --- !u!114 &4998939629705637407
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -196,6 +170,7 @@ MonoBehaviour:
   _rigidbody: {fileID: 8069894609849645937}
   moveSpeed: 10
   jumpForce: 5
+  jumpCooldownTime: 1
   acceleration: 20
   planarDamping: 10
   groundCheckDistance: 0.1
@@ -221,6 +196,39 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
+--- !u!114 &4751865395330377205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3921032179608766505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02284832f568b5945a0ba2229770e053, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Player
+  entityName: Player
+  statBlock: {fileID: 11400000, guid: f1ac5180a9d4c9148bc45bcfb02ef474, type: 2}
+  team: 1
+  canMove: 1
+  canDefaultAttack: 1
+  protector: {fileID: 0}
+  reward_Gold: 0
+  reward_XP: 0
+  rewardRange: 50
+  showRewardRange: 0
+  maximumHitPoints: 0
+  currentHitPoints: 0
+  moveSpeed: 0
+  attackPower: 0
+  defaultAttackCooldown: 0
+  isDead: 0
+  enemyTeams: 
+  playerInfo: {fileID: 0}
+  playerLevel: 1
+  goldTotal: 0
+  xpTotal: 0
 --- !u!1 &8912244245821273830
 GameObject:
   m_ObjectHideFlags: 0

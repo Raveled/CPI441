@@ -53,11 +53,12 @@ public class EnhancedPlayer : Entity
         }
     }
     
-    public override void TakeDamage(int damage, Entity damageOrigin)
+    public override bool TakeDamage(int damage, Entity damageOrigin)
     {
         // Apply defense reduction
         int reducedDamage = Mathf.Max(1, damage - defense);
         base.TakeDamage(reducedDamage, damageOrigin);
+        return false;
     }
     
     public void AddItem(SO_ItemData itemData, int count = 1)

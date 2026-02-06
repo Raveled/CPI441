@@ -1,17 +1,56 @@
+using NUnit.Framework;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class Player : Entity
 {
     [Header("Player Debug")]
-    [SerializeField] SO_PlayerInfo playerInfo = null;
     [SerializeField] int playerLevel = 1;
     [SerializeField] int goldTotal = 0;
     [SerializeField] int xpTotal = 0;
+    SO_PlayerInfo playerInfo = null;
+    List<Tower> friendlyTowers;
     protected override void Start() {
         base.Start();
-        playerInfo = new SO_PlayerInfo();
+        playerInfo = ScriptableObject.CreateInstance<SO_PlayerInfo>();
+
+        //Fill towers with same team towers
+        friendlyTowers = new List<Tower>();
+        Tower[] allTowers = FindObjectsByType<Tower>(FindObjectsSortMode.None);
+        foreach(Tower t in allTowers)
+        {
+            if (GetTeam() == t.GetTeam()) friendlyTowers.Add(t);
+        }
     }
     public override bool TakeDamage(int damage, Entity damageOrigin) {
+        //Check Friendly Tower Aggro
+        Tower closestTower = null;
+        float minDist = Mathf.Infinity;
+
+        //Loop through all friendly towers
+        for(int i = friendlyTowers.Count - 1; i >= 0; i--)
+        {
+            if (friendlyTowers[i])
+            {
+                //Get closest friendly tower
+                float dist = Vector3.Distance(friendlyTowers[i].transform.position, transform.position);
+
+                //If closer, set as closest
+                if(dist < minDist)
+                {
+                    closestTower = friendlyTowers[i];
+                    minDist = dist;
+                }
+            } else
+            {
+                friendlyTowers.RemoveAt(i);
+            }
+        }
+        if (closestTower)
+        {
+            closestTower.OverrideTarget(damageOrigin);
+        }
+
         return base.TakeDamage(damage, damageOrigin);
     }
     protected override void Die(Entity damageOrigin) {

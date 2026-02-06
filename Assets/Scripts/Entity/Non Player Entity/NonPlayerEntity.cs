@@ -1,13 +1,17 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.Assertions.Must;
 
 public class NonPlayerEntity : Entity
 {
     //Setup fields
     [Header("NPE Setup")]
-    [SerializeField] protected Transform attackRangeOrigin = null;
     [SerializeField] protected float attackRange = 10f;
+    [Space]
+    [SerializeField] protected Transform attackRangeOrigin = null;
     [SerializeField] protected NPEDetectLogic npeDetectLogic = null;
+    [SerializeField] protected UnityEngine.UI.Slider healthBar = null;
+    [Space]
     [SerializeField] bool canTargetTower = false;
     [SerializeField] bool canTargetCore = false;
     [SerializeField] bool canTargetMinion = false;
@@ -29,21 +33,42 @@ public class NonPlayerEntity : Entity
 
 
     //Targeting fields
-    [SerializeField] protected Entity closestMinion = null;
-    [SerializeField] protected float minDistanceMinion = Mathf.Infinity;
-    [SerializeField] protected Entity closestPlayer = null;
-    [SerializeField] protected float minDistancePlayer = Mathf.Infinity;
-    [SerializeField] protected Entity closestTower = null;
-    [SerializeField] protected float minDistanceTower = Mathf.Infinity;
-    [SerializeField] protected Entity closestCore = null;
-    [SerializeField] protected float minDistanceCore = Mathf.Infinity;
+    protected Entity closestMinion = null;
+    protected float minDistanceMinion = Mathf.Infinity;
+    protected Entity closestPlayer = null;
+    protected float minDistancePlayer = Mathf.Infinity;
+    protected Entity closestTower = null;
+    protected float minDistanceTower = Mathf.Infinity;
+    protected Entity closestCore = null;
+    protected float minDistanceCore = Mathf.Infinity;
 
     protected override void Start() {
         base.Start();
         npeDetectLogic.SetEnemyTeams(enemyTeams);
         entitiesInRange = new List<Entity>();
     }
-    //Overrided Destroy method
+    public override bool TakeDamage(int damage, Entity damageOrigin)
+    {
+        bool temp = base.TakeDamage(damage, damageOrigin);
+        UpdateHealthBar();
+        return temp;
+    }
+    public override void Heal(int healAmount)
+    {
+        base.Heal(healAmount);
+        UpdateHealthBar();
+    }
+    public override void GainMaxHealth(int maxHealthAmount)
+    {
+        base.GainMaxHealth(maxHealthAmount);
+        UpdateHealthBar();
+    }
+    //Update healthBar UI Element
+    void UpdateHealthBar()
+    {
+        healthBar.maxValue = maximumHitPoints;
+        healthBar.value = currentHitPoints;
+    }
     protected override void Die(Entity damageOrigin) {
         base.Die(damageOrigin);
 
@@ -57,11 +82,6 @@ public class NonPlayerEntity : Entity
     //Attack
     protected virtual void Attack() {
         if (!canDefaultAttack) return;
-    }
-
-    //Getter
-    public Entity GetTarget() {
-        return target;
     }
     //Cooldown for attacks
     protected void AttackTimer() {
@@ -147,4 +167,10 @@ public class NonPlayerEntity : Entity
         canAttackTimer = !freezeNPE;
         canSearchForTarget = !freezeNPE;
     }
+    #region Getters
+    public Entity GetTarget()
+    {
+        return target;
+    }
+    #endregion
 }
