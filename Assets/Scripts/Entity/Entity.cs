@@ -39,13 +39,8 @@ public class Entity : MonoBehaviour
     }
     //Assigns stats to GameObject based on the SO_EntityStatBlock
     private void Setup() {
-        //Init
-        statBlock = Object.Instantiate(statBlock);
-        maximumHitPoints = statBlock.BaseHitPoints;
-        currentHitPoints = maximumHitPoints;
-        moveSpeed = statBlock.BaseMoveSpeed;
-        attackPower = statBlock.BaseAttackPower;
-        defaultAttackCooldown = statBlock.BaseDefaultAttackCooldown;
+        //In case not called from SetStats from spawning in
+        SetupStats();
 
         //Enemy Team Setup
         if (team == Entity.Team.TEAM1) {
@@ -58,6 +53,14 @@ public class Entity : MonoBehaviour
             enemyTeams.Add(Entity.Team.TEAM1);
             enemyTeams.Add(Entity.Team.TEAM2);
         }
+    }
+    //Load in stats from statblock
+    void SetupStats() {
+        maximumHitPoints = statBlock.BaseHitPoints;
+        currentHitPoints = maximumHitPoints;
+        moveSpeed = statBlock.BaseMoveSpeed;
+        attackPower = statBlock.BaseAttackPower;
+        defaultAttackCooldown = statBlock.BaseDefaultAttackCooldown;
     }
     //Basic logic for entity taking damage. Returns true on death, false on no death
     public virtual bool TakeDamage(int damage, Entity damageOrigin) {
@@ -142,6 +145,10 @@ public class Entity : MonoBehaviour
     #region Setters
     public void SetTeam(Team t) {
         team = t;
+    }
+    public void SetStatblock(SO_EntityStatBlock stats) {
+        statBlock = Object.Instantiate(stats);
+        SetupStats();
     }
     #endregion
     #region Getters

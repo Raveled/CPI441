@@ -1,0 +1,19 @@
+{
+  "match_id": 2456,
+  "timestamp": "2026-02-06T00:24:36Z",
+  "map": "2lane",
+  "winner": "ABCD",
+  "duration_seconds": 7,
+  "kills": {
+    "Team1": 0,
+    "Team2": 0
+  },
+  "deaths": {
+    "Team1": 0,
+    "Team2": 0
+  },
+  "towers_destroyed": {
+    "Team1": 50,
+    "Team2": 61
+  }
+}

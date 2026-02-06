@@ -2,10 +2,13 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using Newtonsoft.Json;
+using System.IO;
 
-public class SaveMatchData : MonoBehaviour
+public class JSON_MatchData : MonoBehaviour
 {
-    public Match match = new Match();
+    [SerializeField] TextAsset loadInJSON = null;
+    [Space]
+    [SerializeField] Match match = new Match();
     //Load in the data from GameManager
     public void ImportMatchData(int match_id, string timestamp, string map, string winner, int duration_seconds,
                                 int team1Kills, int team2Kills, int team1Deaths, int team2Deaths, int team1TowersDestroyed, int team2TowersDestroyed) {
@@ -21,23 +24,32 @@ public class SaveMatchData : MonoBehaviour
         match.towers_destroyed["Team1"] = team1TowersDestroyed;
         match.towers_destroyed["Team2"] = team2TowersDestroyed;
     }
-
     //Save as JSON file
     public void SaveToJSON() {
-        string matchData = JsonUtility.ToJson(match);
-        
+        //Convert to text
+        //string matchData = JsonUtility.ToJson(match);
+
         //For saving to pc
         string filePath = Application.persistentDataPath + "/MatchData.json";
 
-        //For saving to project (to test)
-        //string filePath = Application.persistentDataPath + "/MatchData.json";
+        Debug.Log("saving Match Data JSON to: " + filePath);
 
-        Debug.Log(filePath);
-        //System.IO.File.WriteAllText(filePath, matchData);
-
-
+        //Convert to JSON
         string jsonData = JsonConvert.SerializeObject(match, Formatting.Indented);
         System.IO.File.WriteAllText(filePath, jsonData);
+    }
+    //Load in match data from a file
+    public void LoadFromFile() {
+        if (loadInJSON == null) {
+            return;
+        }
+
+        Debug.Log("Loaded In Match Data");
+        match = JsonConvert.DeserializeObject<Match>(loadInJSON.text);
+    }
+    //Getter
+    public Match GetMatch() {
+        return match;
     }
     
 }

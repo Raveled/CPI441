@@ -10,8 +10,8 @@ public class SO_EntityStatBlock : ScriptableObject
     [SerializeField] float baseDefaultAttackCooldown;
 
     //Getters (Ex. x = statblock.BaseHitPoints;)
-    public int BaseHitPoints { get { return baseHitPoints; } }
-    public float BaseMoveSpeed { get { return baseMoveSpeed; } }
-    public int BaseAttackPower { get { return baseAttackPower; } }
-    public float BaseDefaultAttackCooldown { get { return baseDefaultAttackCooldown; } }
+    public int BaseHitPoints { get { return baseHitPoints; } set { baseHitPoints = value; } }
+    public float BaseMoveSpeed { get { return baseMoveSpeed; } set { baseMoveSpeed = value; } }
+    public int BaseAttackPower { get { return baseAttackPower; } set { baseAttackPower = value; } }
+    public float BaseDefaultAttackCooldown { get { return baseDefaultAttackCooldown; } set { baseDefaultAttackCooldown = value; } }
 }

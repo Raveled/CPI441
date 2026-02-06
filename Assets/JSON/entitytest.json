@@ -1,0 +1,40 @@
+{
+  "entityStats": {
+    "Core": {
+      "baseHitPoints": 350,
+      "baseMoveSpeed": 0.0,
+      "baseAttackPower": 10,
+      "baseDefaultAttackCooldown": 5.0
+    },
+    "Minion": {
+      "baseHitPoints": 100,
+      "baseMoveSpeed": 3.0,
+      "baseAttackPower": 10,
+      "baseDefaultAttackCooldown": 2.0
+    },
+    "Tower": {
+      "baseHitPoints": 100,
+      "baseMoveSpeed": 0.0,
+      "baseAttackPower": 50,
+      "baseDefaultAttackCooldown": 2.0
+    },
+    "Beetle": {
+      "baseHitPoints": 100,
+      "baseMoveSpeed": 10.0,
+      "baseAttackPower": 10,
+      "baseDefaultAttackCooldown": 5.0
+    },
+    "Mosquito": {
+      "baseHitPoints": 100,
+      "baseMoveSpeed": 10.0,
+      "baseAttackPower": 10,
+      "baseDefaultAttackCooldown": 5.0
+    },
+    "Butterfly": {
+      "baseHitPoints": 100,
+      "baseMoveSpeed": 10.0,
+      "baseAttackPower": 10,
+      "baseDefaultAttackCooldown": 5.0
+    }
+  }
+}

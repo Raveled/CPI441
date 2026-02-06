@@ -271,7 +271,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPEDetectLogic
   showDetectRange: 0
-  detectRange: 8
   enemiesInRange: []
   enemyTeams: 
 --- !u!135 &695314834115147434
@@ -407,7 +406,8 @@ MonoBehaviour:
   team: 1
   canMove: 1
   canDefaultAttack: 1
-  protector: {fileID: 0}
+  protector:
+  - {fileID: 0}
   reward_Gold: 10
   reward_XP: 10
   rewardRange: 50
@@ -497,6 +497,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1012119486691316765}
     m_Modifications:
+    - target: {fileID: 90029055383075943, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
+      propertyPath: m_Value
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2384800166135074237, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -595,6 +599,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3937284958113983709, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
       propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3937284958113983709, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
+      propertyPath: m_AnchorMin.x
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

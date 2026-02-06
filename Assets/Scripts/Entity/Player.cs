@@ -12,7 +12,7 @@ public class Player : Entity
     List<Tower> friendlyTowers;
     protected override void Start() {
         base.Start();
-        playerInfo = new SO_PlayerInfo();
+        playerInfo = ScriptableObject.CreateInstance<SO_PlayerInfo>();
 
         //Fill towers with same team towers
         friendlyTowers = new List<Tower>();
