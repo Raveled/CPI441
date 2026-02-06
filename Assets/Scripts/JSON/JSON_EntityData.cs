@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using Newtonsoft.Json;
 using System.IO;
+using UnityEngine.Splines.Interpolators;
 
 public class JSON_EntityData : MonoBehaviour
 {
@@ -37,6 +38,10 @@ public class JSON_EntityData : MonoBehaviour
     void ImportEntityDataHelper(string entityType, SO_EntityStatBlock stats_Origin) {
         statblocks.entityStats[entityType].baseHitPoints = stats_Origin.BaseHitPoints;
         statblocks.entityStats[entityType].baseMoveSpeed = stats_Origin.BaseMoveSpeed;
+        statblocks.entityStats[entityType].baseAcceleration = stats_Origin.BaseAcceleration;
+        statblocks.entityStats[entityType].basePlanarDamping = stats_Origin.BasePlanarDamping;
+        statblocks.entityStats[entityType].baseJumpForce = stats_Origin.BaseJumpForce;
+        statblocks.entityStats[entityType].baseJumpCooldown = stats_Origin.BaseJumpCooldown;
         statblocks.entityStats[entityType].baseAttackPower = stats_Origin.BaseAttackPower;
         statblocks.entityStats[entityType].baseDefaultAttackCooldown = stats_Origin.BaseDefaultAttackCooldown;
         statblocks.entityStats[entityType].rewardGold = stats_Origin.RewardGold;
@@ -78,6 +83,10 @@ public class Statblocks {
 public class EntityStatblock {
     public int baseHitPoints = 0;
     public float baseMoveSpeed = 0f;
+    public float baseAcceleration = 0f;
+    public float basePlanarDamping = 0f;
+    public float baseJumpForce = 0f;
+    public float baseJumpCooldown = 0f;
     public int baseAttackPower = 0;
     public float baseDefaultAttackCooldown = 0f;
     public int rewardGold = 0;

@@ -132,7 +132,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Prediction::PurrNet.Prediction.PredictedTransform
   _graphics: {fileID: 2781509865937213894}
-  _floatAccuracy: 0
+  _floatAccuracy: 1
   _interpolationSettings: {fileID: 11400000, guid: 4a8aa8e44e23cfd4a8d4387ef3f36173, type: 2}
   _unparentGraphics: 0
   _characterControllerPatch: 1
@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Prediction::PurrNet.Prediction.PredictedRigidbody
   _rigidbody: {fileID: 8053365526157884349}
-  _floatAccuracy: 0
+  _floatAccuracy: 1
   _eventMask: 63
   _ignoreTriggerOnTrigger: 0
 --- !u!114 &5579395928134298048
@@ -168,12 +168,13 @@ MonoBehaviour:
   _extrapolateInput: 1
   _playerCamera: {fileID: 9010252939979917820}
   _rigidbody: {fileID: 8069894609849645937}
+  _player: {fileID: 0}
   moveSpeed: 10
-  jumpForce: 5
+  jumpForce: 10
   jumpCooldownTime: 1
   acceleration: 20
   planarDamping: 10
-  groundCheckDistance: 0.1
+  groundCheckDistance: 0.2
   groundLayer:
     serializedVersion: 2
     m_Bits: 57
@@ -209,23 +210,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
   entityName: Player
-  statBlock: {fileID: 11400000, guid: f1ac5180a9d4c9148bc45bcfb02ef474, type: 2}
+  statBlock: {fileID: 11400000, guid: a2f27d92d0618f749a6dee4eb1e13594, type: 2}
   team: 1
   canMove: 1
   canDefaultAttack: 1
-  protector: {fileID: 0}
-  reward_Gold: 0
-  reward_XP: 0
+  protector:
+  - {fileID: 0}
   rewardRange: 50
   showRewardRange: 0
   maximumHitPoints: 0
   currentHitPoints: 0
   moveSpeed: 0
+  acceleration: 0
+  planarDamping: 0
+  jumpForce: 0
+  jumpCooldown: 0
   attackPower: 0
   defaultAttackCooldown: 0
+  reward_Gold: 0
+  reward_XP: 0
   isDead: 0
   enemyTeams: 
-  playerInfo: {fileID: 0}
   playerLevel: 1
   goldTotal: 0
   xpTotal: 0

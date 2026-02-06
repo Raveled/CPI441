@@ -92,5 +92,4 @@ public class Player : Entity
     public SO_PlayerInfo GetPlayerInfo() {
         return playerInfo;
     }
-
 }
