@@ -137,6 +137,14 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
         state.position = transform.position;
     }
 
+    protected override void Update()
+    {
+        base.Update();
+
+        // Sync stats from Player component in case they were updated (e.g., from leveling up or buffs)
+        LoadStatsFromPlayer();
+    }
+
     private static Collider[] groundColliders = new Collider[8];
     private bool IsGrounded()
     {
