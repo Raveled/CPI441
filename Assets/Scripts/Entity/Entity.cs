@@ -1,7 +1,10 @@
+using PurrNet;
 using UnityEngine;
 using System.Collections.Generic;
+using PurrNet.Prediction;
+using PurrNet.Modules;
 
-public class Entity : MonoBehaviour
+public class Entity : NetworkBehaviour
 {
     public enum Team : int { NULL = 0, TEAM1 = 1, TEAM2 = 2, NEUTRAL = 3 };
     //Required Setup when script is added to an object
@@ -11,27 +14,31 @@ public class Entity : MonoBehaviour
     [SerializeField] protected Team team = Team.NULL;
     [SerializeField] protected bool canMove = true;
     [SerializeField] protected bool canDefaultAttack = true;
+
     [Tooltip("Only Core & Guardian Tower need this set in inspector")]
-    [SerializeField] Entity[] protector = null;
+    [SerializeField] PredictedObjectID[] protector = null; // Changed from Entity[] to PredictedObjectID[] for better network referencing
     [SerializeField] float rewardRange = 50f;
     [Space]
+
     //Stats that are visible in editor
     [Header("Entity Debug")]
     [Tooltip("Yellow Circle")]
     [SerializeField] bool showRewardRange = false;
     [Space]
-    [SerializeField] protected int maximumHitPoints = 0;
-    [SerializeField] protected int currentHitPoints = 0;
-    [SerializeField] protected float moveSpeed = 0;
-    [SerializeField] protected float acceleration = 0;
-    [SerializeField] protected float planarDamping = 0;
-    [SerializeField] protected float jumpForce = 0;
-    [SerializeField] protected float jumpCooldown = 0;
-    [SerializeField] protected int attackPower = 0;
-    [SerializeField] protected float defaultAttackCooldown = 0;
-    [SerializeField] protected int reward_Gold = 0;
-    [SerializeField] protected int reward_XP = 0;
-    [SerializeField] protected bool isDead = false;
+
+    // NETWORKED STATS
+    [SerializeField] public SyncVar<int> currentHitPoints = new(0);
+    [SerializeField] public SyncVar<int> maximumHitPoints = new(0);
+    [SerializeField] protected SyncVar<float> moveSpeed = new(0f);
+    [SerializeField] protected SyncVar<float> acceleration = new(0f);
+    [SerializeField] protected SyncVar<float> planarDamping = new(0f);
+    [SerializeField] protected SyncVar<float> jumpForce = new(0f);
+    [SerializeField] protected SyncVar<float> jumpCooldown = new(0f);
+    [SerializeField] public SyncVar<int> attackPower = new(0);
+    [SerializeField] public SyncVar<float> defaultAttackCooldown = new(0f);
+    [SerializeField] public SyncVar<int> reward_Gold = new(0);
+    [SerializeField] public SyncVar<int> reward_XP = new(0);
+    [SerializeField] public SyncVar<bool> isDead = new(false);
     
     //Setup
     [SerializeField] protected List<Team> enemyTeams = null;
@@ -58,67 +65,212 @@ public class Entity : MonoBehaviour
         }
     }
     //Load in stats from statblock
-    void SetupStats() {
-        maximumHitPoints = statBlock.BaseHitPoints;
-        currentHitPoints = maximumHitPoints;
-        moveSpeed = statBlock.BaseMoveSpeed;
-        acceleration = statBlock.BaseAcceleration;
-        planarDamping = statBlock.BasePlanarDamping;
-        jumpForce = statBlock.BaseJumpForce;
-        jumpCooldown = statBlock.BaseJumpCooldown;
-        attackPower = statBlock.BaseAttackPower;
-        defaultAttackCooldown = statBlock.BaseDefaultAttackCooldown;
-        reward_Gold = statBlock.RewardGold;
-        reward_XP = statBlock.RewardXP;
+    void SetupStats()
+    {
+        maximumHitPoints.value = statBlock.BaseHitPoints;
+        currentHitPoints.value = maximumHitPoints.value;
+        moveSpeed.value = statBlock.BaseMoveSpeed;
+        acceleration.value = statBlock.BaseAcceleration;
+        planarDamping.value = statBlock.BasePlanarDamping;
+        jumpForce.value = statBlock.BaseJumpForce;
+        jumpCooldown.value = statBlock.BaseJumpCooldown;
+        attackPower.value = statBlock.BaseAttackPower;
+        defaultAttackCooldown.value = statBlock.BaseDefaultAttackCooldown;
+        reward_Gold.value = statBlock.RewardGold;
+        reward_XP.value = statBlock.RewardXP;
     }
-    //Basic logic for entity taking damage. Returns true on death, false on no death
-    public virtual bool TakeDamage(int damage, Entity damageOrigin) {
-        //Lower health by damage amount. If it is 0 or below, it is destroyed
 
-        //Check if it has a protector
-        bool protectorAlive = false;
-        foreach(Entity e in protector)
+
+    //Basic logic for entity taking damage. Returns true on death, false on no death
+    public virtual bool TakeDamage(int damage, Entity damageOrigin) 
+    {
+        if (!isServer)
         {
-            if (e == null) continue;
-            else if (!e.GetIsDead())
+            Debug.Log($"[TakeDamage] Client is requesting to take {damage} damage from {damageOrigin?.name}");
+            // Client requests server to apply damage
+            RequestDamageServerRpc(damage, GetNetworkID(damageOrigin));
+            return isDead.value; // Return current state for client
+        }
+
+        Debug.Log($"[TakeDamage] Server is applying {damage} damage from {damageOrigin?.name} to {name}");
+        // Server applies damage directly
+        ApplyDamageServer(damage, GetNetworkID(damageOrigin));
+        return isDead.value;
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void RequestDamageServerRpc(int damage, NetworkID? originId)
+    {
+        Debug.Log($"[TakeDamageServerRpc] Received damage request: {damage} from origin ID: {originId}");
+        ApplyDamageServer(damage, originId);
+    }
+
+    [ServerRpc]
+    private void ApplyDamageServer(int damage, NetworkID? originId)
+    {
+        if (isDead.value || !isServer)
+            return;
+
+        Debug.Log($"[TakeDamage] {name} is taking {damage} damage from {originId}");
+
+        // Check if protector is alive
+        bool protectorAlive = false;
+        if (protector != null)
+        {
+            foreach (var protectorId in protector)
             {
-                protectorAlive = true;
+                if (protectorId.Equals(null))
+                    continue;
+
+                var protector = FindFirstObjectByType<PredictionManager>().hierarchy.GetComponent<Entity>(protectorId);
+                if (protector != null && !protector.isDead.value)
+                {
+                    protectorAlive = true;
+                    break;
+                }
             }
         }
 
-        //Deal damage if no protector alive
+        Debug.Log($"[TakeDamage] Protector alive: {protectorAlive}");
+
+        // Deal damage if no protector alive
         if (!protectorAlive)
         {
-            currentHitPoints -= damage;
+            Debug.Log($"[TakeDamage] {name} is taking damage because no protector is alive.");
+            currentHitPoints.value -= damage;
 
-            //If hp is <= 0, die
-            if (currentHitPoints <= 0)
+            if (currentHitPoints.value <= 0)
             {
-                Die(damageOrigin);
-                return true;
+                currentHitPoints.value = 0;
+                isDead.value = true;
+                OnDeath(originId);
             }
         }
 
-        return false;
+        // Notify all clients of health update
+        NotifyHealthChanged(currentHitPoints.value);
+
+        return;
     }
+
+    [ObserversRpc]
+    private void NotifyHealthChanged(int newHealth)
+    {
+        // This method can be used to trigger client-side effects when health changes, if needed
+        Debug.Log($"{entityName} health: {newHealth}/{maximumHitPoints}");
+        OnHealthChanged(newHealth);
+    }
+
+    protected virtual void OnHealthChanged(int newHealth)
+    {
+        // Subclasses can override this for custom behavior
+    }
+
     public virtual void Heal(int healAmount)
     {
-        currentHitPoints += healAmount;
-        if (currentHitPoints > maximumHitPoints) currentHitPoints = maximumHitPoints;
+        if (!isServer)
+        {
+            HealServerRpc(healAmount);
+            return;
+        }
+
+        ApplyHeal(healAmount);
     }
+
+    [ServerRpc(requireOwnership: false)]
+    private void HealServerRpc(int healAmount)
+    {
+        ApplyHeal(healAmount);
+    }
+
+    // SERVER ONLY - Apply healing
+    private void ApplyHeal(int healAmount)
+    {
+        if (isDead.value || !isServer)
+            return;
+
+        currentHitPoints.value += healAmount;
+        if (currentHitPoints.value > maximumHitPoints) currentHitPoints.value = maximumHitPoints;
+
+        NotifyHealthChanged(currentHitPoints.value);
+    }
+
     public virtual void GainMaxHealth(int maxHealthAmount)
     {
-        maximumHitPoints += maxHealthAmount;
-        currentHitPoints += maxHealthAmount;
+        if (!isServer)
+        {
+            GainMaxHealthServerRpc(maxHealthAmount);
+            return;
+        }
+
+        ApplyMaxHealthGain(maxHealthAmount);
     }
+
+    [ServerRpc(requireOwnership: false)]
+    private void GainMaxHealthServerRpc(int maxHealthAmount)
+    {
+        ApplyMaxHealthGain(maxHealthAmount);
+    }
+
+    // SERVER ONLY - Apply max health gain
+    public virtual void ApplyMaxHealthGain(int maxHealthAmount)
+    {
+        if (isDead.value || !isServer)
+            return;
+
+        maximumHitPoints.value += maxHealthAmount;
+        currentHitPoints.value += maxHealthAmount;
+
+        NotifyHealthChanged(currentHitPoints.value);
+    }
+    
+    // Server Only Death Logic
+    protected virtual void OnDeath(NetworkID? damageOriginId)
+    {
+        if (!isServer)
+            return;
+
+        // Find the entity that caused the death
+        Entity damageOrigin = null;
+        
+        if (damageOriginId.HasValue)
+        {
+            damageOrigin = GetEntityByNetworkID(damageOriginId.Value);
+        }
+        
+        Die(damageOrigin);
+        NotifyDeathObserversRpc(damageOriginId);
+    }
+    
     //Basic logic for dying/destroying self
     protected virtual void Die(Entity damageOrigin) {
-        isDead = true;
+        if (!isServer)
+            return;
+
+        isDead.value = true;
         DistributeReward();
+    }
+
+    [ObserversRpc]
+    protected virtual void NotifyDeathObserversRpc(NetworkID? damageOriginId)
+    {
+        // Client-side death effects (animations, sounds, VFX, etc.)
+        // Do NOT modify authoritative state here
+
+        Debug.Log($"{entityName} has died.");
+        OnDeathClient(damageOriginId);
+    }
+
+    protected virtual void OnDeathClient(NetworkID? damageOriginId)
+    {
+        // Subclasses can override this for custom client-side death behavior
     }
 
     //Give the gold+xp reward to the closest players in range. Only called on death
     protected virtual void DistributeReward() {
+        if (!isServer)
+            return;
+        
         //Get All Possible Players
         Player[] players = FindObjectsByType<Player>(FindObjectsSortMode.None);
         List<Player> enemyPlayersInRange = new List<Player>();
@@ -133,15 +285,19 @@ public class Entity : MonoBehaviour
             }
         }
 
+        int goldReward = reward_Gold.value;
+        int xpReward = reward_XP.value;
+
         //If 3+ players in range, split the reward amount
         if(enemyPlayersInRange.Count > 2) {
-            reward_Gold = (int)Mathf.Floor((float)reward_Gold / 3);
-            reward_XP = (int)Mathf.Floor((float)reward_XP / 3);
+            goldReward = (int)Mathf.Floor((float)goldReward / 3);
+            xpReward = (int)Mathf.Floor((float)xpReward / 3);
         }
+
         //give the reward amount to each player in range
         foreach (Player p in enemyPlayersInRange) {
-            p.IncreaseGoldTotal(reward_Gold);
-            p.IncreaseXPTotal(reward_XP);
+            p.IncreaseGoldTotal(goldReward);
+            p.IncreaseXPTotal(xpReward);
         }
     }
     protected virtual void OnDrawGizmos() {
@@ -171,11 +327,23 @@ public class Entity : MonoBehaviour
         return name;
     }
     public bool GetIsDead() {
-        return isDead;
+        return isDead.value;
+    }
+    public SO_EntityStatBlock GetEntityStatblock() {
+        return statBlock;
     }
     #endregion
 
-    public SO_EntityStatBlock GetEntityStatblock() {
-        return statBlock;
+    // Helper method to find an Entity by its NetworkID
+    protected Entity GetEntityByNetworkID(NetworkID networkId)
+    {
+        var networkManager = NetworkManager.main;
+
+        if(!networkManager.TryGetModule<HierarchyFactory>(networkManager.isServer, out var factory) || !factory.TryGetIdentity(sceneId, networkId, out var result))
+        {
+            return null;
+        }
+       
+        return result as Entity;
     }
 }

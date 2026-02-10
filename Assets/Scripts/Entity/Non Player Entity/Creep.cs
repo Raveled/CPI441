@@ -17,11 +17,15 @@ public class Creep : NonPlayerEntity
     }
     void Update()
     {
-        Move();
+        if (!isServer) return; // Only execute AI logic on the server
+
+        Entity currentTarget = GetTarget();
+
+        Move(currentTarget);
         CheckPatrolRange();
-        CheckTargetRange();
+        CheckTargetRange(currentTarget);
         AttackTimer();
-        Attack();
+        Attack(currentTarget);
     }
     //Continuously check to see if in patrol range
     void CheckPatrolRange() {
@@ -31,23 +35,23 @@ public class Creep : NonPlayerEntity
         }
     }
     //Check if target is still in range. If not, become inactive
-    void CheckTargetRange() {
-        if (target) {
-            if (Vector3.Distance(attackRangeOrigin.position, target.transform.position) > attackRange) {
-                target = null;
+    void CheckTargetRange(Entity currentTarget) {
+        if (currentTarget) {
+            if (Vector3.Distance(attackRangeOrigin.position, currentTarget.transform.position) > attackRange) {
+                currentTarget = null;
                 isActive = false;
             }
         }
     }
-    protected override void Move() {
+    protected override void Move(Entity currentTarget) {
         //WIP-------------------------------------------------------------------------------------------------------
-        if (isActive && target) {
+        if (isActive && currentTarget) {
             //move
         }
     }
-    protected override void Attack() {
+    protected override void Attack(Entity currentTarget) {
         //WIP-------------------------------------------------------------------------------------------------------
-        if (isActive && target && attackCooldownTimer <= 0) {
+        if (isActive && currentTarget && attackCooldownTimer <= 0) {
             //attack
         }
     }
@@ -61,7 +65,7 @@ public class Creep : NonPlayerEntity
         isActive = true;
         if(damageOrigin is Entity) //THIS SHOULD BE PLAYER
         {
-            target = damageOrigin;
+            //target = damageOrigin;
         }
 
         base.TakeDamage(damage, damageOrigin);

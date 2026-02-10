@@ -102,6 +102,8 @@ GameObject:
   - component: {fileID: 5316062869055454511}
   - component: {fileID: 909528048874163804}
   - component: {fileID: 8089092169863178650}
+  - component: {fileID: -6074234382589923078}
+  - component: {fileID: -7262159239028233579}
   m_Layer: 0
   m_Name: Tower Projectile
   m_TagString: Untagged
@@ -185,9 +187,42 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53afd63c96ad61941a4b5b5e20b13f8e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TowerProjectile
-  rb: {fileID: 909528048874163804}
-  owner: {fileID: 0}
+  rb: {fileID: -7262159239028233579}
+  hitCollider: {fileID: 5316062869055454511}
   damage: 0
   enemyTeams: 
   showHitRadius: 0
   hitRadius: 0.5
+--- !u!114 &-6074234382589923078
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6095882534552082540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98dbb08343eac044895b9b52872bcb49, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Prediction::PurrNet.Prediction.PredictedTransform
+  _graphics: {fileID: 5905972137153594243}
+  _floatAccuracy: 1
+  _interpolationSettings: {fileID: 11400000, guid: 4a8aa8e44e23cfd4a8d4387ef3f36173, type: 2}
+  _unparentGraphics: 0
+  _characterControllerPatch: 1
+--- !u!114 &-7262159239028233579
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6095882534552082540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 939517533de889a4f948d4e2041fb798, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Prediction::PurrNet.Prediction.PredictedRigidbody
+  _rigidbody: {fileID: 909528048874163804}
+  _floatAccuracy: 1
+  _eventMask: 63
+  _ignoreTriggerOnTrigger: 0

@@ -1,12 +1,14 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.Assertions.Must;
+using PurrNet;
+using NUnit.Framework;
 
 public class NonPlayerEntity : Entity
 {
     //Setup fields
     [Header("NPE Setup")]
-    [SerializeField] protected float attackRange = 10f;
+
     [Space]
     [SerializeField] protected Transform attackRangeOrigin = null;
     [SerializeField] protected NPEDetectLogic npeDetectLogic = null;
@@ -24,15 +26,20 @@ public class NonPlayerEntity : Entity
     [Tooltip("Blue Line")]
     [SerializeField] bool showForwardDirection = true;
     [Space]
-    [SerializeField] protected Entity target;
-    [SerializeField] protected bool hasTarget = false;
-    [SerializeField] protected float attackCooldownTimer = 0;
+
+    // NETWORKED
+    [SerializeField] protected SyncVar<NetworkID?> targetId = new(null);
+    [SerializeField] protected SyncVar<bool> hasTarget = new(false);
+    [SerializeField] protected SyncVar<float> attackCooldownTimer = new(0f);
+    [SerializeField] protected SyncVar<float> attackRange = new(10f);
+
+    // LOCAL (non-networked) state
     [SerializeField] bool canSearchForTarget = true;
     [SerializeField] bool canAttackTimer = true;
     [SerializeField] List<Entity> entitiesInRange; //for debug purposes, used in FindTarget()
 
 
-    //Targeting fields
+    //Targeting fields SERVER ONLY
     protected Entity closestMinion = null;
     protected float minDistanceMinion = Mathf.Infinity;
     protected Entity closestPlayer = null;
@@ -46,28 +53,28 @@ public class NonPlayerEntity : Entity
         base.Start();
         npeDetectLogic.SetEnemyTeams(enemyTeams);
         entitiesInRange = new List<Entity>();
-    }
-    public override bool TakeDamage(int damage, Entity damageOrigin)
-    {
-        bool temp = base.TakeDamage(damage, damageOrigin);
-        UpdateHealthBar();
-        return temp;
-    }
-    public override void Heal(int healAmount)
-    {
-        base.Heal(healAmount);
+
         UpdateHealthBar();
     }
-    public override void GainMaxHealth(int maxHealthAmount)
+
+    protected override void OnHealthChanged(int newHealth)
     {
-        base.GainMaxHealth(maxHealthAmount);
+        base.OnHealthChanged(newHealth);
         UpdateHealthBar();
     }
+
+    protected override void OnDeathClient(NetworkID? damageOriginId)
+    {
+        base.OnDeathClient(damageOriginId);
+    }
+
     //Update healthBar UI Element
     void UpdateHealthBar()
     {
-        healthBar.maxValue = maximumHitPoints;
-        healthBar.value = currentHitPoints;
+        if (healthBar == null) return;
+
+        healthBar.maxValue = maximumHitPoints.value;
+        healthBar.value = currentHitPoints.value;
     }
     protected override void Die(Entity damageOrigin) {
         base.Die(damageOrigin);
@@ -75,38 +82,49 @@ public class NonPlayerEntity : Entity
         //Destroy self
         Destroy(gameObject);
     }
+
     //Move
     protected virtual void Move() {
         if (!canMove) return;
     }
+    protected virtual void Move(Entity currentTarget) {
+        if (!canMove) return;
+    }
+
     //Attack
     protected virtual void Attack() {
         if (!canDefaultAttack) return;
     }
+    protected virtual void Attack(Entity currentTarget) {
+        if (!canDefaultAttack) return;
+    }
+
     //Cooldown for attacks
     protected void AttackTimer() {
         if (!canAttackTimer) return;
+        if (!isServer) return; // Only execute timer logic on the server
 
         if (attackCooldownTimer >= 0) {
-            attackCooldownTimer -= Time.deltaTime;
+            attackCooldownTimer.value -= Time.deltaTime;
         }
     }
     //Gets the closest entity in detect range and sets it as target
     protected virtual void FindTarget() {
         if (!canSearchForTarget) return;
+        if (!isServer) return; // Only execute targeting logic on the server
 
-        if (!target) {
+        if (!targetId.value.HasValue) {
             //Get List of entities in range
             entitiesInRange = npeDetectLogic.GetEnemiesInRange();
             if (entitiesInRange.Count <= 0) {
-                target = null;
+                SetTarget(null);
                 return;
             }
 
             //Loop through each entity in range
             foreach (Entity e in entitiesInRange) {
                 //Get distance from this to entity
-                if (!e) continue;
+                if (!e || e.GetIsDead()) continue;
                 float dist = Vector3.Distance(transform.position, e.gameObject.transform.position);
 
                 //Set closest entity type
@@ -126,17 +144,38 @@ public class NonPlayerEntity : Entity
             }
 
             //In order of Tower > Core > Minion > Player, set target equal to the closest
-            if (canTargetTower && closestTower) target = closestTower;
-            else if (canTargetCore && closestCore) target = closestCore;
-            else if (canTargetMinion && closestMinion) target = closestMinion;
-            else if (canTargetPlayer && closestPlayer) target = closestPlayer;
-            else target = null;
+            Entity newTarget = null;
+            if (canTargetTower && closestTower) newTarget = closestTower;
+            else if (canTargetCore && closestCore) newTarget = closestCore;
+            else if (canTargetMinion && closestMinion) newTarget = closestMinion;
+            else if (canTargetPlayer && closestPlayer) newTarget = closestPlayer;
+            else newTarget = null;
 
-            if (target != null) hasTarget = true;
+            SetTarget(newTarget);
         }
     }
+
+    // SERVER
+    protected void SetTarget(Entity newTarget)
+    {
+        if (!isServer) return;
+
+        if (newTarget == null)
+        {
+            targetId.value = null;
+            hasTarget.value = false;
+        }
+        else
+        {
+            targetId.value = GetNetworkID(newTarget);
+            hasTarget.value = true;
+        }
+    }
+
     //Resets the target, called from NPEDetectLogic
     public void ResetTarget() {
+        if (!isServer) return;
+
         closestMinion = null;
         minDistanceMinion = Mathf.Infinity;
         closestPlayer = null;
@@ -146,7 +185,7 @@ public class NonPlayerEntity : Entity
         closestCore = null;
         minDistanceCore = Mathf.Infinity;
 
-        target = null;
+        SetTarget(null);
     }
     //Visualization for ranges using Gizmos
     protected override void OnDrawGizmos() {
@@ -170,7 +209,19 @@ public class NonPlayerEntity : Entity
     #region Getters
     public Entity GetTarget()
     {
-        return target;
+        if (!targetId.value.HasValue) return null;
+
+        return GetEntityByNetworkID(targetId.value.Value);
+    }
+
+    public NetworkID? GetTargetId()
+    {
+        return targetId.value;
+    }
+
+    public bool HasTarget()
+    {
+        return hasTarget.value;
     }
     #endregion
 }
