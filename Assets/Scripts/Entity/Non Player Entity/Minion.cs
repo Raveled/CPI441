@@ -147,9 +147,7 @@ public class Minion : NonPlayerEntity
         //If there is a target and it is within attack range
         if (currentTarget && CheckTargetInAttackRange(currentTarget) && attackCooldownTimer.value <= 0) {
 
-            //Reset attack cooldown
-            attackCooldownTimer.value = defaultAttackCooldown.value;
-
+            
             //Spawn overlapcapsule and check for enemy entities to deal damage to
             Collider[] hits = Physics.OverlapCapsule(p0, p1, attackRange);
 
@@ -161,23 +159,28 @@ public class Minion : NonPlayerEntity
                     //If not AOE attack, only hit target
                     if (!attackIsAOE && e != currentTarget) continue;
 
-                    if (e == currentTarget)
-                    {
-                        Debug.Log($"[Minion Attack] Target {currentTarget.name} on Team: {currentTarget.GetTeam()} \n Enemy Teams: " + string.Join(", ", GetEnemyTeams()));
-                    }
-
                     //Deal Damage if on enemy team
                     if (GetEnemyTeams().Contains(e.GetTeam())) 
                     {
+                        //Reset attack cooldown
+                        attackCooldownTimer.value = defaultAttackCooldown.value;
+
                         Debug.Log($"[Minion Attack] Attempting attack on target: {currentTarget?.name}");
+
                         if (e.TakeDamage(attackPower, this)) {
                             ResetTarget();
                         }
+                    }
+                    else
+                    {
+                        Debug.Log($"[REJECTED] {e.name} is a teammate. Search for a new target!");
+                        ResetTarget(); // Force the minion to stop looking at its friend
                     }
                 }
             }
         }
     }
+
     //Rotate the Transform based on the target
     void Rotate(Entity currentTarget) {
         if (!isServer) return;

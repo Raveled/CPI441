@@ -52,6 +52,8 @@ public class Entity : NetworkBehaviour
         //In case not called from SetStats from spawning in
         SetupStats();
 
+        enemyTeams.Clear();
+
         //Enemy Team Setup
         if (team == Entity.Team.TEAM1) {
             enemyTeams.Add(Entity.Team.TEAM2);

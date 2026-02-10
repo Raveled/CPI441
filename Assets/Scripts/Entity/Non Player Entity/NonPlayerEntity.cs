@@ -51,8 +51,8 @@ public class NonPlayerEntity : Entity
 
     protected override void Start() {
         base.Start();
-        npeDetectLogic.SetEnemyTeams(enemyTeams);
         entitiesInRange = new List<Entity>();
+        npeDetectLogic.SetNPE(this);
 
         UpdateHealthBar();
     }
@@ -110,21 +110,25 @@ public class NonPlayerEntity : Entity
     }
     //Gets the closest entity in detect range and sets it as target
     protected virtual void FindTarget() {
-        if (!canSearchForTarget) return;
-        if (!isServer) return; // Only execute targeting logic on the server
+        if (!canSearchForTarget || !isServer) return; // Only execute targeting logic on the server
 
-        if (!targetId.value.HasValue) {
+        Entity current = GetTarget();
+        if (current == null || current.GetIsDead()) {
+            //Reset Data
+            ResetTarget();
+
             //Get List of entities in range
             entitiesInRange = npeDetectLogic.GetEnemiesInRange();
-            if (entitiesInRange.Count <= 0) {
-                SetTarget(null);
-                return;
-            }
 
             //Loop through each entity in range
             foreach (Entity e in entitiesInRange) {
                 //Get distance from this to entity
                 if (!e || e.GetIsDead()) continue;
+
+                if (e == this) continue;
+
+                if (e.GetTeam() == Team.NULL || e.GetTeam() == GetTeam()) continue; // Don't target entities on the same team
+
                 float dist = Vector3.Distance(transform.position, e.gameObject.transform.position);
 
                 //Set closest entity type
@@ -150,6 +154,12 @@ public class NonPlayerEntity : Entity
             else if (canTargetMinion && closestMinion) newTarget = closestMinion;
             else if (canTargetPlayer && closestPlayer) newTarget = closestPlayer;
             else newTarget = null;
+
+            if (newTarget != null && newTarget.GetTeam() == GetTeam())
+            {
+                Debug.LogError("Attempting to target entity on same team. This should never happen. Check targeting logic.");
+                newTarget = null;
+            }
 
             SetTarget(newTarget);
         }

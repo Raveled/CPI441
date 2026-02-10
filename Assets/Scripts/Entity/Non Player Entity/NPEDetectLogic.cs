@@ -10,8 +10,6 @@ public class NPEDetectLogic : MonoBehaviour
     float detectRange = 0f;
     [SerializeField] List<Entity> enemiesInRange = null;
 
-    //Setup
-    [SerializeField] List<Entity.Team> enemyTeams;
     NonPlayerEntity npe = null;
     private void Start() {
         //Init
@@ -22,11 +20,16 @@ public class NPEDetectLogic : MonoBehaviour
     private void OnTriggerEnter(Collider other) {
         //If collision is an enemy entity, add it to the list enemiesInRange 
         enemiesInRange.RemoveAll(e => e == null);
-        if (enemyTeams.Count <= 0) return;
-        if(other.gameObject.TryGetComponent<Entity>(out Entity e)) {
-            if(enemyTeams.Contains(e.GetTeam())) {
+        if (npe.GetEnemyTeams().Count <= 0) return;
+
+        if(other.gameObject.TryGetComponent<Entity>(out Entity e)) 
+        {
+            if (e == npe) return;
+            if (e.GetTeam() == Entity.Team.NULL) return;
+            if (e.GetTeam() == npe.GetTeam()) return;
+            if(npe.GetEnemyTeams().Contains(e.GetTeam())) {
                 enemiesInRange.Add(e);
-            }
+            }  
         }
     }
     private void OnTriggerExit(Collider other) {
@@ -47,12 +50,13 @@ public class NPEDetectLogic : MonoBehaviour
         }
     }
 
-    //Setter
+    //Getters
     public List<Entity> GetEnemiesInRange() {
         return enemiesInRange;
     }
-    //Getter
-    public void SetEnemyTeams(List<Entity.Team> t) {
-        enemyTeams = t;
+
+    //Setters
+    public void SetNPE (NonPlayerEntity entity) {
+        npe = entity;
     }
 }
