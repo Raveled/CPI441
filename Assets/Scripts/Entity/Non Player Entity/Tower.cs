@@ -3,6 +3,7 @@ using UnityEngine.TextCore.Text;
 using System.Collections.Generic;
 using PurrNet;
 using NUnit.Framework;
+using PurrNet.Prediction;
 
 public class Tower : NonPlayerEntity
 {
@@ -43,8 +44,10 @@ public class Tower : NonPlayerEntity
             Vector3 direction = (currentTarget.transform.position - attackRangeOrigin.position).normalized;
 
             //Instantiate new projectile and set it's properties
-            TowerProjectile proj = Instantiate(towerProjectilePrefab, attackRangeOrigin.position, attackRangeOrigin.rotation, attackRangeOrigin);
-            proj.SpawnSetup(this, attackPower.value, direction, projectileSpeed.value, currentTarget);
+            PredictionManager predictionManager = FindFirstObjectByType<PredictionManager>();
+            PredictedObjectID? projPredictedId = predictionManager.hierarchy.Create(towerProjectilePrefab.gameObject, attackRangeOrigin.position, attackRangeOrigin.rotation);
+            GameObject proj = predictionManager.hierarchy.GetGameObject(projPredictedId);
+            proj.GetComponent<TowerProjectile>().SpawnSetup(this, attackPower.value, direction, projectileSpeed.value, currentTarget);
         }
     }
     protected override void Die(Entity damageOrigin) {

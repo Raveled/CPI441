@@ -1,7 +1,8 @@
 using UnityEngine;
+using PurrNet;
 using System.Collections.Generic;
 
-public class NPEDetectLogic : MonoBehaviour
+public class NPEDetectLogic : NetworkBehaviour
 {
     [Header("Debug")]
     [Tooltip("Green Circle")]
@@ -18,6 +19,8 @@ public class NPEDetectLogic : MonoBehaviour
         detectRange = GetComponent<SphereCollider>().radius;
     }
     private void OnTriggerEnter(Collider other) {
+        if (!isServer) return; // Only execute detection logic on the server
+
         //If collision is an enemy entity, add it to the list enemiesInRange 
         enemiesInRange.RemoveAll(e => e == null);
         if (npe.GetEnemyTeams().Count <= 0) return;
@@ -33,6 +36,8 @@ public class NPEDetectLogic : MonoBehaviour
         }
     }
     private void OnTriggerExit(Collider other) {
+        if (!isServer) return; // Only execute detection logic on the server
+        
         //If collision is an enemy entity in range, remove it from the list enemiesInRange
         if (other.gameObject.TryGetComponent<Entity>(out Entity e)) {
             if (enemiesInRange.Contains(e)) {

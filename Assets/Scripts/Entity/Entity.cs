@@ -11,7 +11,7 @@ public class Entity : NetworkBehaviour
     [Header("Entity Setup")]
     [SerializeField] protected string entityName = "";
     [SerializeField] protected SO_EntityStatBlock statBlock = null;
-    [SerializeField] protected Team team = Team.NULL;
+    [SerializeField] protected SyncVar<Team> team = new(Team.NULL);
     [SerializeField] protected bool canMove = true;
     [SerializeField] protected bool canDefaultAttack = true;
 
@@ -47,11 +47,12 @@ public class Entity : NetworkBehaviour
     protected virtual void Start() {
         Setup();
     }
+
     //Assigns stats to GameObject based on the SO_EntityStatBlock
     private void Setup() {
         //In case not called from SetStats from spawning in
         SetupStats();
-
+        
         enemyTeams.Clear();
 
         //Enemy Team Setup
@@ -69,6 +70,8 @@ public class Entity : NetworkBehaviour
     //Load in stats from statblock
     void SetupStats()
     {
+        if (!isServer) return;
+
         maximumHitPoints.value = statBlock.BaseHitPoints;
         currentHitPoints.value = maximumHitPoints.value;
         moveSpeed.value = statBlock.BaseMoveSpeed;
@@ -90,13 +93,15 @@ public class Entity : NetworkBehaviour
         {
             Debug.Log($"[TakeDamage] Client is requesting to take {damage} damage from {damageOrigin?.name}");
             // Client requests server to apply damage
-            RequestDamageServerRpc(damage, damageOrigin.GetNetworkID(isServer));
+            if (damageOrigin != null) RequestDamageServerRpc(damage, damageOrigin.GetNetworkID(isServer));
+            else RequestDamageServerRpc(damage, null);
             return isDead.value; // Return current state for client
         }
 
         Debug.Log($"[TakeDamage] Server is applying {damage} damage from {damageOrigin?.name} to {name}");
         // Server applies damage directly
-        ApplyDamageServer(damage, damageOrigin.GetNetworkID(isServer));
+        if (damageOrigin != null) ApplyDamageServer(damage, damageOrigin.GetNetworkID(isServer));
+        else ApplyDamageServer(damage, null);
         return isDead.value;
     }
 
@@ -311,7 +316,7 @@ public class Entity : NetworkBehaviour
 
     #region Setters
     public void SetTeam(Team t) {
-        team = t;
+        team.value = t;
     }
     public void SetStatblock(SO_EntityStatBlock stats) {
         statBlock = Object.Instantiate(stats);
@@ -320,7 +325,7 @@ public class Entity : NetworkBehaviour
     #endregion
     #region Getters
     public Team GetTeam() {
-        return team;
+        return team.value;
     }
     public List<Team> GetEnemyTeams() {
         return enemyTeams;

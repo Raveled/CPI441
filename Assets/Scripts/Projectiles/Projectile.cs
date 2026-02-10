@@ -45,14 +45,23 @@ public class Projectile : PredictedIdentity<ProjectileState>
         _onDetonate = new PredictedEvent(predictionManager, this);
         
         // Cache components
-        if (!rb) rb = GetComponent<PredictedRigidbody>();
-        if (!hitCollider) hitCollider = GetComponent<SphereCollider>();
+        if (!rb) 
+        {
+            Debug.Log("Tower -- Missing Predicted Rigidbody reference, attempting to cache.");
+            rb = GetComponent<PredictedRigidbody>();
+        }
+        if (!hitCollider) 
+        {
+            Debug.Log("Tower -- Missing Hit Collider reference, attempting to cache.");
+            hitCollider = GetComponent<SphereCollider>();
+        }
 
         if (isServer)
         {
             // Server: enable physics and collision
             rb.isKinematic = false;
             GetComponent<Collider>().enabled = true;
+            GetComponent<Collider>().isTrigger = true;
         }
         else
         {
@@ -69,7 +78,7 @@ public class Projectile : PredictedIdentity<ProjectileState>
         NetworkID? targetNetId = null;
         if (targetEntity != null)
         {
-            targetNetId = targetEntity.GetComponent<NetworkIdentity>().id;
+            targetNetId = targetEntity.GetNetworkID(isServer);
         }
 
         //Setup
@@ -84,6 +93,11 @@ public class Projectile : PredictedIdentity<ProjectileState>
 
         currentState = newState;
 
+        if (rb)
+        {
+            rb.linearVelocity = newState.velocity;
+        }
+
         // Debug Caching
         this.ownerId = currentState.ownerId;
         this.damage = damage;
@@ -96,22 +110,31 @@ public class Projectile : PredictedIdentity<ProjectileState>
         if (!state.isActive)
             return;
 
-        // Server-side physics simulation
-        //state.velocity += Physics.gravity * delta; // Optional: add gravity if desired
-        state.position += state.velocity * delta;
-
-        // Update transform for collision detection
-        transform.position = state.position;
+        // Apply velocity to rigidbody instead of manual position update
+        if (rb)
+        {
+            state.velocity = rb.linearVelocity;
+        }
+        // Update state position from actual position
+        state.position = transform.position;
     }
 
     protected override void GetUnityState(ref ProjectileState state)
     {
         state.position = transform.position;
+        if (rb)
+        {
+            state.velocity = rb.linearVelocity;
+        }
     }
 
     protected override void SetUnityState(ProjectileState state)
     {
         transform.position = state.position;
+        if (rb)
+        {
+            rb.linearVelocity = state.velocity; 
+        }
     }
 
     protected virtual void OnTriggerEnter(Collider other)

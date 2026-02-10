@@ -180,6 +180,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8448669507176483938, guid: 42be0b0de69bcf6448ed01adafb84135, type: 3}
+      propertyPath: team._value
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8448669507176483938, guid: 42be0b0de69bcf6448ed01adafb84135, type: 3}
       propertyPath: numMinionsInWave
       value: 5
       objectReference: {fileID: 0}
@@ -259,6 +263,10 @@ PrefabInstance:
     - target: {fileID: 4450124783581481318, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
       propertyPath: m_Name
       value: Tower_Team2 (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
+      propertyPath: team._value
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
       propertyPath: protector.Array.size
@@ -345,6 +353,10 @@ PrefabInstance:
       value: Tower_Team1 (1)
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
+      propertyPath: team._value
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: 'protector.Array.data[0]'
       value: 
       objectReference: {fileID: 899496859}
@@ -423,6 +435,10 @@ PrefabInstance:
     - target: {fileID: 4450124783581481318, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
       propertyPath: m_Name
       value: Tower_Team2 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
+      propertyPath: team._value
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
       propertyPath: 'protector.Array.data[0]'
@@ -680,6 +696,10 @@ PrefabInstance:
       value: Tower_Team2
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
+      propertyPath: team._value
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
       propertyPath: protector.Array.size
       value: 0
       objectReference: {fileID: 0}
@@ -717,7 +737,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2551549058546101749, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 50.75584
+      value: 29.4
       objectReference: {fileID: 0}
     - target: {fileID: 2551549058546101749, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: m_LocalPosition.y
@@ -725,7 +745,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2551549058546101749, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 158.78513
+      value: 109.4
       objectReference: {fileID: 0}
     - target: {fileID: 2551549058546101749, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: m_LocalRotation.w
@@ -758,6 +778,10 @@ PrefabInstance:
     - target: {fileID: 4450124783581481318, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: m_Name
       value: Tower_Team1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
+      propertyPath: team._value
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: protector.Array.size
@@ -838,6 +862,10 @@ PrefabInstance:
     - target: {fileID: 4450124783581481318, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: m_Name
       value: Tower_Team1 (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
+      propertyPath: team._value
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: protector.Array.size
@@ -1120,7 +1148,7 @@ PrefabInstance:
     - target: {fileID: 9083819392621653564, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: m_NavMeshData
       value: 
-      objectReference: {fileID: 23800000, guid: 65a573fdba046ce4d83b585eb8dcaf41, type: 2}
+      objectReference: {fileID: 23800000, guid: ac3fbe30231061b469c3d2897514a083, type: 2}
     - target: {fileID: 9218709570853150868, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1218,6 +1246,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3292759093522215002, guid: 736f9aa3aa7e7344ab11c6ca4691c0ea, type: 3}
+      propertyPath: team._value
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3292759093522215002, guid: 736f9aa3aa7e7344ab11c6ca4691c0ea, type: 3}
+      propertyPath: minionPrefab
+      value: 
+      objectReference: {fileID: 8299637077817607579, guid: b81d5a3aecb5571448a2978bae4d76a6, type: 3}
     - target: {fileID: 3292759093522215002, guid: 736f9aa3aa7e7344ab11c6ca4691c0ea, type: 3}
       propertyPath: numMinionsInWave
       value: 5
@@ -1514,6 +1550,10 @@ PrefabInstance:
       value: Tower_Team2 (3)
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
+      propertyPath: team._value
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
       propertyPath: 'protector.Array.data[0]'
       value: 
       objectReference: {fileID: 79939925}
@@ -1725,6 +1765,10 @@ PrefabInstance:
     - target: {fileID: 4450124783581481318, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: m_Name
       value: Tower_Team1 (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
+      propertyPath: team._value
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: 'protector.Array.data[0]'

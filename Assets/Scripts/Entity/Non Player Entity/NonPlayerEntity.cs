@@ -1,8 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.Assertions.Must;
+using System.Collections;
 using PurrNet;
-using NUnit.Framework;
 
 public class NonPlayerEntity : Entity
 {
@@ -54,6 +53,11 @@ public class NonPlayerEntity : Entity
         entitiesInRange = new List<Entity>();
         npeDetectLogic.SetNPE(this);
 
+        StartCoroutine(DelayedHealthBarUpdate());
+    }
+
+    private IEnumerator DelayedHealthBarUpdate() {
+        yield return new WaitForSeconds(0.1f);
         UpdateHealthBar();
     }
 
