@@ -13432,6 +13432,20 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 446958239}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &446996822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
+  m_Name: Mosquito/AmpUp
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
+  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ActionId: 906b7c65-99a4-4f6d-a73f-013966be5a0a
 --- !u!1001 &447654835
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -23419,6 +23433,20 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 777848130}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &780912377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
+  m_Name: Mosquito/BasicAttack
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
+  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ActionId: bd068b8b-e91f-4f2b-b4d0-9dda788a3f0a
 --- !u!1001 &781911828
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -26491,6 +26519,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8f582267bb91cd499cc42bcaf4c2f4e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TempInputTester
+  quickPoke: {fileID: 1539846289}
+  globShot: {fileID: 1052173060}
+  ampUp: {fileID: 446996822}
+  basicAttack: {fileID: 780912377}
 --- !u!1 &879421886
 GameObject:
   m_ObjectHideFlags: 0
@@ -31724,6 +31756,20 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 1049779391}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1052173060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
+  m_Name: Mosquito/GlobShot
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
+  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ActionId: dc0aae5c-80a1-4d8d-9270-6f6174711d96
 --- !u!114 &1052455886
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -45595,6 +45641,20 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 1537439047}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1539846289
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
+  m_Name: Mosquito/QuickPoke
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
+  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ActionId: 4f8eebe2-3b6d-4711-acaf-701ad65c5f90
 --- !u!1001 &1541011288
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -1,55 +1,86 @@
-// TempInputTester.cs - Attach to MosquitoPlayer
+// ******************************************* //
+// ****** THEO XENAKIS - 2026 - CPI 441 ****** //
+// ******************************************* //
+
+using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 public class TempInputTester : MonoBehaviour
 {
-    private Mosquito mosquito;
-    private Camera cam;
+    // **************************************************** //
+    // *** Variable Initializations *** //
 
-    private void Awake()
+    private Mosquito mosquito;
+
+    public InputActionReference quickPoke;
+    public InputActionReference globShot;
+    public InputActionReference ampUp;
+    public InputActionReference basicAttack;
+
+    // **************************************************** //
+    // *** Monobehavior Functions *** //
+
+    void Awake()
     {
         mosquito = GetComponent<Mosquito>();
-        cam = Camera.main;
     }
 
-    private void Update()
+    void Start()
     {
-        // Q = Quick Poke nearest enemy
-        if (Input.GetKeyDown(KeyCode.Q))
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
+    // **************************************************** //
+    // *** Input Actions *** //
+
+    private void OnQuickPoke(InputAction.CallbackContext context)
+    {
+        if (context.started)
         {
             Entity target = FindNearestEnemy();
             if (mosquito.TryQuickPoke(target))
                 Debug.Log("Quick Poke HIT!");
         }
+    }
 
-        // E = Glob Shot
-        if (Input.GetKeyDown(KeyCode.E))
+    private void OnGlobShot(InputAction.CallbackContext context)
+    {
+        if (context.started)
         {
             mosquito.CastGlobShot();
-            Debug.Log("Glob Shot fired!");
+            Debug.Log("Glob Shot FIRED!");
         }
+    }
 
-        // R = Amp Up
-        if (Input.GetKeyDown(KeyCode.R))
+    private void OnAmpUp(InputAction.CallbackContext context)
+    {
+        if (context.started)
         {
             mosquito.ActivateAmpUp();
             Debug.Log("Amp Up ACTIVATED!");
         }
+    }
 
-        // Mouse1 = Basic attack (for blood gain testing)
-        if (Input.GetMouseButtonDown(0))
+    private void OnBasicAttack(InputAction.CallbackContext context)
+    {
+        if (context.started)
         {
             Entity target = FindNearestEnemy();
-            if (target != null)
+            if (target != null && mosquito.entity != null)
             {
-                // Simulate basic attack
                 int damage = mosquito.GetBasicAttackDamageWithBlood(mosquito.entity.attackPower);
                 target.TakeDamage(damage, mosquito.entity);
                 mosquito.OnBasicAttackHit(target);
-                Debug.Log($"Basic attack: {damage} dmg, blood: {mosquito.GetBloodMeter01():F1}");
+                Debug.Log($"Basic: {damage} dmg | Blood: {mosquito.GetBloodMeter01():F1}");
             }
         }
     }
+
+    // **************************************************** //
+    // *** Helper Functions *** //
 
     Entity FindNearestEnemy()
     {
@@ -60,7 +91,7 @@ public class TempInputTester : MonoBehaviour
         foreach (var hit in hits)
         {
             Entity enemy = hit.GetComponent<Entity>();
-            if (enemy != null && enemy.GetTeam() != mosquito.entity.GetTeam())
+            if (enemy != null && mosquito.entity != null && enemy.GetTeam() != mosquito.entity.GetTeam())
             {
                 float dist = Vector3.Distance(transform.position, enemy.transform.position);
                 if (dist < closestDist)
@@ -72,4 +103,24 @@ public class TempInputTester : MonoBehaviour
         }
         return nearest;
     }
+
+    // **************************************************** //
+    // *** Handle Enabling and Disabling Actions *** //
+
+    private void OnEnable()
+    {
+        quickPoke.action.started += OnQuickPoke;
+        globShot.action.started += OnGlobShot;
+        ampUp.action.started += OnAmpUp;
+        basicAttack.action.started += OnBasicAttack;
+    }
+
+    private void OnDisable()
+    {
+        quickPoke.action.started -= OnQuickPoke;
+        globShot.action.started -= OnGlobShot;
+        ampUp.action.started -= OnAmpUp;
+        basicAttack.action.started -= OnBasicAttack;
+    }
 }
+// ******************************************* //
