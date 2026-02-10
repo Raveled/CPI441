@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 using PurrNet;
+using UnityEngine.SocialPlatforms;
 
 public class NonPlayerEntity : Entity
 {
@@ -159,7 +160,6 @@ public class NonPlayerEntity : Entity
             else if (canTargetPlayer && closestPlayer) newTarget = closestPlayer;
             else newTarget = null;
 
-
             //DONT use GetNetworkID(entity).Value use entity.GetNetworkID(isServer)
 
 
@@ -178,8 +178,6 @@ public class NonPlayerEntity : Entity
     {
         if (!isServer) return;
 
-
-
         if (newTarget == null)
         {
             targetId.value = null;
@@ -187,10 +185,15 @@ public class NonPlayerEntity : Entity
         }
         else
         {
+            if (newTarget is Player)
+            {
+                foreach (var player in networkManager.players) {
+                    Debug.Log("Player in game with ID: " + player);
+                    Debug.Log("Target Owner: " + newTarget.owner);
+                }
+            }
             targetId.value = newTarget.GetNetworkID(isServer);
             hasTarget.value = true;
-
-
         }
     }
 

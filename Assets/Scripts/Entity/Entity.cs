@@ -344,11 +344,11 @@ public class Entity : NetworkBehaviour
     // Helper method to find an Entity by its NetworkID
     protected Entity GetEntityByNetworkID(NetworkID? networkId)
     {
-
         Entity[] allEntities = FindObjectsByType<Entity>(FindObjectsSortMode.None);
         foreach (var entity in allEntities) {
             if (entity.GetNetworkID(isServer) == networkId) {
-
+                if (entity is Player) Debug.Log($"Found Entity by NetworkID: {networkId} -- It's a Player with ID: {entity.GetNetworkID(isServer)}");
+                
                 return entity;
             }
         }

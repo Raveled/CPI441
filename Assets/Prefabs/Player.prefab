@@ -209,27 +209,73 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02284832f568b5945a0ba2229770e053, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
   entityName: Player
   statBlock: {fileID: 11400000, guid: a2f27d92d0618f749a6dee4eb1e13594, type: 2}
-  team: 1
+  team:
+    _value: 2
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
   canMove: 1
   canDefaultAttack: 1
-  protector:
-  - {fileID: 0}
   rewardRange: 50
   showRewardRange: 0
-  maximumHitPoints: 0
-  currentHitPoints: 0
-  moveSpeed: 0
-  acceleration: 0
-  planarDamping: 0
-  jumpForce: 0
-  jumpCooldown: 0
-  attackPower: 0
-  defaultAttackCooldown: 0
-  reward_Gold: 0
-  reward_XP: 0
-  isDead: 0
+  currentHitPoints:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  maximumHitPoints:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  moveSpeed:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  acceleration:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  planarDamping:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  jumpForce:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  jumpCooldown:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  attackPower:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  defaultAttackCooldown:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  reward_Gold:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  reward_XP:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  isDead:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
   enemyTeams: 
   playerLevel: 1
   goldTotal: 0
