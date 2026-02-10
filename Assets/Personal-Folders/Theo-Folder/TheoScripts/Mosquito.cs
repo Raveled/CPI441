@@ -96,6 +96,12 @@ public class Mosquito : MonoBehaviour
     // ========== QUICK POKE ==========
     public bool TryQuickPoke(Entity target)
     {
+        // *** DEBUG TESTING *** 
+        Debug.Log("Attempting Quick Poke on target: " + (target != null ? target.name : "null"));
+        Debug.Log("Quick Poke Cooldown Timer: " + quickPokeCooldownTimer);
+        Debug.Log("Current Blood Meter: " + currentBloodMeter);
+        // ********************* //
+
         if (quickPokeCooldownTimer > 0f || target == null) return false;
 
         quickPokeCooldownTimer = quickPokeCooldown;
@@ -112,6 +118,11 @@ public class Mosquito : MonoBehaviour
     // ========== GLOB SHOT ==========
     public void CastGlobShot()
     {
+        // *** DEBUG TESTING *** 
+        Debug.Log("Attempting to Cast Glob Shot");
+        Debug.Log("Current Blood Meter: " + currentBloodMeter);
+        // ********************* //
+
         if (globProjectilePrefab == null || globFirePoint == null || currentBloodMeter <= 0f) return;
 
         float maxUsage = maxBloodMeter * globMaxMeterUsageFraction;
@@ -136,6 +147,10 @@ public class Mosquito : MonoBehaviour
     // ========== AMP UP ==========
     public void ActivateAmpUp()
     {
+        // *** DEBUG TESTING *** 
+        Debug.Log("Attempting to Activate Amp Up");
+        Debug.Log("Amp Up Timer: " + ampUpTimer);
+        // ********************* //
         if (ampUpTimer > 0f) return;
 
         ampUpTimer = ampUpDuration;
@@ -148,6 +163,10 @@ public class Mosquito : MonoBehaviour
 
     private void UpdateAmpUp()
     {
+        // *** DEBUG TESTING *** //
+        Debug.Log("Updating Amp Up - Timer: " + ampUpTimer + ", Move Mult: " + ampUpCurrentMoveMult + ", Attack Speed Mult: " + ampUpCurrentAttackSpeedMult);
+        // ********************* //
+
         if (ampUpTimer <= 0f) return;
 
         ampUpTimer -= Time.deltaTime;
