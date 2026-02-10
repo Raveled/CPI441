@@ -156,7 +156,7 @@ public class NonPlayerEntity : Entity
             else newTarget = null;
 
 
-            //DONT use GetNetworkID(entity).Value
+            //DONT use GetNetworkID(entity).Value use entity.GetNetworkID(isServer)
 
 
             if (newTarget != null && newTarget.GetTeam() == GetTeam()) {

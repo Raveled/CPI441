@@ -90,13 +90,13 @@ public class Entity : NetworkBehaviour
         {
             Debug.Log($"[TakeDamage] Client is requesting to take {damage} damage from {damageOrigin?.name}");
             // Client requests server to apply damage
-            RequestDamageServerRpc(damage, GetNetworkID(damageOrigin));
+            RequestDamageServerRpc(damage, damageOrigin.GetNetworkID(isServer));
             return isDead.value; // Return current state for client
         }
 
         Debug.Log($"[TakeDamage] Server is applying {damage} damage from {damageOrigin?.name} to {name}");
         // Server applies damage directly
-        ApplyDamageServer(damage, GetNetworkID(damageOrigin));
+        ApplyDamageServer(damage, damageOrigin.GetNetworkID(isServer));
         return isDead.value;
     }
 

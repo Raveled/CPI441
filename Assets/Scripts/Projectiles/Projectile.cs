@@ -189,14 +189,15 @@ public class Projectile : PredictedIdentity<ProjectileState>
     // Helper method to find Entity by NetworkID (same pattern as Entity class)
     protected Entity GetEntityByNetworkID(NetworkID networkId)
     {
-        var networkManager = NetworkManager.main;
+        Entity[] allEntities = FindObjectsByType<Entity>(FindObjectsSortMode.None);
+        foreach (var entity in allEntities) {
+            if (entity.GetNetworkID(isServer) == networkId) {
 
-        if(!networkManager.TryGetModule<HierarchyFactory>(networkManager.isServer, out var factory) || !factory.TryGetIdentity(sceneId, networkId, out var result))
-        {
-            return null;
+                return entity;
+            }
         }
-       
-        return result as Entity;
+
+        return null;
     }
 
     protected virtual float GetHitRadius() => 1f;
