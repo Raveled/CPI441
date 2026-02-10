@@ -110,7 +110,7 @@ public class NonPlayerEntity : Entity
     }
     //Gets the closest entity in detect range and sets it as target
     protected virtual void FindTarget() {
-        if (!canSearchForTarget || !isServer) return; // Only execute targeting logic on the server
+        if (!canSearchForTarget || !isServer) return ; // Only execute targeting logic on the server
 
         Entity current = GetTarget();
         if (current == null || current.GetIsDead()) {
@@ -155,20 +155,26 @@ public class NonPlayerEntity : Entity
             else if (canTargetPlayer && closestPlayer) newTarget = closestPlayer;
             else newTarget = null;
 
-            if (newTarget != null && newTarget.GetTeam() == GetTeam())
-            {
+
+            //DONT use GetNetworkID(entity).Value
+
+
+            if (newTarget != null && newTarget.GetTeam() == GetTeam()) {
                 Debug.LogError("Attempting to target entity on same team. This should never happen. Check targeting logic.");
                 newTarget = null;
             }
 
             SetTarget(newTarget);
         }
+
     }
 
     // SERVER
     protected void SetTarget(Entity newTarget)
     {
         if (!isServer) return;
+
+
 
         if (newTarget == null)
         {
@@ -177,8 +183,10 @@ public class NonPlayerEntity : Entity
         }
         else
         {
-            targetId.value = GetNetworkID(newTarget);
+            targetId.value = newTarget.GetNetworkID(isServer);
             hasTarget.value = true;
+
+
         }
     }
 
@@ -221,7 +229,7 @@ public class NonPlayerEntity : Entity
     {
         if (!targetId.value.HasValue) return null;
 
-        return GetEntityByNetworkID(targetId.value.Value);
+        return GetEntityByNetworkID(targetId.value);
     }
 
     public NetworkID? GetTargetId()

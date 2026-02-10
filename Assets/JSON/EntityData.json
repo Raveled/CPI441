@@ -14,7 +14,7 @@
     },
     "Minion": {
       "baseHitPoints": 100,
-      "baseMoveSpeed": 3.0,
+      "baseMoveSpeed": 7.0,
       "baseAcceleration": 0.0,
       "basePlanarDamping": 0.0,
       "baseJumpForce": 0.0,

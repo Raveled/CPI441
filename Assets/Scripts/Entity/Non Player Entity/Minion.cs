@@ -77,6 +77,8 @@ public class Minion : NonPlayerEntity
             ResetTarget();
         }
 
+        //currentTarget = FindTarget();
+
         FindTarget();
         currentTarget = GetTarget();
 
@@ -142,12 +144,22 @@ public class Minion : NonPlayerEntity
 
     protected override void Attack(Entity currentTarget) {
         base.Attack();
+
+        
         if (!isServer) return;
+
+
 
         //If there is a target and it is within attack range
         if (currentTarget && CheckTargetInAttackRange(currentTarget) && attackCooldownTimer.value <= 0) {
 
-            
+            if(currentTarget == this) {
+                Debug.Log(gameObject.name + " is targeting self -- Attack()");
+
+                //Debug.Log($"[Minion Attack] Attempting attack on target: {currentTarget?.name}");
+            }
+
+
             //Spawn overlapcapsule and check for enemy entities to deal damage to
             Collider[] hits = Physics.OverlapCapsule(p0, p1, attackRange);
 
@@ -159,13 +171,13 @@ public class Minion : NonPlayerEntity
                     //If not AOE attack, only hit target
                     if (!attackIsAOE && e != currentTarget) continue;
 
+
                     //Deal Damage if on enemy team
                     if (GetEnemyTeams().Contains(e.GetTeam())) 
                     {
                         //Reset attack cooldown
                         attackCooldownTimer.value = defaultAttackCooldown.value;
 
-                        Debug.Log($"[Minion Attack] Attempting attack on target: {currentTarget?.name}");
 
                         if (e.TakeDamage(attackPower, this)) {
                             ResetTarget();

@@ -337,15 +337,17 @@ public class Entity : NetworkBehaviour
     #endregion
 
     // Helper method to find an Entity by its NetworkID
-    protected Entity GetEntityByNetworkID(NetworkID networkId)
+    protected Entity GetEntityByNetworkID(NetworkID? networkId)
     {
-        var networkManager = NetworkManager.main;
 
-        if(!networkManager.TryGetModule<HierarchyFactory>(networkManager.isServer, out var factory) || !factory.TryGetIdentity(sceneId, networkId, out var result))
-        {
-            return null;
+        Entity[] allEntities = FindObjectsByType<Entity>(FindObjectsSortMode.None);
+        foreach (var entity in allEntities) {
+            if (entity.GetNetworkID(isServer) == networkId) {
+
+                return entity;
+            }
         }
-       
-        return result as Entity;
+
+        return null;
     }
 }
