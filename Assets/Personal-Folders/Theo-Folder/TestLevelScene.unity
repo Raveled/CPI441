@@ -25587,6 +25587,37 @@ Transform:
   - {fileID: 446958240}
   m_Father: {fileID: 1301751811}
   m_LocalEulerAnglesHint: {x: 0, y: -830.881, z: 0}
+--- !u!1 &864278460
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 864278461}
+  m_Layer: 0
+  m_Name: GlobFiringPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &864278461
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 864278460}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.136, y: 1.0117, z: -1.378}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 879240961}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &864775314
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -26306,6 +26337,8 @@ GameObject:
   - component: {fileID: 879240959}
   - component: {fileID: 879240958}
   - component: {fileID: 879240962}
+  - component: {fileID: 879240964}
+  - component: {fileID: 879240963}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -26389,6 +26422,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1191142167}
+  - {fileID: 864278461}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &879240962
@@ -26412,6 +26446,51 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.6599617, y: 0.7590864, z: 1.6614184}
   m_Center: {x: 0.15503883, y: 0.7826227, z: -2.2704656}
+--- !u!114 &879240963
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 879240956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5346c57a49ba92a489bd0a5345f97d71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Mosquito
+  maxBloodMeter: 100
+  bloodMeterGainOnBasicHit: 5
+  bloodMeterGainOnPlayerHit: 10
+  bloodMeterDecayPerSecond: 0
+  extraDamagePerBloodUnit: 0.1
+  quickPokeBaseDamage: 5
+  quickPokeCooldown: 2
+  quickPokeBloodGain: 10
+  quickPokeBloodGainPlayer: 20
+  globProjectilePrefab: {fileID: 5426923190247754776, guid: cb04fc2c9ed1de8489498fc3f2bf7fc5, type: 3}
+  globFirePoint: {fileID: 864278461}
+  globBaseDamage: 10
+  globBaseSpeed: 5
+  globMaxMeterUsageFraction: 0.5
+  globDamagePerBloodUnit: 0.3
+  globSizePerBloodUnit: 0.01
+  ampUpDuration: 5
+  ampUpInitialMoveMult: 2
+  ampUpInitialAttackSpeedMult: 2
+  ampUpColor: {r: 1, g: 0, b: 0, a: 1}
+  entity: {fileID: 0}
+--- !u!114 &879240964
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 879240956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8f582267bb91cd499cc42bcaf4c2f4e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TempInputTester
 --- !u!1 &879421886
 GameObject:
   m_ObjectHideFlags: 0

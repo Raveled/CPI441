@@ -20,7 +20,7 @@ public class Entity : MonoBehaviour
     [SerializeField] protected int maximumHitPoints = 0;
     [SerializeField] protected int currentHitPoints = 0;
     [SerializeField] protected float moveSpeed = 0;
-    [SerializeField] protected int attackPower = 0;
+    [SerializeField] public int attackPower = 0;
     [SerializeField] protected float defaultAttackCooldown = 0;
     [Space]
     [SerializeField] protected bool isDead = false;
