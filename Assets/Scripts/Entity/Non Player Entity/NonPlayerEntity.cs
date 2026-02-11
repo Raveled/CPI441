@@ -187,9 +187,12 @@ public class NonPlayerEntity : Entity
         {
             if (newTarget is Player)
             {
+                PredictedPlayerMovement ppMovement = newTarget.GetComponent<PredictedPlayerMovement>();
                 foreach (var player in networkManager.players) {
-                    Debug.Log("Player in game with ID: " + player);
-                    Debug.Log("Target Owner: " + newTarget.owner);
+                    if (player == ppMovement.owner.Value) {
+                        Debug.Log("Setting target to player with matching ID: " + player);
+                        break;
+                    }
                 }
             }
             targetId.value = newTarget.GetNetworkID(isServer);
