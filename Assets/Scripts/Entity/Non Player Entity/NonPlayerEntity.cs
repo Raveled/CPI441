@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections;
 using PurrNet;
 using UnityEngine.SocialPlatforms;
+using NUnit.Framework;
 
 public class NonPlayerEntity : Entity
 {
@@ -29,6 +30,7 @@ public class NonPlayerEntity : Entity
 
     // NETWORKED
     [SerializeField] protected SyncVar<NetworkID?> targetId = new(null);
+    [SerializeField] protected SyncVar<PlayerID?> targetPlayerId = new(null);
     [SerializeField] protected SyncVar<bool> hasTarget = new(false);
     [SerializeField] protected SyncVar<float> attackCooldownTimer = new(0f);
     [SerializeField] protected SyncVar<float> attackRange = new(10f);
@@ -181,6 +183,7 @@ public class NonPlayerEntity : Entity
         if (newTarget == null)
         {
             targetId.value = null;
+            targetPlayerId.value = null;
             hasTarget.value = false;
         }
         else
@@ -189,14 +192,22 @@ public class NonPlayerEntity : Entity
             {
                 PredictedPlayerMovement ppMovement = newTarget.GetComponent<PredictedPlayerMovement>();
                 foreach (var player in networkManager.players) {
-                    if (player == ppMovement.owner.Value) {
-                        Debug.Log("Setting target to player with matching ID: " + player);
-                        break;
+                    if (player == ppMovement.owner.Value) 
+                    {
+                        Debug.Log(this.gameObject.name + " is targetting Player ID: " + player);
+                        targetPlayerId.value = player;
                     }
                 }
+
+                targetId.value = null;
+                hasTarget.value = true;
             }
-            targetId.value = newTarget.GetNetworkID(isServer);
-            hasTarget.value = true;
+            else
+            {
+                targetId.value = newTarget.GetNetworkID(isServer);
+                targetPlayerId.value = null;
+                hasTarget.value = true;
+            }
         }
     }
 
@@ -237,7 +248,12 @@ public class NonPlayerEntity : Entity
     #region Getters
     public Entity GetTarget()
     {
-        if (!targetId.value.HasValue) return null;
+        if (!targetId.value.HasValue && !targetPlayerId.value.HasValue) return null;
+        
+        if (targetPlayerId.value.HasValue) {
+            Debug.Log(gameObject.name + " is trying to get target by PlayerID: " + targetPlayerId.value);
+            return GetEntityByPlayerID(targetPlayerId.value);
+        }
 
         return GetEntityByNetworkID(targetId.value);
     }
@@ -252,4 +268,18 @@ public class NonPlayerEntity : Entity
         return hasTarget.value;
     }
     #endregion
+
+    // Helper for retrieving player entity
+    public Entity GetEntityByPlayerID(PlayerID? playerId)
+    {
+        Player[] allPlayers = FindObjectsByType<Player>(FindObjectsSortMode.None);
+        foreach (var player in allPlayers) {
+            if (player.GetComponent<PredictedPlayerMovement>().owner.Value == playerId) {  
+                Debug.Log("Found " + player.gameObject.name + " that has ID: " + playerId);              
+                return player;
+            }
+        }
+
+        return null;
+    }
 }

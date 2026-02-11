@@ -168,7 +168,7 @@ MonoBehaviour:
   _extrapolateInput: 1
   _playerCamera: {fileID: 9010252939979917820}
   _rigidbody: {fileID: 8069894609849645937}
-  _player: {fileID: 0}
+  _player: {fileID: 4751865395330377205}
   moveSpeed: 10
   jumpForce: 10
   jumpCooldownTime: 1
@@ -197,6 +197,7 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
+  debugString: test
 --- !u!114 &4751865395330377205
 MonoBehaviour:
   m_ObjectHideFlags: 0
