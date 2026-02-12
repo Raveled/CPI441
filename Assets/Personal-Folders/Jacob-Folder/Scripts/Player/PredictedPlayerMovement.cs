@@ -26,6 +26,8 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     public InputAction moveAction;
     public InputAction jumpAction;
 
+    public string debugString = "test";
+
     protected override void LateAwake()
     {
         if (_player == null) _player = GetComponent<Player>();
@@ -135,6 +137,14 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
         // Update state velocity after physics
         state.velocity = _rigidbody.linearVelocity;
         state.position = transform.position;
+    }
+
+    protected override void Update()
+    {
+        base.Update();
+
+        // Sync stats from Player component in case they were updated (e.g., from leveling up or buffs)
+        LoadStatsFromPlayer();
     }
 
     private static Collider[] groundColliders = new Collider[8];

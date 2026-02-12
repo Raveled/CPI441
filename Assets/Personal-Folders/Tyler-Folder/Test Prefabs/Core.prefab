@@ -204,6 +204,7 @@ GameObject:
   - component: {fileID: 163394565540805433}
   - component: {fileID: 1493378018149619932}
   - component: {fileID: 357166304892261793}
+  - component: {fileID: -1121830826594692187}
   m_Layer: 0
   m_Name: Core
   m_TagString: Untagged
@@ -271,16 +272,21 @@ MonoBehaviour:
   team: 2
   canMove: 0
   canDefaultAttack: 0
-  protector: {fileID: 0}
-  reward_Gold: 0
-  reward_XP: 0
+  protector:
+  - {fileID: 0}
   rewardRange: 50
   showRewardRange: 0
   maximumHitPoints: 0
   currentHitPoints: 0
   moveSpeed: 0
+  acceleration: 0
+  planarDamping: 0
+  jumpForce: 0
+  jumpCooldown: 0
   attackPower: 0
   defaultAttackCooldown: 0
+  reward_Gold: 0
+  reward_XP: 0
   isDead: 0
   enemyTeams: 
   attackRange: 1
@@ -300,11 +306,43 @@ MonoBehaviour:
   canAttackTimer: 1
   entitiesInRange: []
   minionPrefab: {fileID: 3861177414995866693, guid: c0ad892041217224ea91130f0f8a5204, type: 3}
+  minionStatblock: {fileID: 0}
   numMinionsInWave: 5
   timeBetweenMinionsInWave: 1
   waveSpawnOrigins:
   - {fileID: 4493143644682055093}
   - {fileID: 4289042356162334017}
+--- !u!114 &-1121830826594692187
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4257815370024861000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 817fe5016bd0a2a49a95b6eb338bb132, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.NetworkTransform
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _syncPosition: 1
+  _syncRotation: 1
+  _syncScale: 1
+  _syncParent: 1
+  _interpolateSettings: 7
+  _minBufferSize: 1
+  _maxBufferSize: 2
+  _characterControllerPatch: 0
+  _ownerAuth: 1
+  _interpolationTiming: 0
 --- !u!1 &5153168693522856397
 GameObject:
   m_ObjectHideFlags: 0

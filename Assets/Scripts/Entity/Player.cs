@@ -1,13 +1,14 @@
 using NUnit.Framework;
 using UnityEngine;
 using System.Collections.Generic;
+using PurrNet;
 
 public class Player : Entity
 {
     [Header("Player Debug")]
-    [SerializeField] int playerLevel = 1;
-    [SerializeField] int goldTotal = 0;
-    [SerializeField] int xpTotal = 0;
+    [SerializeField] SyncVar<int> playerLevel = new(1);
+    [SerializeField] SyncVar<int> goldTotal = new(0);
+    [SerializeField] SyncVar<int> xpTotal = new(0);
     SO_PlayerInfo playerInfo = null;
     List<Tower> friendlyTowers;
     protected override void Start() {
@@ -76,17 +77,17 @@ public class Player : Entity
     }
     //Called by entity dying, increase gold amount;
     public void IncreaseGoldTotal(int addAmount) {
-        goldTotal += addAmount;
+        goldTotal.value += addAmount;
     }
     //Called by entity dying, increase xp amount;
     public void IncreaseXPTotal(int addAmount) {
-        xpTotal += addAmount;
+        xpTotal.value += addAmount;
         CheckLevelUp();
     }
     //Check for player level up
     void CheckLevelUp() {
         //WIP-----------------------------------------------------------
-        if (xpTotal == 100) playerLevel++;
+        if (xpTotal == 100) playerLevel.value++;
     }
     //Getts
     public SO_PlayerInfo GetPlayerInfo() {

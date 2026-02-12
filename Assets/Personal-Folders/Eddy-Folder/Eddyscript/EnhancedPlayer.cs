@@ -45,11 +45,11 @@ public class EnhancedPlayer : Entity
         if (oldMaxHP != modifiedMaxHitPoints && oldMaxHP > 0)
         {
             float hpRatio = (float)currentHitPoints / oldMaxHP;
-            currentHitPoints = Mathf.RoundToInt(modifiedMaxHitPoints * hpRatio);
+            currentHitPoints.value = Mathf.RoundToInt(modifiedMaxHitPoints * hpRatio);
         }
         else if (oldMaxHP == 0)
         {
-            currentHitPoints = modifiedMaxHitPoints;
+            currentHitPoints.value = modifiedMaxHitPoints;
         }
     }
     
