@@ -14,6 +14,7 @@ public class Core : NonPlayerEntity
     [SerializeField] List<Transform> waypoints_Path1 = new List<Transform>();
     [SerializeField] List<Transform> waypoints_Path2 = new List<Transform>();
     [SerializeField] Core enemyCore = null;
+    bool canSpawnMinions = true;
 
     GameManager gameManager;
     protected override void Start() {
@@ -30,6 +31,7 @@ public class Core : NonPlayerEntity
     }
     //Start the spawning of a minion wave
     public void SpawnWave() {
+        if (!canSpawnMinions) return;
         if (!isServer) return; // Only server spawns minions
         
         if (GetIsDead()) return;
@@ -56,6 +58,11 @@ public class Core : NonPlayerEntity
             yield return new WaitForSeconds(timeBetweenMinionsInWave);
         }
     }
+    public override void Freeze(bool freezeNPE) {
+        base.Freeze(freezeNPE);
+        canSpawnMinions = !freezeNPE;
+
+    }
 
     //Setter
     public void SetMinionStatblock(SO_EntityStatBlock stats) {
@@ -64,6 +71,7 @@ public class Core : NonPlayerEntity
     public void SetNumMinionsInWave(int num) {
         numMinionsInWave = num;
     }
+
 
 
 }

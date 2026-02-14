@@ -278,6 +278,10 @@ public class Minion : NonPlayerEntity
             this.waypoints.Add(w);
         }
     }
+    public override void Freeze(bool freezeNPE) {
+        base.Freeze(freezeNPE);
+        agent.isStopped = !freezeNPE;
+    }
     //Setter for enemy core
     public void SetEnemyCore(Core core) {
         enemyCore = core;
