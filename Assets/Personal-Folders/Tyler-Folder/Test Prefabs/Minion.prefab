@@ -103,6 +103,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3380a30c495ab443b0f333f53ba34c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DisableVisualOnStart
+  disableOnAwake: 1
 --- !u!1 &3131427354785753274
 GameObject:
   m_ObjectHideFlags: 0
@@ -270,9 +271,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f165c045aa6846428600e6786508a51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPEDetectLogic
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
   showDetectRange: 0
   enemiesInRange: []
-  enemyTeams: 
 --- !u!135 &695314834115147434
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -402,29 +411,74 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f117cec4b15fb34ba58891292110917, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Minion
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
   entityName: Minion
   statBlock: {fileID: 11400000, guid: 1c5597f30614c7a4f8562a0c52215488, type: 2}
-  team: 1
+  team:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
   canMove: 1
   canDefaultAttack: 1
-  protector:
-  - {fileID: 0}
   rewardRange: 50
   showRewardRange: 0
-  maximumHitPoints: 0
-  currentHitPoints: 0
-  moveSpeed: 0
-  acceleration: 0
-  planarDamping: 0
-  jumpForce: 0
-  jumpCooldown: 0
-  attackPower: 0
-  defaultAttackCooldown: 0
-  reward_Gold: 10
-  reward_XP: 10
-  isDead: 0
+  currentHitPoints:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  maximumHitPoints:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  moveSpeed:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  acceleration:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  planarDamping:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  jumpForce:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  jumpCooldown:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  attackPower:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  defaultAttackCooldown:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  reward_Gold:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  reward_XP:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  isDead:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
   enemyTeams: 
-  attackRange: 3.5
   attackRangeOrigin: {fileID: 8676399737213301542}
   npeDetectLogic: {fileID: 5433543613642113234}
   healthBar: {fileID: 6069629477477171167}
@@ -434,16 +488,36 @@ MonoBehaviour:
   canTargetPlayer: 1
   showAttackRange: 0
   showForwardDirection: 1
-  target: {fileID: 0}
-  hasTarget: 0
-  attackCooldownTimer: 0
+  targetId:
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  targetPlayerId:
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  hasTarget:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  attackCooldownTimer:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  attackRange:
+    _value: 10
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
   canSearchForTarget: 1
   canAttackTimer: 1
   entitiesInRange: []
   attackHeight: 10
   attackIsAOE: 0
+  waypointRange: 3
   showAttackBounds: 0
+  showNavMeshTarget: 0
   navMeshMoveTarget: {fileID: 0}
+  waypoints: []
+  currentWaypoint: {fileID: 0}
+  waypointDistance: Infinity
   enemyCore: {fileID: 0}
 --- !u!54 &5179025272331914492
 Rigidbody:

@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
     [Tooltip("Time In Seconds")][SerializeField] float minionWaveSpawnInterval = 5f;
     [SerializeField] NavMeshSurface navMeshSurface = null;
     [Tooltip("Set to -1 for infinite waves default")][SerializeField] int maxWaves = -1;
+    [SerializeField] int numMinionsInWave = 5;
     [Space]
     [SerializeField] bool spawnWaveOnStart = false;
     [SerializeField] bool spawnCharactersOnStart = false;
@@ -104,6 +105,7 @@ public class GameManager : MonoBehaviour
         foreach (Core c in cores) {
             c.SetStatblock(stats_Core);
             c.SetMinionStatblock(stats_Minion);
+            c.SetNumMinionsInWave(numMinionsInWave);
         }
         towers = FindObjectsByType<Tower>(FindObjectsSortMode.None);
         foreach (Tower t in towers) t.SetStatblock(stats_Tower);

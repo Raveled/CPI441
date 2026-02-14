@@ -103,4 +103,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3380a30c495ab443b0f333f53ba34c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DisableVisualOnStart
-  disableOnAwake: 1
+  disableOnAwake: 0
