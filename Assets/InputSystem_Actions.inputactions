@@ -997,7 +997,7 @@
             "id": "ea69bb1b-5b46-4a71-bcd1-9bad3640a074",
             "actions": [
                 {
-                    "name": "QuickPoke",
+                    "name": "QuickPoke-Ability2",
                     "type": "Button",
                     "id": "4f8eebe2-3b6d-4711-acaf-701ad65c5f90",
                     "expectedControlType": "",
@@ -1006,7 +1006,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "GlobShot",
+                    "name": "GlobShot-Ability3",
                     "type": "Button",
                     "id": "dc0aae5c-80a1-4d8d-9270-6f6174711d96",
                     "expectedControlType": "",
@@ -1015,7 +1015,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "AmpUp",
+                    "name": "AmpUp-Ultimate",
                     "type": "Button",
                     "id": "906b7c65-99a4-4f6d-a73f-013966be5a0a",
                     "expectedControlType": "",
@@ -1024,7 +1024,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "BasicAttack",
+                    "name": "BloodShot-BasicAttack",
                     "type": "Button",
                     "id": "bd068b8b-e91f-4f2b-b4d0-9dda788a3f0a",
                     "expectedControlType": "",
@@ -1041,7 +1041,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "QuickPoke",
+                    "action": "QuickPoke-Ability2",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -1052,7 +1052,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "GlobShot",
+                    "action": "GlobShot-Ability3",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -1063,7 +1063,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "AmpUp",
+                    "action": "AmpUp-Ultimate",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -1074,7 +1074,115 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "BasicAttack",
+                    "action": "BloodShot-BasicAttack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Butterfly",
+            "id": "50210f80-798c-4396-bba4-c9663ff6d785",
+            "actions": [
+                {
+                    "name": "WindBurst-BasicAttack",
+                    "type": "Button",
+                    "id": "68ad8968-802f-46ba-ab51-2ca1b80df5a8",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DustWave-Ability1",
+                    "type": "Button",
+                    "id": "4ba801eb-12b6-496a-af52-4bfc101567ea",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DazzlingWave-Ability2",
+                    "type": "Button",
+                    "id": "8e27cc00-7860-4b3c-b60c-30badc1adfd9",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Fly-Ability3",
+                    "type": "Button",
+                    "id": "d9cf2a90-ae20-4a54-a7cb-b9b9587cbd24",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Tornado-Ultimate",
+                    "type": "Button",
+                    "id": "c538ba13-2f28-4ac1-acf0-4d0a02aa116d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "9164582b-c685-439d-9336-ba9ad792144c",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "WindBurst-BasicAttack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8c17f5d2-1c75-4450-ba67-3d190194962f",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DustWave-Ability1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "af1c2cd4-1272-4c6c-ba7c-ae763ef4c245",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DazzlingWave-Ability2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b1005bc8-0cf4-4c40-a860-72501f57441a",
+                    "path": "<Keyboard>/leftShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Fly-Ability3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "96f665e0-7d21-4a8f-99e8-68fb88110c3d",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Tornado-Ultimate",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

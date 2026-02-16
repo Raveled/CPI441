@@ -5,7 +5,7 @@ public class BloodShotProjectile : MonoBehaviour
     [HideInInspector] public Entity ownerEntity;
     [HideInInspector] public int damage;
     [HideInInspector] public float speed;
-    [HideInInspector] public float maxRange = 5f;
+    [HideInInspector] public float maxRange = 8f;
 
     private Vector3 startPos;
 
@@ -17,7 +17,6 @@ public class BloodShotProjectile : MonoBehaviour
     private void Update()
     {
         transform.Translate(Vector3.forward * speed * Time.deltaTime);
-
         if (Vector3.Distance(startPos, transform.position) >= maxRange)
             Destroy(gameObject);
     }
@@ -28,11 +27,11 @@ public class BloodShotProjectile : MonoBehaviour
         if (target != null && target != ownerEntity && target.GetTeam() != ownerEntity.GetTeam())
         {
             target.TakeDamage(damage, ownerEntity);
+
             Mosquito mosquito = ownerEntity?.GetComponent<Mosquito>();
             if (mosquito != null)
-            {
                 mosquito.OnBasicAttackHit(target);
-            }
+
             Destroy(gameObject);
         }
     }

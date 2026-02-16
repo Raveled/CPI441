@@ -3,20 +3,28 @@ using System.Collections;
 
 public class Mosquito : MonoBehaviour
 {
-    [Header("Blood Meter - Passive (Blood Energy)")]
+    [Header("Basic Attack - Blood Shot")]
+    [SerializeField] private GameObject bloodShotProjectilePrefab;
+    [SerializeField] private Transform bloodShotFirePoint;
+    [SerializeField] private int bloodShotBaseDamage = 8;
+    [SerializeField] private float bloodShotSpeed = 12f;
+    [SerializeField] private float bloodShotRange = 8f;
+
+    [Header("Blood Energy - Ability 1 (Passive)")]
     [SerializeField] private float maxBloodMeter = 100f;
     [SerializeField] private float bloodMeterGainOnBasicHit = 5f;
     [SerializeField] private float bloodMeterGainOnPlayerHit = 10f;
     [SerializeField] private float bloodMeterDecayPerSecond = 0f;
     [SerializeField] private float extraDamagePerBloodUnit = 0.1f;
 
-    [Header("Quick Poke (Ability 2)")]
+    [Header("Quick Poke - Ability 2")]
     [SerializeField] private int quickPokeBaseDamage = 5;
     [SerializeField] private float quickPokeCooldown = 2f;
     [SerializeField] private float quickPokeBloodGain = 10f;
     [SerializeField] private float quickPokeBloodGainPlayer = 20f;
+    private float quickPokeCooldownTimer = 0f;
 
-    [Header("Glob Shot (Ability 3)")]
+    [Header("Glob Shot - Ability 3")]
     [SerializeField] private GameObject globProjectilePrefab;
     [SerializeField] private Transform globFirePoint;
     [SerializeField] private float globBaseDamage = 10f;
@@ -25,7 +33,7 @@ public class Mosquito : MonoBehaviour
     [SerializeField] private float globDamagePerBloodUnit = 0.3f;
     [SerializeField] private float globSizePerBloodUnit = 0.01f;
 
-    [Header("Amp Up (Ultimate)")]
+    [Header("Amp Up - Ultimate")]
     [SerializeField] private float ampUpDuration = 5f;
     [SerializeField] private float ampUpInitialMoveMult = 2f;
     [SerializeField] private float ampUpInitialAttackSpeedMult = 2f;
@@ -33,7 +41,6 @@ public class Mosquito : MonoBehaviour
 
     // Runtime state
     private float currentBloodMeter = 0f;
-    private float quickPokeCooldownTimer = 0f;
     private float ampUpTimer = 0f;
     private float ampUpCurrentMoveMult = 1f;
     private float ampUpCurrentAttackSpeedMult = 1f;
@@ -47,14 +54,6 @@ public class Mosquito : MonoBehaviour
         entity = GetComponent<Entity>();
         if (meshRenderer != null)
             originalColor = meshRenderer.material.color;
-    }
-
-    private void Start()
-    {
-        if (entity != null)
-        {
-            // Optional: init blood based on entity stats
-        }
     }
 
     private void Update()
@@ -79,7 +78,30 @@ public class Mosquito : MonoBehaviour
 
     public float GetBloodMeter01() => maxBloodMeter <= 0f ? 0f : currentBloodMeter / maxBloodMeter;
 
-    // ========== BLOOD ENERGY PASSIVE ==========
+    // ========== BASIC ATTACK - BLOOD SHOT ==========
+    public void CastBloodShot()
+    {
+        Debug.Log("Casting Blood Shot");
+
+        if (bloodShotProjectilePrefab == null || bloodShotFirePoint == null)
+            return;
+
+        // Make entity optional - work even if null (like before)
+        Entity shooter = entity ?? GetComponent<Entity>();
+        int damage = GetBasicAttackDamageWithBlood(bloodShotBaseDamage);
+
+        GameObject projGO = Instantiate(bloodShotProjectilePrefab, bloodShotFirePoint.position, bloodShotFirePoint.rotation);
+        BloodShotProjectile proj = projGO.GetComponent<BloodShotProjectile>();
+        if (proj != null)
+        {
+            proj.ownerEntity = shooter;  // Can be null, projectile handles it
+            proj.damage = damage;
+            proj.speed = bloodShotSpeed;
+            proj.maxRange = bloodShotRange;
+        }
+    }
+
+    // ========== BLOOD ENERGY PASSIVE (Ability 1) ==========
     public int GetBasicAttackDamageWithBlood(int baseDamage)
     {
         float bonusDamage = currentBloodMeter * extraDamagePerBloodUnit;
@@ -88,21 +110,20 @@ public class Mosquito : MonoBehaviour
 
     public void OnBasicAttackHit(Entity target)
     {
-        bool hitPlayer = target.GetType().Name == "Player"; // prototype check
+        bool hitPlayer = target.GetType().Name == "Player";
         float gain = hitPlayer ? bloodMeterGainOnPlayerHit : bloodMeterGainOnBasicHit;
         ModifyBloodMeter(gain);
     }
 
-    // ========== QUICK POKE ==========
+    // ========== QUICK POKE - ABILITY 2 ==========
     public bool TryQuickPoke(Entity target)
     {
-        // *** DEBUG TESTING *** 
         Debug.Log("Attempting Quick Poke on target: " + (target != null ? target.name : "null"));
         Debug.Log("Quick Poke Cooldown Timer: " + quickPokeCooldownTimer);
         Debug.Log("Current Blood Meter: " + currentBloodMeter);
-        // ********************* //
 
-        if (quickPokeCooldownTimer > 0f || target == null) return false;
+        if (quickPokeCooldownTimer > 0f || target == null || entity == null)
+            return false;
 
         quickPokeCooldownTimer = quickPokeCooldown;
         int damage = GetBasicAttackDamageWithBlood(quickPokeBaseDamage);
@@ -115,43 +136,44 @@ public class Mosquito : MonoBehaviour
         return true;
     }
 
-    // ========== GLOB SHOT ==========
+    // ========== GLOB SHOT - ABILITY 3 ==========
     public void CastGlobShot()
     {
-        // *** DEBUG TESTING *** 
-        Debug.Log("Attempting to Cast Glob Shot");
-        Debug.Log("Current Blood Meter: " + currentBloodMeter);
-        // ********************* //
+        Debug.Log("Attempting to Cast Glob Shot - Blood: " + currentBloodMeter);
 
-        if (globProjectilePrefab == null || globFirePoint == null /* || currentBloodMeter <= 0f*/) return;
+        if (globProjectilePrefab == null || globFirePoint == null)
+            return;
 
+        Entity shooter = entity ?? GetComponent<Entity>();
         float maxUsage = maxBloodMeter * globMaxMeterUsageFraction;
         float bloodToUse = Mathf.Min(currentBloodMeter, maxUsage);
-        ModifyBloodMeter(-bloodToUse);
 
+        if (bloodToUse <= 0f) return;
+
+        ModifyBloodMeter(-bloodToUse);
         float damage = globBaseDamage + bloodToUse * globDamagePerBloodUnit;
         float sizeScale = 1f + bloodToUse * globSizePerBloodUnit;
 
         GameObject projGO = Instantiate(globProjectilePrefab, globFirePoint.position, globFirePoint.rotation);
         projGO.transform.localScale *= sizeScale;
-
         GlobProjectile proj = projGO.GetComponent<GlobProjectile>();
         if (proj != null)
         {
             proj.damage = Mathf.RoundToInt(damage);
             proj.speed = globBaseSpeed;
-            proj.ownerEntity = entity;  // Pass Entity instead
+            proj.ownerEntity = shooter;  // Can be null
         }
     }
 
-    // ========== AMP UP ==========
+    // ========== AMP UP - ULTIMATE ==========
     public void ActivateAmpUp()
     {
-        // *** DEBUG TESTING *** 
         Debug.Log("Attempting to Activate Amp Up");
-        Debug.Log("Amp Up Timer: " + ampUpTimer + ", Move Mult: " + ampUpCurrentMoveMult + ", Attack Speed Mult: " + ampUpCurrentAttackSpeedMult);
-        // ********************* //
-        if (ampUpTimer > 0f) return;
+        if (ampUpTimer > 0f)
+        {
+            Debug.Log("Amp Up already active!");
+            return;
+        }
 
         ampUpTimer = ampUpDuration;
         ampUpCurrentMoveMult = ampUpInitialMoveMult;
@@ -163,10 +185,6 @@ public class Mosquito : MonoBehaviour
 
     private void UpdateAmpUp()
     {
-        // *** DEBUG TESTING *** //
-        //Debug.Log("Updating Amp Up - Timer: " + ampUpTimer + ", Move Mult: " + ampUpCurrentMoveMult + ", Attack Speed Mult: " + ampUpCurrentAttackSpeedMult);
-        // ********************* //
-
         if (ampUpTimer <= 0f) return;
 
         ampUpTimer -= Time.deltaTime;
@@ -186,6 +204,38 @@ public class Mosquito : MonoBehaviour
     public float GetAttackSpeedMultiplier() => ampUpCurrentAttackSpeedMult;
 
     // Debug helpers
+    [ContextMenu("Test Blood Shot")]
+    private void TestBloodShot() => CastBloodShot();
+
     [ContextMenu("Test Quick Poke")]
-    private void TestQuickPoke() { /* find target via Physics.Raycast */ }
+    private void TestQuickPoke()
+    {
+        Entity target = FindNearestEnemy();
+        if (target != null) TryQuickPoke(target);
+    }
+
+    [ContextMenu("Test Glob Shot")]
+    private void TestGlobShot() => CastGlobShot();
+
+    private Entity FindNearestEnemy()
+    {
+        Collider[] hits = Physics.OverlapSphere(transform.position, 5f);
+        Entity nearest = null;
+        float closestDist = float.MaxValue;
+
+        foreach (var hit in hits)
+        {
+            Entity enemy = hit.GetComponent<Entity>();
+            if (enemy != null && entity != null && enemy.GetTeam() != entity.GetTeam())
+            {
+                float dist = Vector3.Distance(transform.position, enemy.transform.position);
+                if (dist < closestDist)
+                {
+                    closestDist = dist;
+                    nearest = enemy;
+                }
+            }
+        }
+        return nearest;
+    }
 }

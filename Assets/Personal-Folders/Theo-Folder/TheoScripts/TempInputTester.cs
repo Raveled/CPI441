@@ -1,7 +1,6 @@
 // ******************************************* //
 // ****** THEO XENAKIS - 2026 - CPI 441 ****** //
 // ******************************************* //
-
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -11,20 +10,26 @@ public class TempInputTester : MonoBehaviour
 {
     // **************************************************** //
     // *** Variable Initializations *** //
-
     private Mosquito mosquito;
+    private Butterfly butterfly;
 
     public InputActionReference quickPoke;
     public InputActionReference globShot;
     public InputActionReference ampUp;
     public InputActionReference basicAttack;
 
+    // Butterfly inputs
+    public InputActionReference dustWave;
+    public InputActionReference dazzlingWave;
+    public InputActionReference flyDash;
+    public InputActionReference tornado;
+
     // **************************************************** //
     // *** Monobehavior Functions *** //
-
     void Awake()
     {
         mosquito = GetComponent<Mosquito>();
+        butterfly = GetComponent<Butterfly>();
     }
 
     void Start()
@@ -34,21 +39,20 @@ public class TempInputTester : MonoBehaviour
     }
 
     // **************************************************** //
-    // *** Input Actions *** //
-
+    // *** Mosquito Input Actions *** //
     private void OnQuickPoke(InputAction.CallbackContext context)
     {
         if (context.started)
         {
             Entity target = FindNearestEnemy();
-            if (mosquito.TryQuickPoke(target))
+            if (mosquito != null && mosquito.TryQuickPoke(target))
                 Debug.Log("Quick Poke HIT!");
         }
     }
 
     private void OnGlobShot(InputAction.CallbackContext context)
     {
-        if (context.started)
+        if (context.started && mosquito != null)
         {
             mosquito.CastGlobShot();
             Debug.Log("Glob Shot FIRED!");
@@ -57,7 +61,7 @@ public class TempInputTester : MonoBehaviour
 
     private void OnAmpUp(InputAction.CallbackContext context)
     {
-        if (context.started)
+        if (context.started && mosquito != null)
         {
             mosquito.ActivateAmpUp();
             Debug.Log("Amp Up ACTIVATED!");
@@ -66,24 +70,65 @@ public class TempInputTester : MonoBehaviour
 
     private void OnBasicAttack(InputAction.CallbackContext context)
     {
-        if (context.started)
+        if (context.started && mosquito != null)
         {
             Entity target = FindNearestEnemy();
             if (target != null && mosquito.entity != null)
             {
-                int damage = mosquito.GetBasicAttackDamageWithBlood(mosquito.entity.attackPower);
-                target.TakeDamage(damage, mosquito.entity);
-                mosquito.OnBasicAttackHit(target);
-                Debug.Log($"Basic: {damage} dmg | Blood: {mosquito.GetBloodMeter01():F1}");
+                mosquito.CastBloodShot();
+                Debug.Log("Blood Shot FIRED!");
             }
         }
     }
 
     // **************************************************** //
-    // *** Helper Functions *** //
+    // *** Butterfly Input Actions *** //
+    private void OnDustWave(InputAction.CallbackContext context)
+    {
+        if (context.started && butterfly != null)
+        {
+            butterfly.CastDustWave();
+            Debug.Log("Dust Wave CAST!");
+        }
+    }
 
+    private void OnDazzlingWave(InputAction.CallbackContext context)
+    {
+        if (context.started && butterfly != null)
+        {
+            butterfly.CastDazzlingWave();
+            Debug.Log("Dazzling Wave CAST!");
+        }
+    }
+
+    private void OnFlyDash(InputAction.CallbackContext context)
+    {
+        if (context.started && butterfly != null)
+        {
+            Vector3 flyDirection = transform.forward; // Forward dash, modify as needed
+            butterfly.StartFly(flyDirection);
+            Debug.Log("Fly DASH!");
+        }
+    }
+
+    private void OnTornado(InputAction.CallbackContext context)
+    {
+        if (context.started && butterfly != null)
+        {
+            // Aim at mouse position or center screen for tornado
+            Vector3 tornadoPos = transform.position + transform.forward * 5f;
+            butterfly.CastTornado(tornadoPos);
+            Debug.Log("Tornado SUMMONED!");
+        }
+    }
+
+    // **************************************************** //
+    // *** Helper Functions *** //
     Entity FindNearestEnemy()
     {
+        Entity owner = mosquito?.entity ?? butterfly?.entity;
+        if (owner == null) return null;
+
         Collider[] hits = Physics.OverlapSphere(transform.position, 5f);
         Entity nearest = null;
         float closestDist = float.MaxValue;
@@ -91,7 +136,7 @@ public class TempInputTester : MonoBehaviour
         foreach (var hit in hits)
         {
             Entity enemy = hit.GetComponent<Entity>();
-            if (enemy != null && mosquito.entity != null && enemy.GetTeam() != mosquito.entity.GetTeam())
+            if (enemy != null && enemy.GetTeam() != owner.GetTeam())
             {
                 float dist = Vector3.Distance(transform.position, enemy.transform.position);
                 if (dist < closestDist)
@@ -106,13 +151,18 @@ public class TempInputTester : MonoBehaviour
 
     // **************************************************** //
     // *** Handle Enabling and Disabling Actions *** //
-
     private void OnEnable()
     {
         quickPoke.action.started += OnQuickPoke;
         globShot.action.started += OnGlobShot;
         ampUp.action.started += OnAmpUp;
         basicAttack.action.started += OnBasicAttack;
+
+        // Butterfly actions
+        dustWave.action.started += OnDustWave;
+        dazzlingWave.action.started += OnDazzlingWave;
+        flyDash.action.started += OnFlyDash;
+        tornado.action.started += OnTornado;
     }
 
     private void OnDisable()
@@ -121,6 +171,12 @@ public class TempInputTester : MonoBehaviour
         globShot.action.started -= OnGlobShot;
         ampUp.action.started -= OnAmpUp;
         basicAttack.action.started -= OnBasicAttack;
+
+        // Butterfly actions
+        dustWave.action.started -= OnDustWave;
+        dazzlingWave.action.started -= OnDazzlingWave;
+        flyDash.action.started -= OnFlyDash;
+        tornado.action.started -= OnTornado;
     }
+    // ******************************************* //
 }
-// ******************************************* //

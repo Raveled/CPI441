@@ -92,14 +92,19 @@ public class Butterfly : MonoBehaviour
 
     public void CastWindBurst()
     {
-        if (windBurstProjectilePrefab == null || windBurstFirePoint == null || entity == null)
+        Debug.Log("Casting Wind Burst");
+
+        if (windBurstProjectilePrefab == null || windBurstFirePoint == null)
             return;
+
+        // Make entity optional - work even if null
+        Entity shooter = entity ?? GetComponent<Entity>();
 
         GameObject projGO = Instantiate(windBurstProjectilePrefab, windBurstFirePoint.position, windBurstFirePoint.rotation);
         WindBurstProjectile proj = projGO.GetComponent<WindBurstProjectile>();
         if (proj != null)
         {
-            proj.ownerEntity = entity;
+            proj.ownerEntity = shooter;  // Can be null
             proj.damage = windBurstBaseDamage;
             proj.speed = windBurstSpeed;
             proj.maxRange = windBurstRange;
@@ -112,24 +117,22 @@ public class Butterfly : MonoBehaviour
 
     public void CastDustWave()
     {
-        if (dustWaveCooldownTimer > 0f || entity == null)
-            return;
+        if (dustWaveCooldownTimer > 0f) return;
 
         if (dustWavePrefab != null && dustWaveOrigin != null)
-        {
             Instantiate(dustWavePrefab, dustWaveOrigin.position, dustWaveOrigin.rotation);
-        }
 
-        // Simple AoE damage (low damage + slow is baked into wave visual/effect)
+        // Make entity optional for team checks
+        Entity shooter = entity ?? GetComponent<Entity>();
         Vector3 origin = (dustWaveOrigin != null) ? dustWaveOrigin.position : transform.position;
         Collider[] hits = Physics.OverlapSphere(origin, dustWaveRadius);
+
         foreach (var hit in hits)
         {
             Entity target = hit.GetComponent<Entity>();
-            if (target == null || target.GetTeam() == entity.GetTeam())
+            if (target == null || (shooter != null && target.GetTeam() == shooter.GetTeam()))
                 continue;
-
-            target.TakeDamage(dustWaveBaseDamage, entity);
+            target.TakeDamage(dustWaveBaseDamage, shooter);
         }
 
         dustWaveCooldownTimer = dustWaveCooldown;
@@ -141,37 +144,31 @@ public class Butterfly : MonoBehaviour
 
     public void CastDazzlingWave()
     {
-        if (dazzlingWaveCooldownTimer > 0f || entity == null)
-            return;
+        if (dazzlingWaveCooldownTimer > 0f) return;
+
+        Entity shooter = entity ?? GetComponent<Entity>();
 
         if (dazzlingWavePrefab != null && dazzlingWaveOrigin != null)
-        {
             Instantiate(dazzlingWavePrefab, dazzlingWaveOrigin.position, dazzlingWaveOrigin.rotation);
-        }
 
         Vector3 origin = (dazzlingWaveOrigin != null) ? dazzlingWaveOrigin.position : transform.position;
         Collider[] hits = Physics.OverlapSphere(origin, dazzlingWaveRadius);
+
         foreach (var hit in hits)
         {
             Entity target = hit.GetComponent<Entity>();
-            if (target == null)
-                continue;
+            if (target == null) continue;
 
-            if (target.GetTeam() == entity.GetTeam())
+            if (shooter != null && target.GetTeam() == shooter.GetTeam())
             {
-                // Ally: small heal (direct HP increase)
+                // Ally heal
                 target.currentHitPoints = Mathf.Min(target.currentHitPoints + dazzlingWaveHealAmount, target.maximumHitPoints);
             }
             else
             {
-                // Enemy: low damage
-                target.TakeDamage(dazzlingWaveBaseDamage, entity);
-
-                // Upgrade: Reduced Damage (apply multiplier to attackPower temporarily)
+                target.TakeDamage(dazzlingWaveBaseDamage, shooter);
                 if (dazzlingWaveUpgradeReducedDamage)
-                {
                     StartCoroutine(ApplyDamageReduction(target, dazzlingWaveDamageReductionMultiplier));
-                }
             }
         }
 
@@ -193,7 +190,7 @@ public class Butterfly : MonoBehaviour
 
     public void StartFly(Vector3 direction)
     {
-        if (isFlying || flyCurrentCharges <= 0 || entity == null)
+        if (isFlying || flyCurrentCharges <= 0)
             return;
 
         isFlying = true;
@@ -260,14 +257,14 @@ public class Butterfly : MonoBehaviour
 
     public void CastTornado(Vector3 position)
     {
-        if (tornadoPrefab == null)
-            return;
+        if (tornadoPrefab == null) return;
 
+        Entity shooter = entity ?? GetComponent<Entity>();
         GameObject tornadoGO = Instantiate(tornadoPrefab, position, Quaternion.identity);
         TornadoArea tornado = tornadoGO.GetComponent<TornadoArea>();
         if (tornado != null)
         {
-            tornado.ownerEntity = entity;
+            tornado.ownerEntity = shooter;  // Can be null
             tornado.radius = tornadoRadius;
             tornado.duration = tornadoDuration;
             tornado.damagePerTick = tornadoBaseDamagePerTick;

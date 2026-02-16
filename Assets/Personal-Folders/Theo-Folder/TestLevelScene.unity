@@ -13432,20 +13432,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 446958239}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &446996822
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
-  m_Name: Mosquito/AmpUp
-  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
-  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  m_ActionId: 906b7c65-99a4-4f6d-a73f-013966be5a0a
 --- !u!1001 &447654835
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -16043,6 +16029,20 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 537129147}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &537302788
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
+  m_Name: Mosquito/QuickPoke-Ability2
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
+  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ActionId: 4f8eebe2-3b6d-4711-acaf-701ad65c5f90
 --- !u!1001 &538687994
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -23433,20 +23433,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 777848130}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &780912377
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
-  m_Name: Mosquito/BasicAttack
-  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
-  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  m_ActionId: bd068b8b-e91f-4f2b-b4d0-9dda788a3f0a
 --- !u!1001 &781911828
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -25625,7 +25611,7 @@ GameObject:
   m_Component:
   - component: {fileID: 864278461}
   m_Layer: 0
-  m_Name: GlobFiringPoint
+  m_Name: UniversalFiringPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26365,8 +26351,10 @@ GameObject:
   - component: {fileID: 879240959}
   - component: {fileID: 879240958}
   - component: {fileID: 879240962}
-  - component: {fileID: 879240964}
   - component: {fileID: 879240963}
+  - component: {fileID: 879240965}
+  - component: {fileID: 879240967}
+  - component: {fileID: 879240966}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -26481,11 +26469,16 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 879240956}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5346c57a49ba92a489bd0a5345f97d71, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Mosquito
+  bloodShotProjectilePrefab: {fileID: 2440982292386426808, guid: db618fa92a4755d4b9dfe8aaf99e759a, type: 3}
+  bloodShotFirePoint: {fileID: 864278461}
+  bloodShotBaseDamage: 8
+  bloodShotSpeed: 12
+  bloodShotRange: 8
   maxBloodMeter: 100
   bloodMeterGainOnBasicHit: 5
   bloodMeterGainOnPlayerHit: 10
@@ -26507,7 +26500,7 @@ MonoBehaviour:
   ampUpInitialAttackSpeedMult: 2
   ampUpColor: {r: 1, g: 0, b: 0, a: 1}
   entity: {fileID: 0}
---- !u!114 &879240964
+--- !u!114 &879240965
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -26516,13 +26509,72 @@ MonoBehaviour:
   m_GameObject: {fileID: 879240956}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d8f582267bb91cd499cc42bcaf4c2f4e, type: 3}
+  m_Script: {fileID: 11500000, guid: 574a32c9abe174a4eafb1fdacf8d5385, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TempInputTester
-  quickPoke: {fileID: 1539846289}
-  globShot: {fileID: 1052173060}
-  ampUp: {fileID: 446996822}
-  basicAttack: {fileID: 780912377}
+  m_EditorClassIdentifier: Assembly-CSharp::Butterfly
+  entity: {fileID: 0}
+  windBurstProjectilePrefab: {fileID: 9061833513333517290, guid: d2aff26f45766434b9961825d0e5dd3b, type: 3}
+  windBurstFirePoint: {fileID: 864278461}
+  windBurstBaseDamage: 4
+  windBurstSpeed: 10
+  windBurstRange: 6
+  dustWavePrefab: {fileID: 8448847598253864756, guid: a1654c76fbd952f4d92ab041c6d06690, type: 3}
+  dustWaveOrigin: {fileID: 864278461}
+  dustWaveBaseDamage: 3
+  dustWaveRadius: 4
+  dustWaveCooldown: 5
+  dazzlingWavePrefab: {fileID: 8448847598253864756, guid: e71230ba1b81dcc4682c088e606b1a16, type: 3}
+  dazzlingWaveOrigin: {fileID: 864278461}
+  dazzlingWaveBaseDamage: 2
+  dazzlingWaveRadius: 4
+  dazzlingWaveHealAmount: 10
+  dazzlingWaveCooldown: 6
+  dazzlingWaveUpgradeReducedDamage: 0
+  dazzlingWaveDamageReductionMultiplier: 0.7
+  flyDashDistance: 8
+  flyDashDuration: 0.35
+  flyCooldown: 7
+  flyUpgradeTwoCharges: 0
+  flyMaxChargesBase: 1
+  flyMaxChargesUpgraded: 2
+  tornadoPrefab: {fileID: 2401556809699640610, guid: 4df3dc496d02c134cad6c07df09a6112, type: 3}
+  tornadoRadius: 5
+  tornadoDuration: 4
+  tornadoBaseDamagePerTick: 2
+  tornadoTickInterval: 0.5
+  tornadoGroupForce: 10
+--- !u!114 &879240966
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 879240956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f10852763fb896f4893e811df83b42ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButterflyInputTester
+  dustWave: {fileID: 1214415367}
+  dazzlingWave: {fileID: 1246339943}
+  flyDash: {fileID: 998468201}
+  tornado: {fileID: 1916545046}
+--- !u!114 &879240967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 879240956}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ad845074b85451468732a8e465ef283, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MosquitoInputTester
+  quickPoke: {fileID: 537302788}
+  globShot: {fileID: 2083012668}
+  ampUp: {fileID: 2071828143}
+  basicAttack: {fileID: 1527607173}
 --- !u!1 &879421886
 GameObject:
   m_ObjectHideFlags: 0
@@ -30746,6 +30798,20 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 993494673}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &998468201
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
+  m_Name: Butterfly/Fly-Ability3
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
+  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ActionId: d9cf2a90-ae20-4a54-a7cb-b9b9587cbd24
 --- !u!1001 &1008291304
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -31756,20 +31822,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 1049779391}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1052173060
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
-  m_Name: Mosquito/GlobShot
-  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
-  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  m_ActionId: dc0aae5c-80a1-4d8d-9270-6f6174711d96
 --- !u!114 &1052455886
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -36582,6 +36634,20 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 1205769983}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1214415367
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
+  m_Name: Butterfly/DustWave-Ability1
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
+  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ActionId: 4ba801eb-12b6-496a-af52-4bfc101567ea
 --- !u!1001 &1218983046
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -37229,6 +37295,20 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 1245909194}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1246339943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
+  m_Name: Butterfly/DazzlingWave-Ability2
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
+  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ActionId: 8e27cc00-7860-4b3c-b60c-30badc1adfd9
 --- !u!1001 &1247734797
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -45480,6 +45560,20 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 1519506233}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1527607173
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
+  m_Name: Mosquito/BloodShot-BasicAttack
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
+  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ActionId: bd068b8b-e91f-4f2b-b4d0-9dda788a3f0a
 --- !u!1001 &1528880214
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -45641,20 +45735,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 1537439047}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1539846289
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
-  m_Name: Mosquito/QuickPoke
-  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
-  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  m_ActionId: 4f8eebe2-3b6d-4711-acaf-701ad65c5f90
 --- !u!1001 &1541011288
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -58969,6 +59049,20 @@ Transform:
   - {fileID: 114944178}
   m_Father: {fileID: 1301751811}
   m_LocalEulerAnglesHint: {x: 0, y: -1456.83, z: 0}
+--- !u!114 &1916545046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
+  m_Name: Butterfly/Tornado-Ultimate
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
+  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ActionId: c538ba13-2f28-4ac1-acf0-4d0a02aa116d
 --- !u!1001 &1916697141
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -64159,6 +64253,20 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 2071480454}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2071828143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
+  m_Name: Mosquito/AmpUp-Ultimate
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
+  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ActionId: 906b7c65-99a4-4f6d-a73f-013966be5a0a
 --- !u!1001 &2075448995
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -64441,6 +64549,20 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 2082988941}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2083012668
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
+  m_Name: Mosquito/GlobShot-Ability3
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
+  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ActionId: dc0aae5c-80a1-4d8d-9270-6f6174711d96
 --- !u!1001 &2084574113
 PrefabInstance:
   m_ObjectHideFlags: 0
