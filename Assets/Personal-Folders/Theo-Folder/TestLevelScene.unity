@@ -26498,7 +26498,7 @@ MonoBehaviour:
   globProjectilePrefab: {fileID: 5426923190247754776, guid: cb04fc2c9ed1de8489498fc3f2bf7fc5, type: 3}
   globFirePoint: {fileID: 864278461}
   globBaseDamage: 10
-  globBaseSpeed: 5
+  globBaseSpeed: 25
   globMaxMeterUsageFraction: 0.5
   globDamagePerBloodUnit: 0.3
   globSizePerBloodUnit: 0.01

@@ -123,7 +123,7 @@ public class Mosquito : MonoBehaviour
         Debug.Log("Current Blood Meter: " + currentBloodMeter);
         // ********************* //
 
-        if (globProjectilePrefab == null || globFirePoint == null || currentBloodMeter <= 0f) return;
+        if (globProjectilePrefab == null || globFirePoint == null /* || currentBloodMeter <= 0f*/) return;
 
         float maxUsage = maxBloodMeter * globMaxMeterUsageFraction;
         float bloodToUse = Mathf.Min(currentBloodMeter, maxUsage);
@@ -149,7 +149,7 @@ public class Mosquito : MonoBehaviour
     {
         // *** DEBUG TESTING *** 
         Debug.Log("Attempting to Activate Amp Up");
-        Debug.Log("Amp Up Timer: " + ampUpTimer);
+        Debug.Log("Amp Up Timer: " + ampUpTimer + ", Move Mult: " + ampUpCurrentMoveMult + ", Attack Speed Mult: " + ampUpCurrentAttackSpeedMult);
         // ********************* //
         if (ampUpTimer > 0f) return;
 
@@ -164,7 +164,7 @@ public class Mosquito : MonoBehaviour
     private void UpdateAmpUp()
     {
         // *** DEBUG TESTING *** //
-        Debug.Log("Updating Amp Up - Timer: " + ampUpTimer + ", Move Mult: " + ampUpCurrentMoveMult + ", Attack Speed Mult: " + ampUpCurrentAttackSpeedMult);
+        //Debug.Log("Updating Amp Up - Timer: " + ampUpTimer + ", Move Mult: " + ampUpCurrentMoveMult + ", Attack Speed Mult: " + ampUpCurrentAttackSpeedMult);
         // ********************* //
 
         if (ampUpTimer <= 0f) return;
