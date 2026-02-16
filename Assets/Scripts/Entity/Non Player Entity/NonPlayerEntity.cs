@@ -188,26 +188,27 @@ public class NonPlayerEntity : Entity
         }
         else
         {
+            /* DEPRECIATED: PLAYER NOW HAS NETWORKID ON PLAYER SCRIPT
             if (newTarget is Player)
             {
                 PredictedPlayerMovement ppMovement = newTarget.GetComponent<PredictedPlayerMovement>();
                 foreach (var player in networkManager.players) {
                     if (player == ppMovement.owner.Value) 
                     {
-                        Debug.Log(this.gameObject.name + " is targetting Player ID: " + player);
+                        //Debug.Log(this.gameObject.name + " is targetting Player ID: " + player);
                         targetPlayerId.value = player;
                     }
                 }
 
                 targetId.value = null;
                 hasTarget.value = true;
+                return;
             }
-            else
-            {
-                targetId.value = newTarget.GetNetworkID(isServer);
-                targetPlayerId.value = null;
-                hasTarget.value = true;
-            }
+            */
+
+            targetId.value = newTarget.GetNetworkID(isServer);
+            targetPlayerId.value = null;
+            hasTarget.value = true;
         }
     }
 
@@ -251,7 +252,7 @@ public class NonPlayerEntity : Entity
         if (!targetId.value.HasValue && !targetPlayerId.value.HasValue) return null;
         
         if (targetPlayerId.value.HasValue) {
-            Debug.Log(gameObject.name + " is trying to get target by PlayerID: " + targetPlayerId.value);
+            //Debug.Log(gameObject.name + " is trying to get target by PlayerID: " + targetPlayerId.value);
             return GetEntityByPlayerID(targetPlayerId.value);
         }
 
@@ -275,7 +276,7 @@ public class NonPlayerEntity : Entity
         Player[] allPlayers = FindObjectsByType<Player>(FindObjectsSortMode.None);
         foreach (var player in allPlayers) {
             if (player.GetComponent<PredictedPlayerMovement>().owner.Value == playerId) {  
-                Debug.Log("Found " + player.gameObject.name + " that has ID: " + playerId);              
+                //Debug.Log("Found " + player.gameObject.name + " that has ID: " + playerId);              
                 return player;
             }
         }

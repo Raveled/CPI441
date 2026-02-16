@@ -197,7 +197,6 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
-  debugString: test
 --- !u!114 &4751865395330377205
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -278,9 +277,19 @@ MonoBehaviour:
     _ownerAuth: 0
     _sendIntervalInSeconds: 0
   enemyTeams: 
-  playerLevel: 1
-  goldTotal: 0
-  xpTotal: 0
+  playerLevel:
+    _value: 1
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  goldTotal:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  xpTotal:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  predictedMovement: {fileID: 5579395928134298048}
 --- !u!1 &8912244245821273830
 GameObject:
   m_ObjectHideFlags: 0
