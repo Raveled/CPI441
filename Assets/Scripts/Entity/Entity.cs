@@ -69,6 +69,11 @@ public class Entity : NetworkBehaviour
 
    public void SetupStats()
     {
+        if (!isSpawned)
+        {
+            return;
+        }
+
         if (!isServer)
         {
             SetupStatsServerRpc();
@@ -90,6 +95,8 @@ public class Entity : NetworkBehaviour
     {
         if (!isServer)
             return;
+
+        Debug.Log($"Applying stats for {entityName} on team {team.value}");
 
         maximumHitPoints.value = statBlock.BaseHitPoints;
         currentHitPoints.value = maximumHitPoints.value;
