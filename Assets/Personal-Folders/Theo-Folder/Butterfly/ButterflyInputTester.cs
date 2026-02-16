@@ -11,6 +11,8 @@ public class ButterflyInputTester : MonoBehaviour
     // Variable Initializations
     private Butterfly butterfly;
 
+    // ADD THIS LINE - Basic Attack input
+    public InputActionReference basicAttack;
     public InputActionReference dustWave;
     public InputActionReference dazzlingWave;
     public InputActionReference flyDash;
@@ -25,6 +27,16 @@ public class ButterflyInputTester : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+    }
+
+    // ADD THIS METHOD - Basic Attack (Wind Burst)
+    private void OnBasicAttack(InputAction.CallbackContext context)
+    {
+        if (context.started && butterfly != null)
+        {
+            butterfly.CastWindBurst();
+            Debug.Log("Wind Burst FIRED!");
+        }
     }
 
     // Input Actions
@@ -69,6 +81,8 @@ public class ButterflyInputTester : MonoBehaviour
     // Handle Enabling and Disabling Actions
     private void OnEnable()
     {
+        // ADD THIS LINE
+        basicAttack.action.started += OnBasicAttack;
         dustWave.action.started += OnDustWave;
         dazzlingWave.action.started += OnDazzlingWave;
         flyDash.action.started += OnFlyDash;
@@ -77,6 +91,8 @@ public class ButterflyInputTester : MonoBehaviour
 
     private void OnDisable()
     {
+        // ADD THIS LINE
+        basicAttack.action.started -= OnBasicAttack;
         dustWave.action.started -= OnDustWave;
         dazzlingWave.action.started -= OnDazzlingWave;
         flyDash.action.started -= OnFlyDash;

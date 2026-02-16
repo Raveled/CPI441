@@ -19,7 +19,7 @@ public class Entity : MonoBehaviour
     [SerializeField] protected int goldReward = 0;
     [SerializeField] public int maximumHitPoints = 0;
     [SerializeField] public int currentHitPoints = 0;
-    [SerializeField] protected float moveSpeed = 0;
+    [SerializeField] public float moveSpeed = 0;
     [SerializeField] public int attackPower = 0;
     [SerializeField] protected float defaultAttackCooldown = 0;
     [Space]

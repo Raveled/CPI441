@@ -4942,6 +4942,20 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 135393225}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &139666557
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
+  m_Name: Beetle/Ground Stomp-Ultimate
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
+  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ActionId: 29ac3277-6835-4ee2-a6d8-72624767fc47
 --- !u!1001 &143345622
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6989,6 +7003,20 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 222909234}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &223527235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
+  m_Name: Beetle/Swagger-Ability 2
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
+  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ActionId: c7c03f72-6e1d-4c4c-b1a9-a9b72d37e77c
 --- !u!1001 &224149482
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11324,6 +11352,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 368534869}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &375178146
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 375178147}
+  m_Layer: 0
+  m_Name: WaveFirePoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &375178147
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 375178146}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.219, y: 1.064, z: 0.512}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 879240961}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &375205698
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21767,6 +21826,20 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 730041273}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &732501198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
+  m_Name: Beetle/Mandible Attack-BasicAttack
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
+  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ActionId: 308ac8d2-d9fc-412a-b4f2-436b6f88de55
 --- !u!1001 &732529337
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -26353,8 +26426,10 @@ GameObject:
   - component: {fileID: 879240962}
   - component: {fileID: 879240963}
   - component: {fileID: 879240965}
+  - component: {fileID: 879240969}
   - component: {fileID: 879240967}
   - component: {fileID: 879240966}
+  - component: {fileID: 879240968}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -26439,6 +26514,7 @@ Transform:
   m_Children:
   - {fileID: 1191142167}
   - {fileID: 864278461}
+  - {fileID: 375178147}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &879240962
@@ -26514,17 +26590,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Butterfly
   entity: {fileID: 0}
   windBurstProjectilePrefab: {fileID: 9061833513333517290, guid: d2aff26f45766434b9961825d0e5dd3b, type: 3}
-  windBurstFirePoint: {fileID: 864278461}
+  windBurstFirePoint: {fileID: 375178147}
   windBurstBaseDamage: 4
   windBurstSpeed: 10
   windBurstRange: 6
   dustWavePrefab: {fileID: 8448847598253864756, guid: a1654c76fbd952f4d92ab041c6d06690, type: 3}
-  dustWaveOrigin: {fileID: 864278461}
+  dustWaveOrigin: {fileID: 375178147}
   dustWaveBaseDamage: 3
   dustWaveRadius: 4
   dustWaveCooldown: 5
   dazzlingWavePrefab: {fileID: 8448847598253864756, guid: e71230ba1b81dcc4682c088e606b1a16, type: 3}
-  dazzlingWaveOrigin: {fileID: 864278461}
+  dazzlingWaveOrigin: {fileID: 375178147}
   dazzlingWaveBaseDamage: 2
   dazzlingWaveRadius: 4
   dazzlingWaveHealAmount: 10
@@ -26555,6 +26631,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f10852763fb896f4893e811df83b42ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ButterflyInputTester
+  basicAttack: {fileID: 1078746640}
   dustWave: {fileID: 1214415367}
   dazzlingWave: {fileID: 1246339943}
   flyDash: {fileID: 998468201}
@@ -26575,6 +26652,56 @@ MonoBehaviour:
   globShot: {fileID: 2083012668}
   ampUp: {fileID: 2071828143}
   basicAttack: {fileID: 1527607173}
+--- !u!114 &879240968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 879240956}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdd423a9cb692c64c8c51dc44081309a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BeetleInputTester
+  mandibleAttack: {fileID: 732501198}
+  hornImpale: {fileID: 986234662}
+  swagger: {fileID: 223527235}
+  roll: {fileID: 1834203537}
+  groundStomp: {fileID: 139666557}
+--- !u!114 &879240969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 879240956}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6d84af96f2654f4c86c0e4084bf1320, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Beetle
+  entity: {fileID: 0}
+  mandibleBaseDamage: 12
+  mandibleRange: 2.5
+  mandibleCooldown: 1.2
+  hornImpaleDamage: 25
+  hornDashDistance: 4
+  hornDashDuration: 0.4
+  hornSlowAmount: 0.5
+  hornSlowDuration: 2
+  hornCooldown: 8
+  swaggerMoveSpeedMult: 0.6
+  swaggerDamageReduction: 0.4
+  swaggerDuration: 6
+  rollDamage: 15
+  rollSpeed: 15
+  rollKnockbackForce: 8
+  rollCooldown: 12
+  stompPrefab: {fileID: 0}
+  stompRadius: 4
+  stompDamage: 8
+  stompStunDuration: 1.5
 --- !u!1 &879421886
 GameObject:
   m_ObjectHideFlags: 0
@@ -30516,6 +30643,20 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 981894527}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &986234662
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
+  m_Name: Beetle/Horn Impale-Ability 1
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
+  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ActionId: 2f8083cd-a33d-473f-8611-54d1e36b0ebf
 --- !u!1001 &986630394
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -32462,6 +32603,20 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 1078325176}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1078746640
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
+  m_Name: Butterfly/WindBurst-BasicAttack
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
+  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ActionId: 68ad8968-802f-46ba-ab51-2ca1b80df5a8
 --- !u!1 &1083065702
 GameObject:
   m_ObjectHideFlags: 0
@@ -55676,6 +55831,20 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7717566546202839522, guid: 9717d775412e68e4f85f7ee9e0e4813a, type: 3}
   m_PrefabInstance: {fileID: 1834014638}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1834203537
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
+  m_Name: Beetle/Roll-Ability 3
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
+  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ActionId: e3975230-1110-472b-bc3b-fae9c9bf8f12
 --- !u!1001 &1834565395
 PrefabInstance:
   m_ObjectHideFlags: 0

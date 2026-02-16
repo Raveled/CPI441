@@ -1187,6 +1187,114 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Beetle",
+            "id": "9c52e42a-fd75-4e8e-a7bf-1ea808d1ee4f",
+            "actions": [
+                {
+                    "name": "Mandible Attack-BasicAttack",
+                    "type": "Button",
+                    "id": "308ac8d2-d9fc-412a-b4f2-436b6f88de55",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Horn Impale-Ability 1",
+                    "type": "Button",
+                    "id": "2f8083cd-a33d-473f-8611-54d1e36b0ebf",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Swagger-Ability 2",
+                    "type": "Button",
+                    "id": "c7c03f72-6e1d-4c4c-b1a9-a9b72d37e77c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Roll-Ability 3",
+                    "type": "Button",
+                    "id": "e3975230-1110-472b-bc3b-fae9c9bf8f12",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Ground Stomp-Ultimate",
+                    "type": "Button",
+                    "id": "29ac3277-6835-4ee2-a6d8-72624767fc47",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "2e57722c-dc8b-42cb-a521-7451433aebca",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Mandible Attack-BasicAttack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "66e0c6ca-e057-4490-aa2c-f3b30aa70180",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Horn Impale-Ability 1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "399cc5eb-08de-466e-8859-1e3f9cc01c25",
+                    "path": "<Keyboard>/leftShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Touch",
+                    "action": "Swagger-Ability 2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c25df6fd-52f6-4669-b748-ddc7b9b2cfe4",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "Roll-Ability 3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "93dbfe06-46ac-4ae6-a418-66086c8b829d",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Ground Stomp-Ultimate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [
