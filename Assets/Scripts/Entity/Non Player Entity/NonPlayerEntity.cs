@@ -60,7 +60,7 @@ public class NonPlayerEntity : Entity
     }
 
     private IEnumerator DelayedHealthBarUpdate() {
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitUntil(() => isSpawned);
         UpdateHealthBar();
     }
 

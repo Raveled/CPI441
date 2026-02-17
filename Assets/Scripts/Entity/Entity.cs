@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using PurrNet.Prediction;
 using PurrNet.Modules;
+using System.Collections;
 
 public class Entity : NetworkBehaviour
 {
@@ -64,23 +65,21 @@ public class Entity : NetworkBehaviour
         }
 
         //In case not called from SetStats from spawning in
-        SetupStats();
+        StartCoroutine(SetupStats());
     }
 
-   public void SetupStats()
+    public IEnumerator SetupStats()
     {
-        if (!isSpawned)
-        {
-            return;
-        }
+        yield return new WaitUntil(() => isSpawned);
 
         if (!isServer)
         {
             SetupStatsServerRpc();
-            return;
         }
-
-        ApplySetupStats();
+        else
+        {
+            ApplySetupStats();
+        }
     }
 
     [ServerRpc(requireOwnership: false)]

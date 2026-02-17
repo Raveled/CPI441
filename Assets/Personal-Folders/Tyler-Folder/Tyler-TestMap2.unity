@@ -13770,6 +13770,10 @@ PrefabInstance:
       value: Tower_Team1 (1)
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
+      propertyPath: team._value
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: 'protector.Array.data[0]'
       value: 
       objectReference: {fileID: 536710564}
@@ -14930,6 +14934,10 @@ PrefabInstance:
     - target: {fileID: 3099228963143835330, guid: 736f9aa3aa7e7344ab11c6ca4691c0ea, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3292759093522215002, guid: 736f9aa3aa7e7344ab11c6ca4691c0ea, type: 3}
+      propertyPath: team._value
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3292759093522215002, guid: 736f9aa3aa7e7344ab11c6ca4691c0ea, type: 3}
       propertyPath: protector.Array.size
@@ -16284,6 +16292,10 @@ PrefabInstance:
     - target: {fileID: 4450124783581481318, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: m_Name
       value: Tower_Team1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
+      propertyPath: team._value
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: protector.Array.size
@@ -18248,6 +18260,31 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+--- !u!4 &616711881 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8847827241605076448, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+  m_PrefabInstance: {fileID: 616711880}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &616711882 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2771562178992919709, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+  m_PrefabInstance: {fileID: 616711880}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &616711883 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1256348374070741935, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+  m_PrefabInstance: {fileID: 616711880}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &616711884 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4524921500119811135, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+  m_PrefabInstance: {fileID: 616711880}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &616711885 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2221630867754063606, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+  m_PrefabInstance: {fileID: 616711880}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &616711886 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4378048839524894691, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
@@ -21836,6 +21873,10 @@ PrefabInstance:
     - target: {fileID: 4450124783581481318, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
       propertyPath: m_Name
       value: Tower_Team2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
+      propertyPath: team._value
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
       propertyPath: protector.Array.size
@@ -29207,6 +29248,10 @@ PrefabInstance:
       value: Tower_Team2 (2)
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
+      propertyPath: team._value
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
       propertyPath: protector.Array.size
       value: 0
       objectReference: {fileID: 0}
@@ -31403,6 +31448,10 @@ PrefabInstance:
     - target: {fileID: 4450124783581481318, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: m_Name
       value: Tower_Team1 (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
+      propertyPath: team._value
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: 'protector.Array.data[0]'
@@ -33636,6 +33685,10 @@ PrefabInstance:
       value: Tower_Team2 (3)
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
+      propertyPath: team._value
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
       propertyPath: 'protector.Array.data[0]'
       value: 
       objectReference: {fileID: 950852915}
@@ -34121,6 +34174,10 @@ PrefabInstance:
     - target: {fileID: 4450124783581481318, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
       propertyPath: m_Name
       value: Tower_Team2 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
+      propertyPath: team._value
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
       propertyPath: 'protector.Array.data[0]'
@@ -44085,6 +44142,10 @@ PrefabInstance:
       value: Tower_Team1 (2)
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
+      propertyPath: team._value
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: protector.Array.size
       value: 0
       objectReference: {fileID: 0}
@@ -49056,6 +49117,11 @@ MonoBehaviour:
   _destroyOnDisconnect: 1
   spawnPoints:
   - {fileID: 616711886}
+  - {fileID: 616711885}
+  - {fileID: 616711884}
+  - {fileID: 616711883}
+  - {fileID: 616711882}
+  - {fileID: 616711881}
 --- !u!114 &1643989589
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -49690,6 +49756,10 @@ PrefabInstance:
     - target: {fileID: 8326912195664519930, guid: 42be0b0de69bcf6448ed01adafb84135, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8448669507176483938, guid: 42be0b0de69bcf6448ed01adafb84135, type: 3}
+      propertyPath: team._value
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8448669507176483938, guid: 42be0b0de69bcf6448ed01adafb84135, type: 3}
       propertyPath: protector.Array.size
