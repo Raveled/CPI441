@@ -1,24 +1,40 @@
 // ******************************************* //
 // ****** THEO XENAKIS - 2026 - CPI 441 ****** //
 // ******************************************* //
+
 using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class BeetleInputTester : MonoBehaviour
 {
     private Beetle beetle;
 
-    public InputActionReference mandibleAttack;
-    public InputActionReference hornImpale;
-    public InputActionReference swagger;
-    public InputActionReference roll;
-    public InputActionReference groundStomp;
+    [Header("Input Actions")]
+    public InputActionAsset actions;
+
+    public string mandibleAttackAction = "MandibleAttack";
+    public string hornImpaleAction = "HornImpale";
+    public string swaggerAction = "Swagger";
+    public string rollAction = "Roll";
+    public string groundStompAction = "GroundStomp";
+
+    private InputAction mandibleAttack;
+    private InputAction hornImpale;
+    private InputAction swagger;
+    private InputAction roll;
+    private InputAction groundStomp;
 
     void Awake()
     {
         beetle = GetComponent<Beetle>();
+
+        // Resolve actions by name (Unity 6 safe)
+        mandibleAttack = actions.FindAction(mandibleAttackAction, throwIfNotFound: true);
+        hornImpale = actions.FindAction(hornImpaleAction, throwIfNotFound: true);
+        swagger = actions.FindAction(swaggerAction, throwIfNotFound: true);
+        roll = actions.FindAction(rollAction, throwIfNotFound: true);
+        groundStomp = actions.FindAction(groundStompAction, throwIfNotFound: true);
     }
 
     void Start()
@@ -27,6 +43,7 @@ public class BeetleInputTester : MonoBehaviour
         Cursor.visible = false;
     }
 
+    // Input Callbacks
     private void OnMandibleAttack(InputAction.CallbackContext context)
     {
         if (context.started && beetle != null)
@@ -72,21 +89,34 @@ public class BeetleInputTester : MonoBehaviour
         }
     }
 
+    // Enable / Disable
     private void OnEnable()
     {
-        mandibleAttack.action.started += OnMandibleAttack;
-        hornImpale.action.started += OnHornImpale;
-        swagger.action.started += OnSwagger;
-        roll.action.started += OnRoll;
-        groundStomp.action.started += OnGroundStomp;
+        mandibleAttack.started += OnMandibleAttack;
+        hornImpale.started += OnHornImpale;
+        swagger.started += OnSwagger;
+        roll.started += OnRoll;
+        groundStomp.started += OnGroundStomp;
+
+        mandibleAttack.Enable();
+        hornImpale.Enable();
+        swagger.Enable();
+        roll.Enable();
+        groundStomp.Enable();
     }
 
     private void OnDisable()
     {
-        mandibleAttack.action.started -= OnMandibleAttack;
-        hornImpale.action.started -= OnHornImpale;
-        swagger.action.started -= OnSwagger;
-        roll.action.started -= OnRoll;
-        groundStomp.action.started -= OnGroundStomp;
+        mandibleAttack.started -= OnMandibleAttack;
+        hornImpale.started -= OnHornImpale;
+        swagger.started -= OnSwagger;
+        roll.started -= OnRoll;
+        groundStomp.started -= OnGroundStomp;
+
+        mandibleAttack.Disable();
+        hornImpale.Disable();
+        swagger.Disable();
+        roll.Disable();
+        groundStomp.Disable();
     }
 }

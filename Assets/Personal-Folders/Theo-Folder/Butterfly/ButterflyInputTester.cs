@@ -1,26 +1,40 @@
 // ******************************************* //
 // ****** THEO XENAKIS - 2026 - CPI 441 ****** //
 // ******************************************* //
+
 using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class ButterflyInputTester : MonoBehaviour
 {
-    // Variable Initializations
     private Butterfly butterfly;
 
-    // ADD THIS LINE - Basic Attack input
-    public InputActionReference basicAttack;
-    public InputActionReference dustWave;
-    public InputActionReference dazzlingWave;
-    public InputActionReference flyDash;
-    public InputActionReference tornado;
+    [Header("Input Actions")]
+    public InputActionAsset actions;
+
+    public string basicAttackAction = "BasicAttack";
+    public string dustWaveAction = "DustWave";
+    public string dazzlingWaveAction = "DazzlingWave";
+    public string flyDashAction = "FlyDash";
+    public string tornadoAction = "Tornado";
+
+    private InputAction basicAttack;
+    private InputAction dustWave;
+    private InputAction dazzlingWave;
+    private InputAction flyDash;
+    private InputAction tornado;
 
     void Awake()
     {
         butterfly = GetComponent<Butterfly>();
+
+        // Resolve actions by name (Unity 6 safe)
+        basicAttack = actions.FindAction(basicAttackAction, throwIfNotFound: true);
+        dustWave = actions.FindAction(dustWaveAction, throwIfNotFound: true);
+        dazzlingWave = actions.FindAction(dazzlingWaveAction, throwIfNotFound: true);
+        flyDash = actions.FindAction(flyDashAction, throwIfNotFound: true);
+        tornado = actions.FindAction(tornadoAction, throwIfNotFound: true);
     }
 
     void Start()
@@ -29,7 +43,7 @@ public class ButterflyInputTester : MonoBehaviour
         Cursor.visible = false;
     }
 
-    // ADD THIS METHOD - Basic Attack (Wind Burst)
+    // Input Callbacks
     private void OnBasicAttack(InputAction.CallbackContext context)
     {
         if (context.started && butterfly != null)
@@ -39,7 +53,6 @@ public class ButterflyInputTester : MonoBehaviour
         }
     }
 
-    // Input Actions
     private void OnDustWave(InputAction.CallbackContext context)
     {
         if (context.started && butterfly != null)
@@ -78,24 +91,34 @@ public class ButterflyInputTester : MonoBehaviour
         }
     }
 
-    // Handle Enabling and Disabling Actions
+    // Enable / Disable
     private void OnEnable()
     {
-        // ADD THIS LINE
-        basicAttack.action.started += OnBasicAttack;
-        dustWave.action.started += OnDustWave;
-        dazzlingWave.action.started += OnDazzlingWave;
-        flyDash.action.started += OnFlyDash;
-        tornado.action.started += OnTornado;
+        basicAttack.started += OnBasicAttack;
+        dustWave.started += OnDustWave;
+        dazzlingWave.started += OnDazzlingWave;
+        flyDash.started += OnFlyDash;
+        tornado.started += OnTornado;
+
+        basicAttack.Enable();
+        dustWave.Enable();
+        dazzlingWave.Enable();
+        flyDash.Enable();
+        tornado.Enable();
     }
 
     private void OnDisable()
     {
-        // ADD THIS LINE
-        basicAttack.action.started -= OnBasicAttack;
-        dustWave.action.started -= OnDustWave;
-        dazzlingWave.action.started -= OnDazzlingWave;
-        flyDash.action.started -= OnFlyDash;
-        tornado.action.started -= OnTornado;
+        basicAttack.started -= OnBasicAttack;
+        dustWave.started -= OnDustWave;
+        dazzlingWave.started -= OnDazzlingWave;
+        flyDash.started -= OnFlyDash;
+        tornado.started -= OnTornado;
+
+        basicAttack.Disable();
+        dustWave.Disable();
+        dazzlingWave.Disable();
+        flyDash.Disable();
+        tornado.Disable();
     }
 }
