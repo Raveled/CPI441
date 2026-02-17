@@ -246,6 +246,8 @@ public class GameManager : MonoBehaviour
         }
         ChangeGameState(GameState.END);
         GenerateMatchJSON();
+
+        //GetComponent<JSONUpload>().SendMatchData();
     }
 
     //When a Tower is destroyed, this is called for JSON
