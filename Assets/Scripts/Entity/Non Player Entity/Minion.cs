@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.AI;
 using NUnit.Framework;
 using PurrNet;
+using System.Collections;
 
 public class Minion : NonPlayerEntity
 {
