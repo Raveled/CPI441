@@ -290,6 +290,34 @@ public class Entity : NetworkBehaviour
             attackPower.value = originalAttackPower;
     }
 
+    // *** Move Speed Buff / Debuff / Stun *** //
+    public void ModifyMoveSpeedMultiplier(float multiplier, float duration)
+    {
+        if (!isServer)
+        {
+            ModifyMoveSpeedMultiplierServerRpc(multiplier, duration);
+            return;
+        }
+        StartCoroutine(ModifyMoveSpeedCoroutine(multiplier, duration));
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void ModifyMoveSpeedMultiplierServerRpc(float multiplier, float duration)
+    {
+        StartCoroutine(ModifyMoveSpeedCoroutine(multiplier, duration));
+    }
+
+    private IEnumerator ModifyMoveSpeedCoroutine(float multiplier, float duration)
+    {
+        float originalMoveSpeed = moveSpeed.value;
+        moveSpeed.value *= multiplier;
+
+        yield return new WaitForSeconds(duration);
+
+        if (!isDead.value)
+            moveSpeed.value = originalMoveSpeed;
+    }
+
 
 
     //************************************************************************//
