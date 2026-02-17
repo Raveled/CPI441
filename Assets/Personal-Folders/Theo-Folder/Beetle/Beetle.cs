@@ -135,20 +135,12 @@ public class Beetle : MonoBehaviour
             {
                 target.TakeDamage(hornImpaleDamage, shooter);
                 // Apply slow (direct moveSpeed modification)
-                target.moveSpeed *= (1f - hornSlowAmount);
-                StartCoroutine(RestoreTargetSpeed(target, hornSlowDuration));
+                target.ModifyMoveSpeedMultiplier(1f - hornSlowAmount, hornSlowDuration);
             }
         }
 
         hornCooldownTimer = hornCooldown;
         Debug.Log("Horn Impale! - Beetle.cs");
-    }
-
-    private IEnumerator RestoreTargetSpeed(Entity target, float duration)
-    {
-        yield return new WaitForSeconds(duration);
-        if (target != null)
-            target.moveSpeed *= (1f / (1f - hornSlowAmount));
     }
     #endregion
 
@@ -157,12 +149,10 @@ public class Beetle : MonoBehaviour
     {
         if (swaggerTimer > 0f /*|| entity == null*/) return;
 
-        originalMoveSpeed = entity.moveSpeed;
-        entity.moveSpeed *= swaggerMoveSpeedMult;
+        entity.ModifyMoveSpeedMultiplier(swaggerMoveSpeedMult, swaggerDuration);
 
         // Damage reduction (reduce incoming damage)
         StartCoroutine(SwaggerDamageReduction());
-
         swaggerTimer = swaggerDuration;
         isSwaggerActive = true;
 
@@ -174,20 +164,22 @@ public class Beetle : MonoBehaviour
 
     private IEnumerator SwaggerDamageReduction()
     {
-        float originalMaxHP = entity.maximumHitPoints;
-        while (swaggerTimer > 0f)
-        {
-            entity.maximumHitPoints = Mathf.RoundToInt(originalMaxHP * (1f - swaggerDamageReduction));
-            yield return null;
-        }
-        entity.maximumHitPoints = Mathf.RoundToInt(originalMaxHP);
+        float originalMaxHP = entity.maximumHitPoints.value;
+        float reducedHP = originalMaxHP * (1f - swaggerDamageReduction);
+
+        // Apply reduced max HP during swagger
+        entity.GainMaxHealth((int)(reducedHP - entity.maximumHitPoints.value));
+
+        yield return new WaitUntil(() => swaggerTimer <= 0f);
+
+        // Restore original max HP
+        entity.GainMaxHealth((int)(originalMaxHP - entity.maximumHitPoints.value));
     }
 
     private void EndSwagger()
     {
         isSwaggerActive = false;
-        if (entity != null)
-            entity.moveSpeed = originalMoveSpeed;
+        // Move speed already restored by ModifyMoveSpeedMultiplier
         if (meshRenderer != null)
             meshRenderer.material.color = originalColor;
         Debug.Log("Swagger ENDED! - Beetle.cs");
@@ -262,20 +254,11 @@ public class Beetle : MonoBehaviour
             {
                 target.TakeDamage(stompDamage, shooter);
                 // Stun (set moveSpeed to 0 temporarily)
-                StartCoroutine(StunTarget(target, stompStunDuration));
+                target.ModifyMoveSpeedMultiplier(0f, stompStunDuration);  // 0 speed = stun
             }
         }
 
         Debug.Log("GROUND STOMP! - Beetle.cs");
-    }
-
-    private IEnumerator StunTarget(Entity target, float duration)
-    {
-        float originalSpeed = target.moveSpeed;
-        target.moveSpeed = 0f;
-        yield return new WaitForSeconds(duration);
-        if (target != null)
-            target.moveSpeed = originalSpeed;
     }
     #endregion
 

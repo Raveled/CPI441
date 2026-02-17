@@ -23,12 +23,12 @@ public class Entity : NetworkBehaviour
 
     //Stats that are visible in editor
     [Header("Entity Debug")]
-    [SerializeField] protected int goldReward = 0;
+    /*[SerializeField] protected int goldReward = 0;
     [SerializeField] public int maximumHitPoints = 0;
-    [SerializeField] public int currentHitPoints = 0;
+    [SerializeField] public int currentHitPoints = 0;                   //Modified by Theo - made this SyncVar and moved it to networked stats section, since health needs to be synchronized across clients for damage - removed safe mode
     [SerializeField] public float moveSpeed = 0;
     [SerializeField] public int attackPower = 0;
-    [SerializeField] protected float defaultAttackCooldown = 0;
+    [SerializeField] protected float defaultAttackCooldown = 0;*/
     [Space]
 
     // NETWORKED STATS
@@ -192,7 +192,7 @@ public class Entity : NetworkBehaviour
     private void NotifyHealthChanged(int newHealth)
     {
         // This method can be used to trigger client-side effects when health changes, if needed
-        Debug.Log($"{entityName} health: {newHealth}/{maximumHitPoints}");
+        Debug.Log($"{entityName} health: {newHealth}/{maximumHitPoints.value}");
         OnHealthChanged(newHealth);
     }
 
@@ -225,7 +225,7 @@ public class Entity : NetworkBehaviour
             return;
 
         currentHitPoints.value += healAmount;
-        if (currentHitPoints.value > maximumHitPoints) currentHitPoints.value = maximumHitPoints;
+        if (currentHitPoints.value > maximumHitPoints.value) currentHitPoints.value = maximumHitPoints.value;
 
         NotifyHealthChanged(currentHitPoints.value);
     }
@@ -258,7 +258,70 @@ public class Entity : NetworkBehaviour
 
         NotifyHealthChanged(currentHitPoints.value);
     }
-    
+
+    //************************************************************************//
+    //New Additions from Theo for Character Abilities
+
+    // *** Attack Power Buff / Debuff *** //
+    public void ModifyAttackPowerForSeconds(float multiplier, float duration)
+    {
+        if (!isServer)
+        {
+            ModifyAttackPowerForSecondsServerRpc(multiplier, duration);
+            return;
+        }
+        StartCoroutine(ModifyAttackPowerCoroutine(multiplier, duration));
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void ModifyAttackPowerForSecondsServerRpc(float multiplier, float duration)
+    {
+        StartCoroutine(ModifyAttackPowerCoroutine(multiplier, duration));
+    }
+
+    private IEnumerator ModifyAttackPowerCoroutine(float multiplier, float duration)
+    {
+        int originalAttackPower = attackPower.value;
+        attackPower.value = Mathf.RoundToInt(originalAttackPower * multiplier);
+
+        yield return new WaitForSeconds(duration);
+
+        if (!isDead.value) // only restore if still alive
+            attackPower.value = originalAttackPower;
+    }
+
+    // *** Move Speed Buff / Debuff / Stun *** //
+    public void ModifyMoveSpeedMultiplier(float multiplier, float duration)
+    {
+        if (!isServer)
+        {
+            ModifyMoveSpeedMultiplierServerRpc(multiplier, duration);
+            return;
+        }
+        StartCoroutine(ModifyMoveSpeedCoroutine(multiplier, duration));
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void ModifyMoveSpeedMultiplierServerRpc(float multiplier, float duration)
+    {
+        StartCoroutine(ModifyMoveSpeedCoroutine(multiplier, duration));
+    }
+
+    private IEnumerator ModifyMoveSpeedCoroutine(float multiplier, float duration)
+    {
+        float originalMoveSpeed = moveSpeed.value;
+        moveSpeed.value *= multiplier;
+
+        yield return new WaitForSeconds(duration);
+
+        if (!isDead.value)
+            moveSpeed.value = originalMoveSpeed;
+    }
+
+
+
+    //************************************************************************//
+
     // Server Only Death Logic
     protected virtual void OnDeath(NetworkID? damageOriginId)
     {
@@ -336,10 +399,10 @@ public class Entity : NetworkBehaviour
         }
     }
     protected virtual void OnDrawGizmos() {
-        if (showRewardRange) {
+        /*if (showRewardRange) {
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, rewardRange);
-        }
+        }*/
     }
 
     #region Setters
@@ -348,7 +411,7 @@ public class Entity : NetworkBehaviour
     }
     public void SetStatblock(SO_EntityStatBlock stats) {
         statBlock = Object.Instantiate(stats);
-        SetupStats();
+        StartCoroutine(SetupStats()); //Modified by Theo - will wait until isSpawned to apply stats, ensuring proper network synchronization
     }
     #endregion
     #region Getters
