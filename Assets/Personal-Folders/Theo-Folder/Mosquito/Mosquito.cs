@@ -93,12 +93,12 @@ public class Mosquito : NetworkBehaviour
 
         if (isServer)
         {
-            Debug.Log("[Mosquito] IS server — spawning directly.");
+            Debug.Log("[Mosquito] IS server - spawning directly.");
             ServerSpawnBloodShot(bloodShotFirePoint.position, bloodShotFirePoint.rotation, damage);
         }
         else
         {
-            Debug.Log("[Mosquito] NOT server — sending ServerRpc.");
+            Debug.Log("[Mosquito] NOT server - sending ServerRpc.");
             ServerSpawnBloodShotRpc(bloodShotFirePoint.position, bloodShotFirePoint.rotation, damage);
         }
     }
@@ -112,7 +112,7 @@ public class Mosquito : NetworkBehaviour
 
     private void ServerSpawnBloodShot(Vector3 position, Quaternion rotation, int damage)
     {
-        Debug.Log($"[Mosquito] ServerSpawnBloodShot — prefab={bloodShotProjectilePrefab}, firePoint={bloodShotFirePoint}, networkManager={networkManager}");
+        Debug.Log($"[Mosquito] ServerSpawnBloodShot - prefab={bloodShotProjectilePrefab}, firePoint={bloodShotFirePoint}, networkManager={networkManager}");
 
         if (bloodShotProjectilePrefab == null) { Debug.LogError("[Mosquito] bloodShotProjectilePrefab is NULL!"); return; }
         if (bloodShotFirePoint == null) { Debug.LogError("[Mosquito] bloodShotFirePoint is NULL!"); return; }
@@ -128,7 +128,7 @@ public class Mosquito : NetworkBehaviour
         proj.syncSpeed.value = bloodShotSpeed;
         proj.syncMaxRange.value = bloodShotRange;
         proj.syncOwnerID.value = entity.GetNetworkID(isServer);
-        Debug.Log($"[Mosquito] Projectile configured — damage={damage}, speed={bloodShotSpeed}, range={bloodShotRange}, ownerID={entity.GetNetworkID(isServer)}");
+        Debug.Log($"[Mosquito] Projectile configured - damage={damage}, speed={bloodShotSpeed}, range={bloodShotRange}, ownerID={entity.GetNetworkID(isServer)}");
     }
 
     // ========== BLOOD ENERGY PASSIVE (Ability 1) ==========
@@ -143,6 +143,7 @@ public class Mosquito : NetworkBehaviour
         bool hitPlayer = target.GetType().Name == "Player";
         float gain = hitPlayer ? bloodMeterGainOnPlayerHit : bloodMeterGainOnBasicHit;
         ModifyBloodMeter(gain);
+        Debug.Log($"[Mosquito] Blood gained: +{gain:F1} — current blood: {currentBloodMeter:F1}/{maxBloodMeter}");
     }
 
     // ========== QUICK POKE - ABILITY 2 ==========
@@ -165,8 +166,17 @@ public class Mosquito : NetworkBehaviour
     }
 
     // ========== GLOB SHOT - ABILITY 3 ==========
+    [Header("Glob Shot Threshold")]
+    [SerializeField] private float globShotMinBloodThreshold = 10f;
+
     public void CastGlobShot()
     {
+        if (currentBloodMeter < globShotMinBloodThreshold)
+        {
+            Debug.Log($"[Mosquito] Glob Shot blocked — blood {currentBloodMeter:F1} below threshold {globShotMinBloodThreshold}");
+            return;
+        }
+
         PlayGlobShotAnim();
 
         float maxUsage = maxBloodMeter * globMaxMeterUsageFraction;
@@ -174,6 +184,7 @@ public class Mosquito : NetworkBehaviour
         if (bloodToUse <= 0f) return;
 
         ModifyBloodMeter(-bloodToUse);
+        Debug.Log($"[Mosquito] Glob Shot fired — used {bloodToUse:F1} blood, remaining: {currentBloodMeter:F1}");
         float damage = globBaseDamage + bloodToUse * globDamagePerBloodUnit;
         float sizeScale = 1f + bloodToUse * globSizePerBloodUnit;
 
