@@ -43,10 +43,10 @@ GameObject:
   - component: {fileID: 2620513460872895128}
   - component: {fileID: 8053365526157884349}
   - component: {fileID: 4442215727534351921}
-  - component: {fileID: 4180152989988615847}
   - component: {fileID: 4998939629705637407}
   - component: {fileID: 8069894609849645937}
   - component: {fileID: 5579395928134298048}
+  - component: {fileID: 4751865395330377205}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -95,7 +95,7 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!65 &4442215727534351921
@@ -119,32 +119,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.6599617, y: 0.7590864, z: 1.659962}
   m_Center: {x: 0, y: 0.35, z: 0.24}
---- !u!114 &4180152989988615847
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3921032179608766505}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bdd212e5871d38e48829d38a0bb3726f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Entity
-  entityName: Player
-  statBlock: {fileID: 11400000, guid: 1b9f3dc4380eca440af0c4294dc006fb, type: 2}
-  team: 1
-  canMove: 1
-  canDefaultAttack: 1
-  protector: {fileID: 0}
-  goldReward: 0
-  maximumHitPoints: 0
-  currentHitPoints: 0
-  moveSpeed: 0
-  attackPower: 0
-  defaultAttackCooldown: 0
-  isDead: 0
-  enemyTeams: 
 --- !u!114 &4998939629705637407
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -158,7 +132,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Prediction::PurrNet.Prediction.PredictedTransform
   _graphics: {fileID: 2781509865937213894}
-  _floatAccuracy: 0
+  _floatAccuracy: 1
   _interpolationSettings: {fileID: 11400000, guid: 4a8aa8e44e23cfd4a8d4387ef3f36173, type: 2}
   _unparentGraphics: 0
   _characterControllerPatch: 1
@@ -175,7 +149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Prediction::PurrNet.Prediction.PredictedRigidbody
   _rigidbody: {fileID: 8053365526157884349}
-  _floatAccuracy: 0
+  _floatAccuracy: 1
   _eventMask: 63
   _ignoreTriggerOnTrigger: 0
 --- !u!114 &5579395928134298048
@@ -194,11 +168,13 @@ MonoBehaviour:
   _extrapolateInput: 1
   _playerCamera: {fileID: 9010252939979917820}
   _rigidbody: {fileID: 8069894609849645937}
+  _player: {fileID: 4751865395330377205}
   moveSpeed: 10
-  jumpForce: 5
+  jumpForce: 10
+  jumpCooldownTime: 1
   acceleration: 20
   planarDamping: 10
-  groundCheckDistance: 0.1
+  groundCheckDistance: 0.2
   groundLayer:
     serializedVersion: 2
     m_Bits: 57
@@ -221,6 +197,99 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
+--- !u!114 &4751865395330377205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3921032179608766505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02284832f568b5945a0ba2229770e053, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Player
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  entityName: Player
+  statBlock: {fileID: 11400000, guid: a2f27d92d0618f749a6dee4eb1e13594, type: 2}
+  team:
+    _value: 2
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  canMove: 1
+  canDefaultAttack: 1
+  rewardRange: 50
+  showRewardRange: 0
+  currentHitPoints:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  maximumHitPoints:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  moveSpeed:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  acceleration:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  planarDamping:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  jumpForce:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  jumpCooldown:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  attackPower:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  defaultAttackCooldown:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  reward_Gold:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  reward_XP:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  isDead:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  enemyTeams: 
+  playerLevel:
+    _value: 1
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  goldTotal:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  xpTotal:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  predictedMovement: {fileID: 5579395928134298048}
 --- !u!1 &8912244245821273830
 GameObject:
   m_ObjectHideFlags: 0

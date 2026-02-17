@@ -6,14 +6,19 @@ using UnityEngine.InputSystem;
 
 public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement.MoveInput, PredictedPlayerMovement.MoveState>
 {
+    [Header("References")]
     [SerializeField] private PlayerCamera _playerCamera;
     [SerializeField] private PredictedRigidbody _rigidbody;
+    [SerializeField] private Player _player;
 
-    [SerializeField] private float moveSpeed = 20f;
-    [SerializeField] private float jumpForce = 20f;
-    [SerializeField] private float jumpCooldownTime = 1f;
-    [SerializeField] private float acceleration = 20f;
-    [SerializeField] private float planarDamping = 10f;
+    [Header("Movement Settings - Pull from SO_EntityStatBlock")]
+    [SerializeField] private float moveSpeed = 0f;
+    [SerializeField] private float jumpForce = 0f;
+    [SerializeField] private float jumpCooldownTime = 0f;
+    [SerializeField] private float acceleration = 0f;
+    [SerializeField] private float planarDamping = 0f;
+
+    [Header("Ground Check Settings")]
     [SerializeField] private float groundCheckDistance = 0.1f;
     [SerializeField] private LayerMask groundLayer;
 
@@ -23,6 +28,17 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
 
     protected override void LateAwake()
     {
+        if (_player == null) _player = GetComponent<Player>();
+
+        if (_player != null)
+        {
+            LoadStatsFromPlayer();
+        }
+        else
+        {
+            Debug.LogError("PredictedPlayerMovement: No Player component found on the GameObject.");
+        }
+
         if (isOwner)
         {
             moveAction = InputSystem.actions.FindAction("Move");
@@ -35,6 +51,17 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
         }
     }
 
+    private void LoadStatsFromPlayer()
+    {
+        SO_EntityStatBlock playerStatBlock = _player.GetEntityStatblock();
+        moveSpeed = playerStatBlock.BaseMoveSpeed;
+        jumpForce = playerStatBlock.BaseJumpForce;
+        jumpCooldownTime = playerStatBlock.BaseJumpCooldown;
+        acceleration = playerStatBlock.BaseAcceleration;
+        planarDamping = playerStatBlock.BasePlanarDamping;
+    }
+
+
     protected override void OnDestroy() 
     {
         base.OnDestroy();
@@ -46,6 +73,29 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
         }
     }
 
+    protected override MoveState GetInitialState()
+    {
+        return new MoveState
+        {
+            position = transform.position,
+            rotation = transform.rotation,
+            velocity = _rigidbody.linearVelocity,
+            jumpCooldown = 0f
+        };
+    }
+
+    protected override void GetUnityState(ref MoveState state)
+    {
+        state.position = transform.position;
+        state.rotation = transform.rotation;
+        state.velocity = _rigidbody.linearVelocity;
+    }
+
+    protected override void SetUnityState(MoveState state)
+    {
+        transform.SetPositionAndRotation(state.position, state.rotation);
+        _rigidbody.linearVelocity = state.velocity;
+    }
 
     protected override void Simulate(MoveInput input, ref MoveState state, float delta)
     {
@@ -53,16 +103,17 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
 
         // Movement
         Vector3 targetVelocity = (transform.forward * input.moveDirection.y + transform.right * input.moveDirection.x) * moveSpeed;
-        Vector3 velocityDelta = targetVelocity - _rigidbody.linearVelocity;
+        Vector3 velocityDelta = targetVelocity - state.velocity;
         velocityDelta.y = 0f;
 
         _rigidbody.AddForce(velocityDelta * acceleration, ForceMode.Acceleration);
 
-        var horizontal = new Vector3(_rigidbody.linearVelocity.x, 0f, _rigidbody.linearVelocity.z);
+        var horizontal = new Vector3(state.velocity.x, 0f, state.velocity.z);
         _rigidbody.AddForce(-horizontal * planarDamping);
         if (horizontal.magnitude > moveSpeed)
         {
-            _rigidbody.velocity = new Vector3(targetVelocity.x, _rigidbody.velocity.y, targetVelocity.z);
+            state.velocity = new Vector3(targetVelocity.x, state.velocity.y, targetVelocity.z);
+            _rigidbody.linearVelocity = state.velocity;
         }
 
         // Jumping
@@ -77,8 +128,21 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
         camForward.y = 0f;
         if (camForward.sqrMagnitude > 0.001f)
         {
-            _rigidbody.MoveRotation(Quaternion.LookRotation(camForward.normalized));
+            state.rotation = Quaternion.LookRotation(camForward.normalized);
+            _rigidbody.MoveRotation(state.rotation);
         }
+
+        // Update state velocity after physics
+        state.velocity = _rigidbody.linearVelocity;
+        state.position = transform.position;
+    }
+
+    protected override void Update()
+    {
+        base.Update();
+
+        // Sync stats from Player component in case they were updated (e.g., from leveling up or buffs)
+        LoadStatsFromPlayer();
     }
 
     private static Collider[] groundColliders = new Collider[8];
@@ -118,6 +182,9 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
 
     public struct MoveState : IPredictedData<MoveState>
     {
+        public Vector3 position;
+        public Quaternion rotation;
+        public Vector3 velocity;
         public float jumpCooldown;
         public void Dispose() {}
     }

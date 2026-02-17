@@ -1,14 +1,20 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
+using PurrNet;
+using UnityEngine.SocialPlatforms;
+using NUnit.Framework;
 
 public class NonPlayerEntity : Entity
 {
     //Setup fields
     [Header("NPE Setup")]
-    [SerializeField] float rewardRange = 50f;
+
+    [Space]
     [SerializeField] protected Transform attackRangeOrigin = null;
-    [SerializeField] protected float attackRange = 10f;
     [SerializeField] protected NPEDetectLogic npeDetectLogic = null;
+    [SerializeField] protected UnityEngine.UI.Slider healthBar = null;
+    [Space]
     [SerializeField] bool canTargetTower = false;
     [SerializeField] bool canTargetCore = false;
     [SerializeField] bool canTargetMinion = false;
@@ -16,17 +22,26 @@ public class NonPlayerEntity : Entity
     [Space]
     //Debug fields
     [Header("NPE Debug")]
-    [Tooltip("Yellow Circle")]
-    [SerializeField] bool showRewardRange = false;
     [Tooltip("Red Circle")]
     [SerializeField] bool showAttackRange = true;
     [Tooltip("Blue Line")]
     [SerializeField] bool showForwardDirection = true;
     [Space]
-    [SerializeField] protected Entity target;
-    [SerializeField] protected float attackCooldownTimer = 0;
 
-    //Targeting fields
+    // NETWORKED
+    [SerializeField] protected SyncVar<NetworkID?> targetId = new(null);
+    [SerializeField] protected SyncVar<PlayerID?> targetPlayerId = new(null);
+    [SerializeField] protected SyncVar<bool> hasTarget = new(false);
+    [SerializeField] protected SyncVar<float> attackCooldownTimer = new(0f);
+    [SerializeField] protected SyncVar<float> attackRange = new(10f);
+
+    // LOCAL (non-networked) state
+    [SerializeField] bool canSearchForTarget = true;
+    [SerializeField] bool canAttackTimer = true;
+    [SerializeField] List<Entity> entitiesInRange; //for debug purposes, used in FindTarget()
+
+
+    //Targeting fields SERVER ONLY
     protected Entity closestMinion = null;
     protected float minDistanceMinion = Mathf.Infinity;
     protected Entity closestPlayer = null;
@@ -38,82 +53,169 @@ public class NonPlayerEntity : Entity
 
     protected override void Start() {
         base.Start();
-        npeDetectLogic.SetEnemyTeams(enemyTeams);
-    }
-    //Overrided Destroy method
-    protected override void DestroyThis(Entity damageOrigin) {
-        isDead = true;
+        entitiesInRange = new List<Entity>();
+        npeDetectLogic.SetNPE(this);
 
-        //Give gold to the closest players
-        DistributeGoldReward();
+        StartCoroutine(DelayedHealthBarUpdate());
+    }
 
-        base.DestroyThis(damageOrigin);
+    private IEnumerator DelayedHealthBarUpdate() {
+        yield return new WaitUntil(() => isSpawned);
+        UpdateHealthBar();
     }
-    //Give the gold reward to the closest players in range
-    protected virtual void DistributeGoldReward() {
-        /*
-         * WIP-------------------------------------------------------------------------------------------------------
-         * ***Use this for minions and towers
-         * 1. get array of all players in range
-         * 2. find up to two closest players within range that is not the damageOrigin
-         * 3. Give the 1 or 2 selected players the gold reward
-         */
+
+    protected override void OnHealthChanged(int newHealth)
+    {
+        base.OnHealthChanged(newHealth);
+        UpdateHealthBar();
     }
+
+    protected override void OnDeathClient(NetworkID? damageOriginId)
+    {
+        base.OnDeathClient(damageOriginId);
+    }
+
+    //Update healthBar UI Element
+    void UpdateHealthBar()
+    {
+        if (healthBar == null) return;
+
+        healthBar.maxValue = maximumHitPoints.value;
+        healthBar.value = currentHitPoints.value;
+    }
+    protected override void Die(Entity damageOrigin) {
+        base.Die(damageOrigin);
+
+        //Destroy self
+        Destroy(gameObject);
+    }
+
     //Move
     protected virtual void Move() {
         if (!canMove) return;
     }
+    protected virtual void Move(Entity currentTarget) {
+        if (!canMove) return;
+    }
+
     //Attack
     protected virtual void Attack() {
         if (!canDefaultAttack) return;
     }
-
-    //Getter
-    public Entity GetTarget() {
-        return target;
+    protected virtual void Attack(Entity currentTarget) {
+        if (!canDefaultAttack) return;
     }
+
     //Cooldown for attacks
     protected void AttackTimer() {
+        if (!canAttackTimer) return;
+        if (!isServer) return; // Only execute timer logic on the server
+
         if (attackCooldownTimer >= 0) {
-            attackCooldownTimer -= Time.deltaTime;
+            attackCooldownTimer.value -= Time.deltaTime;
         }
     }
     //Gets the closest entity in detect range and sets it as target
     protected virtual void FindTarget() {
-        if (!target) {
+        if (!canSearchForTarget || !isServer) return ; // Only execute targeting logic on the server
+
+        Entity current = GetTarget();
+        if (current == null || current.GetIsDead()) {
+            //Reset Data
+            ResetTarget();
+
             //Get List of entities in range
-            List<Entity> entitiesInRange = npeDetectLogic.GetEnemiesInRange();
-            if (entitiesInRange.Count <= 0) {
-                target = null;
-                return;
-            }
+            entitiesInRange = npeDetectLogic.GetEnemiesInRange();
 
             //Loop through each entity in range
             foreach (Entity e in entitiesInRange) {
                 //Get distance from this to entity
-                if (!e) continue;
+                if (!e || e.GetIsDead()) continue;
+
+                if (e == this) continue;
+
+                if (e.GetTeam() == Team.NULL || e.GetTeam() == GetTeam()) continue; // Don't target entities on the same team
+
                 float dist = Vector3.Distance(transform.position, e.gameObject.transform.position);
 
                 //Set closest entity type
                 if (e is Minion && dist < minDistanceMinion) {
                     closestMinion = e;
                     minDistanceMinion = dist;
-                } else if (e is Entity && dist < minDistancePlayer) {//THIS SHOULD BE PLAYER
+                } else if (e is Player && dist < minDistancePlayer) {
                     closestPlayer = e;
                     minDistancePlayer = dist;
+                } else if (e is Tower && dist < minDistanceTower) {
+                    closestTower = e;
+                    minDistanceTower = dist;
+                } else if (e is Core && dist < minDistanceCore) {
+                    closestCore = e;
+                    minDistanceCore = dist;
                 }
             }
 
             //In order of Tower > Core > Minion > Player, set target equal to the closest
-            if (canTargetTower && closestTower) target = closestTower;
-            else if (canTargetCore && closestCore) target = closestCore;
-            else if (canTargetMinion && closestMinion) target = closestMinion;
-            else if (canTargetPlayer && closestPlayer) target = closestPlayer;
-            else target = null;
+            Entity newTarget = null;
+            if (canTargetTower && closestTower) newTarget = closestTower;
+            else if (canTargetCore && closestCore) newTarget = closestCore;
+            else if (canTargetMinion && closestMinion) newTarget = closestMinion;
+            else if (canTargetPlayer && closestPlayer) newTarget = closestPlayer;
+            else newTarget = null;
+
+            //DONT use GetNetworkID(entity).Value use entity.GetNetworkID(isServer)
+
+
+            if (newTarget != null && newTarget.GetTeam() == GetTeam()) {
+                Debug.LogError("Attempting to target entity on same team. This should never happen. Check targeting logic.");
+                newTarget = null;
+            }
+
+            SetTarget(newTarget);
+        }
+
+    }
+
+    // SERVER
+    protected void SetTarget(Entity newTarget)
+    {
+        if (!isServer) return;
+
+        if (newTarget == null)
+        {
+            targetId.value = null;
+            targetPlayerId.value = null;
+            hasTarget.value = false;
+        }
+        else
+        {
+            /* DEPRECIATED: PLAYER NOW HAS NETWORKID ON PLAYER SCRIPT
+            if (newTarget is Player)
+            {
+                PredictedPlayerMovement ppMovement = newTarget.GetComponent<PredictedPlayerMovement>();
+                foreach (var player in networkManager.players) {
+                    if (player == ppMovement.owner.Value) 
+                    {
+                        //Debug.Log(this.gameObject.name + " is targetting Player ID: " + player);
+                        targetPlayerId.value = player;
+                    }
+                }
+
+                targetId.value = null;
+                hasTarget.value = true;
+                return;
+            }
+            */
+
+            targetId.value = newTarget.GetNetworkID(isServer);
+            targetPlayerId.value = null;
+            hasTarget.value = true;
         }
     }
+
     //Resets the target, called from NPEDetectLogic
     public void ResetTarget() {
+        if (!isServer) return;
+
         closestMinion = null;
         minDistanceMinion = Mathf.Infinity;
         closestPlayer = null;
@@ -123,14 +225,11 @@ public class NonPlayerEntity : Entity
         closestCore = null;
         minDistanceCore = Mathf.Infinity;
 
-        target = null;
+        SetTarget(null);
     }
     //Visualization for ranges using Gizmos
-    protected virtual void OnDrawGizmos() {
-        if (showRewardRange) {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(transform.position, rewardRange);
-        }
+    protected override void OnDrawGizmos() {
+        base.OnDrawGizmos();
         if (showAttackRange) {
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(attackRangeOrigin.position, attackRange);
@@ -139,5 +238,49 @@ public class NonPlayerEntity : Entity
             Gizmos.color = Color.blue;
             Gizmos.DrawLine(transform.position, transform.position + transform.forward * 5f);
         }
+    }
+    //For pausing the game
+    public virtual void Freeze(bool freezeNPE) {
+        canMove = !freezeNPE;
+        canDefaultAttack = !freezeNPE;
+        canAttackTimer = !freezeNPE;
+        canSearchForTarget = !freezeNPE;
+    }
+    #region Getters
+    public Entity GetTarget()
+    {
+        if (!targetId.value.HasValue && !targetPlayerId.value.HasValue) return null;
+        
+        if (targetPlayerId.value.HasValue) {
+            //Debug.Log(gameObject.name + " is trying to get target by PlayerID: " + targetPlayerId.value);
+            return GetEntityByPlayerID(targetPlayerId.value);
+        }
+
+        return GetEntityByNetworkID(targetId.value);
+    }
+
+    public NetworkID? GetTargetId()
+    {
+        return targetId.value;
+    }
+
+    public bool HasTarget()
+    {
+        return hasTarget.value;
+    }
+    #endregion
+
+    // Helper for retrieving player entity
+    public Entity GetEntityByPlayerID(PlayerID? playerId)
+    {
+        Player[] allPlayers = FindObjectsByType<Player>(FindObjectsSortMode.None);
+        foreach (var player in allPlayers) {
+            if (player.GetComponent<PredictedPlayerMovement>().owner.Value == playerId) {  
+                //Debug.Log("Found " + player.gameObject.name + " that has ID: " + playerId);              
+                return player;
+            }
+        }
+
+        return null;
     }
 }

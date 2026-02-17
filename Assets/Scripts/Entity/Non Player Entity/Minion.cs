@@ -2,30 +2,40 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
 using UnityEngine.AI;
+using NUnit.Framework;
+using PurrNet;
+using System.Collections;
 
 public class Minion : NonPlayerEntity
 {
-    public enum MinionState : int { CHASE_ENEMY = 0, CHASE_CORE = 1};
     [Header("Minion Setup")]
     [SerializeField] float attackHeight = 10f;
+    [SerializeField] bool attackIsAOE = false;
+    [SerializeField] float waypointRange = 1f;
+
     [Header("Minion Debug")]
     [Tooltip("Purple Circle")]
     [SerializeField] bool showAttackBounds = false;
+    [SerializeField] bool showNavMeshTarget = false;
     [Space]
     [SerializeField] Transform navMeshMoveTarget = null;
+    //Waypoints
+    [SerializeField] List<Transform> waypoints = new List<Transform>();
+    [SerializeField] Transform currentWaypoint = null;
+    [SerializeField] float waypointDistance = Mathf.Infinity;
     
-    //Nav Mesh
+    //Nav Mesh [SERVER CONTROLLED ONLY - CLIENTS SHOULD INTERP POS]
     [SerializeField] Core enemyCore = null;
     NavMeshAgent agent = null;
     float distanceToTarget = 0f;
     Vector3 previousDestination;
 
-    //Attack Cylinder
+    //Attack Cylinder - Local Calculation for OverlapCapsule
     Vector3 p0 = new Vector3();
     Vector3 p1 = new Vector3();
     Vector3 halfHeight;
 
-    //Distance Checking
+    //Distance Checking - Local Visualization
     Vector3 basePOSThis;
     Vector3 basePOSTarget;
     Color debugLineColor;
@@ -37,57 +47,119 @@ public class Minion : NonPlayerEntity
         //Set the half height of attack cylinder
         halfHeight = Vector3.up * (attackHeight / 2f);
 
-        //Set Enemy Core
-        Core[] cores = FindObjectsByType<Core>(FindObjectsSortMode.None);
-        foreach(Core c in cores) {
-            if (GetEnemyTeams().Contains(c.GetTeam())) enemyCore = c;
+        //NavMesh Init
+        if (enemyCore) {
+            agent = GetComponent<NavMeshAgent>();
+
+            if (isServer)
+            {  
+                StartCoroutine(DelayedInitialAINav());
+            }
+            else agent.enabled = false;
         }
 
-        if (enemyCore) {
-            //NavMesh Init
-            agent = GetComponent<NavMeshAgent>();
-            agent.speed = moveSpeed;
-            navMeshMoveTarget = enemyCore.transform;
-            agent.SetDestination(enemyCore.transform.position);
-            agent.isStopped = false;
-        }
+        //Waypoint Setup
+        if (waypoints.Count > 0) currentWaypoint = waypoints[0];
     }
+
+    private IEnumerator DelayedInitialAINav()
+    {
+        yield return new WaitUntil(() => isSpawned);
+
+        Debug.Log("Initialize Navigation");
+        agent.speed = moveSpeed.value;
+        navMeshMoveTarget = enemyCore.transform;
+        agent.SetDestination(enemyCore.transform.position);
+        agent.isStopped = false;
+        agent.updateRotation = true;
+    }
+
     void Update()
     {
-        FindTarget();
-        if(enemyCore) Move();
-        AttackTimer();
-        Attack();
+        if (isServer) ServerUpdate();
 
+        ClientUpdate();
+    }
+
+    void ServerUpdate()
+    {
+        Entity currentTarget = GetTarget();
+        if(hasTarget && !currentTarget) 
+        {
+            ResetTarget();
+        }
+
+        //currentTarget = FindTarget();
+
+        if (enemyCore) 
+        {
+            FindTarget();
+            currentTarget = GetTarget();
+            //if (currentTarget) Debug.Log(gameObject.name + " has current target: " + currentTarget.gameObject.name);
+            CheckWaypointDistance();
+            Move(currentTarget);
+            Rotate(currentTarget);
+            AttackTimer();
+            Attack(currentTarget);
+        }
+    }
+
+    void ClientUpdate()
+    {
         //Update the cylinder points for attack
         p0 = attackRangeOrigin.position + halfHeight;
         p1 = attackRangeOrigin.position - halfHeight;
 
         //Debug for showing attackrange distance as a line
-        if (showAttackBounds && target) {
-            if (CheckTargetInAttackRange()) {
-                debugLineColor = Color.green;
-            } else {
-                debugLineColor = Color.red;
+        if (showAttackBounds) {
+            Entity currentTarget = GetTarget();
+            if (currentTarget)
+            {
+                if (CheckTargetInAttackRange(currentTarget)) {
+                    debugLineColor = Color.green;
+                } else {
+                    debugLineColor = Color.red;
+                }
+                basePOSThis = new Vector3(attackRangeOrigin.position.x, 0, attackRangeOrigin.position.z);
+                basePOSTarget = new Vector3(currentTarget.transform.position.x, 0, currentTarget.transform.position.z);
+                Debug.DrawLine(basePOSThis, basePOSTarget, debugLineColor);
             }
-            basePOSThis = new Vector3(attackRangeOrigin.position.x, 0, attackRangeOrigin.position.z);
-            basePOSTarget = new Vector3(target.transform.position.x, 0, target.transform.position.z);
-            Debug.DrawLine(basePOSThis, basePOSTarget, debugLineColor);
         }
     }
-    protected override void Move() {
+
+    protected override void Move(Entity currentTarget) {
         base.Move();
 
+        if (!isServer) return;
+
         //Set move target
-        navMeshMoveTarget = target ? target.transform : enemyCore.transform;
+        //navMeshMoveTarget = currentTarget ? currentTarget.transform : enemyCore.transform;
+
+        if (currentTarget) {
+            //If there is a target, move to it
+            navMeshMoveTarget = currentTarget.transform;
+            //Debug.Log(gameObject.name + " is targeting: currentTarget");
+        } else {
+            if (waypoints.Count <= 0) {
+                //If waypoints list is empty, move to core
+                navMeshMoveTarget = enemyCore.transform;
+                //Debug.Log(gameObject.name + " is targeting: Core");
+            } else if (waypoints.Count > 0) {
+                //If there is a waypoint, move to it
+                navMeshMoveTarget = currentWaypoint;
+                //Debug.Log(gameObject.name + " is targeting: waypoint");
+            }
+        }
 
         //Get distance to target
         distanceToTarget = Vector3.Distance(navMeshMoveTarget.position, transform.position);
 
         // Stop when in attack range AND we have a real target
-        if (distanceToTarget <= attackRange) {
-            agent.isStopped = true;
-            return;
+        if (currentTarget) {
+            if (distanceToTarget <= attackRange) {
+                agent.isStopped = true;
+                return;
+            }
         }
 
         //Continue moving
@@ -99,13 +171,24 @@ public class Minion : NonPlayerEntity
             agent.SetDestination(previousDestination);
         }
     }
-    protected override void Attack() {
+
+    protected override void Attack(Entity currentTarget) {
         base.Attack();
+
+        
+        if (!isServer) return;
+
+
+
         //If there is a target and it is within attack range
-        if (target && CheckTargetInAttackRange() && attackCooldownTimer <= 0) {
-            Debug.Log(GetName() + " is attacking " + target.GetName());
-            //Reset attack cooldown
-            attackCooldownTimer = defaultAttackCooldown;
+        if (currentTarget && CheckTargetInAttackRange(currentTarget) && attackCooldownTimer.value <= 0) {
+
+            if(currentTarget == this) {
+                Debug.Log(gameObject.name + " is targeting self -- Attack()");
+
+                //Debug.Log($"[Minion Attack] Attempting attack on target: {currentTarget?.name}");
+            }
+
 
             //Spawn overlapcapsule and check for enemy entities to deal damage to
             Collider[] hits = Physics.OverlapCapsule(p0, p1, attackRange);
@@ -113,23 +196,104 @@ public class Minion : NonPlayerEntity
             foreach (Collider hit in hits) {
                 //if collider is an entity on enemy team, deal damage to it
                 if(hit.gameObject.TryGetComponent<Entity>(out Entity e)){
-                    if (GetEnemyTeams().Contains(e.GetTeam())) {
-                        e.TakeDamage(attackPower, this); 
-                        Debug.Log(GetName() + " dealt damage to " + e.GetName());
+                    if (e.GetIsDead()) continue;
+
+                    //If not AOE attack, only hit target
+                    if (!attackIsAOE && e != currentTarget) continue;
+
+
+                    //Deal Damage if on enemy team
+                    if (GetEnemyTeams().Contains(e.GetTeam())) 
+                    {
+                        //Reset attack cooldown
+                        attackCooldownTimer.value = defaultAttackCooldown.value;
+
+
+                        if (e.TakeDamage(attackPower, this)) {
+                            ResetTarget();
+                        }
+                    }
+                    else
+                    {
+                        Debug.Log($"[REJECTED] {e.name} is a teammate. Search for a new target!");
+                        ResetTarget(); // Force the minion to stop looking at its friend
                     }
                 }
             }
         }
     }
+
+    //Rotate the Transform based on the target
+    void Rotate(Entity currentTarget) {
+        if (!isServer) return;
+        
+        if (!currentTarget) {
+            //If no target, use agent rotation
+            agent.updateRotation = true;
+        } else {
+            //If target, use custom rotation
+            agent.updateRotation = false;
+
+            //Get rotate direction
+            Vector3 direction = currentTarget.transform.position - transform.position;
+            direction.y = 0f; // keep upright
+
+            if (direction.sqrMagnitude < 0.001f) return;
+
+            //Rotate
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, agent.angularSpeed / 2 * Time.deltaTime);
+        }
+    }
     //Make sure target is in range
-    bool CheckTargetInAttackRange() {
-        if (target) {
+    bool CheckTargetInAttackRange(Entity currentTarget) {
+        if (currentTarget) {
             //Flatten y to only check horizontal distance
             basePOSThis = new Vector3(attackRangeOrigin.position.x, 0, attackRangeOrigin.position.z);
-            basePOSTarget = new Vector3(target.transform.position.x, 0, target.transform.position.z);
+            basePOSTarget = new Vector3(currentTarget.transform.position.x, 0, currentTarget.transform.position.z);
             if (Vector3.Distance(basePOSTarget, basePOSThis) <= attackRange) return true;
         }
         return false;
+    }
+    void CheckWaypointDistance() {
+        if (waypoints.Count < 1) return;
+
+        //Get distance to waypoint
+        waypointDistance = Vector3.Distance(currentWaypoint.position, transform.position);
+
+        //Check if within range of waypoint to get next one
+        if (waypointDistance <= waypointRange) {
+
+            if (waypoints.Count > 1) {
+
+                //If there are 2+ waypoints, make currentWaypoint the next one and remove current
+                currentWaypoint = waypoints[waypoints.IndexOf(currentWaypoint) +1];
+                waypoints.RemoveAt(0);
+            } else if (waypoints.Count == 1) {
+
+                //If there is only 1 waypoint, remove it
+                waypoints.RemoveAt(0);
+            }
+
+            //Reset the distance to waypoint
+            waypointDistance = Mathf.Infinity;
+        }
+    }
+
+
+    //Setter for waypoints array
+    public void SetWaypoints(List<Transform> waypoints) {
+        foreach(Transform w in waypoints) {
+            this.waypoints.Add(w);
+        }
+    }
+    public override void Freeze(bool freezeNPE) {
+        base.Freeze(freezeNPE);
+        agent.isStopped = !freezeNPE;
+    }
+    //Setter for enemy core
+    public void SetEnemyCore(Core core) {
+        enemyCore = core;
     }
     protected override void OnDrawGizmos()
     {
@@ -145,6 +309,11 @@ public class Minion : NonPlayerEntity
             Gizmos.DrawLine(p0 - Vector3.right * attackRange, p1 - Vector3.right * attackRange);
             Gizmos.DrawLine(p0 + Vector3.forward * attackRange, p1 + Vector3.forward * attackRange);
             Gizmos.DrawLine(p0 - Vector3.forward * attackRange, p1 - Vector3.forward * attackRange);
+        }
+        if (showNavMeshTarget) {
+            Gizmos.color = Color.orange;
+
+            Gizmos.DrawLine(transform.position, navMeshMoveTarget.position);
         }
     }
 }

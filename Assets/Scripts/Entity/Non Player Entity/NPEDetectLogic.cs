@@ -1,17 +1,16 @@
 using UnityEngine;
+using PurrNet;
 using System.Collections.Generic;
 
-public class NPEDetectLogic : MonoBehaviour
+public class NPEDetectLogic : NetworkBehaviour
 {
     [Header("Debug")]
     [Tooltip("Green Circle")]
     [SerializeField] bool showDetectRange = false;
     [Tooltip("Always equal to the range of the sphere collider")]
-    [SerializeField] float detectRange = 0f;
+    float detectRange = 0f;
     [SerializeField] List<Entity> enemiesInRange = null;
 
-    //Setup
-    [SerializeField] List<Entity.Team> enemyTeams;
     NonPlayerEntity npe = null;
     private void Start() {
         //Init
@@ -20,15 +19,25 @@ public class NPEDetectLogic : MonoBehaviour
         detectRange = GetComponent<SphereCollider>().radius;
     }
     private void OnTriggerEnter(Collider other) {
+        if (!isServer) return; // Only execute detection logic on the server
+
         //If collision is an enemy entity, add it to the list enemiesInRange 
-        if (enemyTeams.Count <= 0) return;
-        if(other.gameObject.TryGetComponent<Entity>(out Entity e)) {
-            if(enemyTeams.Contains(e.GetTeam())) {
+        enemiesInRange.RemoveAll(e => e == null);
+        if (npe.GetEnemyTeams().Count <= 0) return;
+
+        if(other.gameObject.TryGetComponent<Entity>(out Entity e)) 
+        {
+            if (e == npe) return;
+            if (e.GetTeam() == Entity.Team.NULL) return;
+            if (e.GetTeam() == npe.GetTeam()) return;
+            if(npe.GetEnemyTeams().Contains(e.GetTeam())) {
                 enemiesInRange.Add(e);
-            }
+            }  
         }
     }
     private void OnTriggerExit(Collider other) {
+        if (!isServer) return; // Only execute detection logic on the server
+        
         //If collision is an enemy entity in range, remove it from the list enemiesInRange
         if (other.gameObject.TryGetComponent<Entity>(out Entity e)) {
             if (enemiesInRange.Contains(e)) {
@@ -46,12 +55,13 @@ public class NPEDetectLogic : MonoBehaviour
         }
     }
 
-    //Setter
+    //Getters
     public List<Entity> GetEnemiesInRange() {
         return enemiesInRange;
     }
-    //Getter
-    public void SetEnemyTeams(List<Entity.Team> t) {
-        enemyTeams = t;
+
+    //Setters
+    public void SetNPE (NonPlayerEntity entity) {
+        npe = entity;
     }
 }
