@@ -39,6 +39,10 @@ public class Mosquito : MonoBehaviour
     [SerializeField] private float ampUpInitialAttackSpeedMult = 2f;
     [SerializeField] private Color ampUpColor = Color.red;
 
+    // Animator functionality
+    [Header("Animator")]
+    [SerializeField] private Animator animator;
+
     // Runtime state
     private float currentBloodMeter = 0f;
     private float ampUpTimer = 0f;
@@ -52,6 +56,11 @@ public class Mosquito : MonoBehaviour
     {
         meshRenderer = GetComponentInChildren<MeshRenderer>();
         entity = GetComponent<Entity>();
+
+        // Cache animator from Mosquito Rigged child
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>();
+
         if (meshRenderer != null)
             originalColor = meshRenderer.material.color;
     }
@@ -82,11 +91,11 @@ public class Mosquito : MonoBehaviour
     public void CastBloodShot()
     {
         Debug.Log("Casting Blood Shot");
+        PlayBloodShotAnim();
 
         if (bloodShotProjectilePrefab == null || bloodShotFirePoint == null)
             return;
 
-        // Make entity optional - work even if null (like before)
         Entity shooter = entity ?? GetComponent<Entity>();
         int damage = GetBasicAttackDamageWithBlood(bloodShotBaseDamage);
 
@@ -94,7 +103,7 @@ public class Mosquito : MonoBehaviour
         BloodShotProjectile proj = projGO.GetComponent<BloodShotProjectile>();
         if (proj != null)
         {
-            proj.ownerEntity = shooter;  // Can be null, projectile handles it
+            proj.ownerEntity = shooter;
             proj.damage = damage;
             proj.speed = bloodShotSpeed;
             proj.maxRange = bloodShotRange;
@@ -126,6 +135,8 @@ public class Mosquito : MonoBehaviour
             return false;
 
         quickPokeCooldownTimer = quickPokeCooldown;
+        PlayQuickPokeAnim(); // Quick poke uses attack anim
+
         int damage = GetBasicAttackDamageWithBlood(quickPokeBaseDamage);
         target.TakeDamage(damage, entity);
 
@@ -140,6 +151,7 @@ public class Mosquito : MonoBehaviour
     public void CastGlobShot()
     {
         Debug.Log("Attempting to Cast Glob Shot - Blood: " + currentBloodMeter);
+        PlayGlobShotAnim();
 
         if (globProjectilePrefab == null || globFirePoint == null)
             return;
@@ -161,7 +173,7 @@ public class Mosquito : MonoBehaviour
         {
             proj.damage = Mathf.RoundToInt(damage);
             proj.speed = globBaseSpeed;
-            proj.ownerEntity = shooter;  // Can be null
+            proj.ownerEntity = shooter;
         }
     }
 
@@ -178,6 +190,8 @@ public class Mosquito : MonoBehaviour
         ampUpTimer = ampUpDuration;
         ampUpCurrentMoveMult = ampUpInitialMoveMult;
         ampUpCurrentAttackSpeedMult = ampUpInitialAttackSpeedMult;
+
+        PlayAmpUpAnimation();
 
         if (meshRenderer != null)
             meshRenderer.material.color = ampUpColor;
@@ -199,6 +213,35 @@ public class Mosquito : MonoBehaviour
         }
     }
 
+    // ========== ANIMATOR METHODS ==========
+    private void PlayBloodShotAnim()
+    {
+        if (animator != null)
+            animator.SetTrigger("BloodShot");
+    }
+    private void PlayQuickPokeAnim()
+    {
+        if (animator != null)
+            animator.SetTrigger("QuickPoke");
+    }
+    private void PlayGlobShotAnim()
+    {
+        if (animator != null)
+            animator.SetTrigger("GlobShot");
+    }
+
+    private void PlayAmpUpAnimation()
+    {
+        if (animator != null)
+            animator.SetTrigger("AmpUp");
+    }
+
+    public void PlayDeathAnimation()
+    {
+        if (animator != null)
+            animator.SetTrigger("Death");
+    }
+
     // Multiplier getters for movement/attack scripts
     public float GetMoveSpeedMultiplier() => ampUpCurrentMoveMult;
     public float GetAttackSpeedMultiplier() => ampUpCurrentAttackSpeedMult;
@@ -216,6 +259,9 @@ public class Mosquito : MonoBehaviour
 
     [ContextMenu("Test Glob Shot")]
     private void TestGlobShot() => CastGlobShot();
+
+    [ContextMenu("Test Amp Up")]
+    private void TestAmpUp() => ActivateAmpUp();
 
     private Entity FindNearestEnemy()
     {
