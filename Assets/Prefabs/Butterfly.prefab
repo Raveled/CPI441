@@ -30,6 +30,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3161593174052774940}
+  - {fileID: 154977485595512342}
   m_Father: {fileID: 2620513460872895128}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3921032179608766505
@@ -47,8 +48,10 @@ GameObject:
   - component: {fileID: 8069894609849645937}
   - component: {fileID: 5579395928134298048}
   - component: {fileID: 4751865395330377205}
+  - component: {fileID: 6822694615502514086}
+  - component: {fileID: 415774168675383472}
   m_Layer: 6
-  m_Name: Player
+  m_Name: Butterfly
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -289,6 +292,92 @@ MonoBehaviour:
     _ownerAuth: 0
     _sendIntervalInSeconds: 0
   predictedMovement: {fileID: 5579395928134298048}
+--- !u!114 &6822694615502514086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3921032179608766505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5346c57a49ba92a489bd0a5345f97d71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Mosquito
+  bloodShotProjectilePrefab: {fileID: 2440982292386426808, guid: db618fa92a4755d4b9dfe8aaf99e759a, type: 3}
+  bloodShotFirePoint: {fileID: 154977485595512342}
+  bloodShotBaseDamage: 8
+  bloodShotSpeed: 12
+  bloodShotRange: 8
+  maxBloodMeter: 100
+  bloodMeterGainOnBasicHit: 5
+  bloodMeterGainOnPlayerHit: 10
+  bloodMeterDecayPerSecond: 0
+  extraDamagePerBloodUnit: 0.1
+  quickPokeBaseDamage: 5
+  quickPokeCooldown: 2
+  quickPokeBloodGain: 10
+  quickPokeBloodGainPlayer: 20
+  globProjectilePrefab: {fileID: 5426923190247754776, guid: cb04fc2c9ed1de8489498fc3f2bf7fc5, type: 3}
+  globFirePoint: {fileID: 154977485595512342}
+  globBaseDamage: 10
+  globBaseSpeed: 5
+  globMaxMeterUsageFraction: 0.5
+  globDamagePerBloodUnit: 0.3
+  globSizePerBloodUnit: 0.01
+  ampUpDuration: 5
+  ampUpInitialMoveMult: 2
+  ampUpInitialAttackSpeedMult: 2
+  ampUpColor: {r: 1, g: 0, b: 0, a: 1}
+  entity: {fileID: 4751865395330377205}
+--- !u!114 &415774168675383472
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3921032179608766505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ad845074b85451468732a8e465ef283, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MosquitoInputTester
+  actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  quickPokeAction: QuickPoke-Ability2
+  globShotAction: GlobShot-Ability3
+  ampUpAction: AmpUp-Ultimate
+  basicAttackAction: BloodShot-BasicAttack
+--- !u!1 &8111900342316838556
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 154977485595512342}
+  m_Layer: 0
+  m_Name: Firing Point
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &154977485595512342
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8111900342316838556}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.836, y: 0.344, z: 2.981}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2781509865937213894}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8912244245821273830
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,24 +1,37 @@
 // ******************************************* //
 // ****** THEO XENAKIS - 2026 - CPI 441 ****** //
 // ******************************************* //
+
 using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class MosquitoInputTester : MonoBehaviour
 {
-    // Variable Initializations
     private Mosquito mosquito;
 
-    public InputActionReference quickPoke;
-    public InputActionReference globShot;
-    public InputActionReference ampUp;
-    public InputActionReference basicAttack;
+    [Header("Input Actions")]
+    public InputActionAsset actions;
+
+    public string quickPokeAction = "QuickPoke";
+    public string globShotAction = "GlobShot";
+    public string ampUpAction = "AmpUp";
+    public string basicAttackAction = "BasicAttack";
+
+    private InputAction quickPoke;
+    private InputAction globShot;
+    private InputAction ampUp;
+    private InputAction basicAttack;
 
     void Awake()
     {
         mosquito = GetComponent<Mosquito>();
+
+        // Resolve actions by name (Unity 6 safe)
+        quickPoke = actions.FindAction(quickPokeAction, throwIfNotFound: true);
+        globShot = actions.FindAction(globShotAction, throwIfNotFound: true);
+        ampUp = actions.FindAction(ampUpAction, throwIfNotFound: true);
+        basicAttack = actions.FindAction(basicAttackAction, throwIfNotFound: true);
     }
 
     void Start()
@@ -27,7 +40,7 @@ public class MosquitoInputTester : MonoBehaviour
         Cursor.visible = false;
     }
 
-    // Input Actions
+    // Input Callbacks
     private void OnQuickPoke(InputAction.CallbackContext context)
     {
         if (context.started && mosquito != null)
@@ -65,7 +78,7 @@ public class MosquitoInputTester : MonoBehaviour
         }
     }
 
-    // Helper Functions
+    // Enemy Search
     Entity FindNearestEnemy()
     {
         if (mosquito?.entity == null) return null;
@@ -90,20 +103,30 @@ public class MosquitoInputTester : MonoBehaviour
         return nearest;
     }
 
-    // Handle Enabling and Disabling Actions
+    // Enable / Disable
     private void OnEnable()
     {
-        quickPoke.action.started += OnQuickPoke;
-        globShot.action.started += OnGlobShot;
-        ampUp.action.started += OnAmpUp;
-        basicAttack.action.started += OnBasicAttack;
+        quickPoke.started += OnQuickPoke;
+        globShot.started += OnGlobShot;
+        ampUp.started += OnAmpUp;
+        basicAttack.started += OnBasicAttack;
+
+        quickPoke.Enable();
+        globShot.Enable();
+        ampUp.Enable();
+        basicAttack.Enable();
     }
 
     private void OnDisable()
     {
-        quickPoke.action.started -= OnQuickPoke;
-        globShot.action.started -= OnGlobShot;
-        ampUp.action.started -= OnAmpUp;
-        basicAttack.action.started -= OnBasicAttack;
+        quickPoke.started -= OnQuickPoke;
+        globShot.started -= OnGlobShot;
+        ampUp.started -= OnAmpUp;
+        basicAttack.started -= OnBasicAttack;
+
+        quickPoke.Disable();
+        globShot.Disable();
+        ampUp.Disable();
+        basicAttack.Disable();
     }
 }
