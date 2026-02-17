@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.AI;
 using NUnit.Framework;
 using PurrNet;
+using System.Collections;
 
 public class Minion : NonPlayerEntity
 {
@@ -46,20 +47,30 @@ public class Minion : NonPlayerEntity
             if (GetEnemyTeams().Contains(c.GetTeam())) enemyCore = c;
         }
 
+
+
         if (enemyCore) {
             //NavMesh Init
             agent = GetComponent<NavMeshAgent>();
 
             if (isServer)
             {  
-                agent.speed = moveSpeed;
-                navMeshMoveTarget = enemyCore.transform;
-                agent.SetDestination(enemyCore.transform.position);
-                agent.isStopped = false;
-                agent.updateRotation = true;
+                StartCoroutine(DelayedInitialAINav());
             }
             else agent.enabled = false;
         }
+    }
+
+    private IEnumerator DelayedInitialAINav()
+    {
+        yield return new WaitUntil(() => isSpawned);
+
+        Debug.Log("Initialize Navigation");
+        agent.speed = moveSpeed.value;
+        navMeshMoveTarget = enemyCore.transform;
+        agent.SetDestination(enemyCore.transform.position);
+        agent.isStopped = false;
+        agent.updateRotation = true;
     }
 
     void Update()
