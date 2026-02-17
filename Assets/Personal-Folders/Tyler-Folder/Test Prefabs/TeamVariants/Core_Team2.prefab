@@ -52,10 +52,22 @@ PrefabInstance:
       propertyPath: minionPrefab
       value: 
       objectReference: {fileID: 1041369088382745406, guid: 102c7e858e0587744b85c064cffde853, type: 3}
+    - target: {fileID: 2114472906830139636, guid: e20ec55b79fd7db4b9bf7be096106784, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2114472906830139636, guid: e20ec55b79fd7db4b9bf7be096106784, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4257815370024861000, guid: e20ec55b79fd7db4b9bf7be096106784, type: 3}
       propertyPath: m_Name
       value: Core_Team2
       objectReference: {fileID: 0}
+    - target: {fileID: 4389805751742847963, guid: e20ec55b79fd7db4b9bf7be096106784, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 94e6c3a7543fcb4488bb8878ca87e3bf, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -31,6 +31,7 @@ Transform:
   m_Children:
   - {fileID: 3912326382823364788}
   - {fileID: 4629226148207852019}
+  - {fileID: 2546707551202161847}
   m_Father: {fileID: 52383368268841401}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1436622436811561127
@@ -78,9 +79,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f165c045aa6846428600e6786508a51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPEDetectLogic
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
   showDetectRange: 0
   enemiesInRange: []
-  enemyTeams: 
 --- !u!135 &5055006070050696865
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -176,29 +185,74 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6465c876b1c276c4dba4acc49af56a9e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tower
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
   entityName: Tower
   statBlock: {fileID: 11400000, guid: 8cd4546f662ed25459b1a18e4281bdd0, type: 2}
-  team: 2
+  team:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
   canMove: 0
   canDefaultAttack: 0
-  protector:
-  - {fileID: 0}
   rewardRange: 50
   showRewardRange: 0
-  maximumHitPoints: 0
-  currentHitPoints: 0
-  moveSpeed: 0
-  acceleration: 0
-  planarDamping: 0
-  jumpForce: 0
-  jumpCooldown: 0
-  attackPower: 0
-  defaultAttackCooldown: 0
-  reward_Gold: 10
-  reward_XP: 10
-  isDead: 0
+  currentHitPoints:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  maximumHitPoints:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  moveSpeed:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  acceleration:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  planarDamping:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  jumpForce:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  jumpCooldown:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  attackPower:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  defaultAttackCooldown:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  reward_Gold:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  reward_XP:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  isDead:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
   enemyTeams: 
-  attackRange: 10
   attackRangeOrigin: {fileID: 2091050431416320281}
   npeDetectLogic: {fileID: 5426260684124222954}
   healthBar: {fileID: 110598211892977179}
@@ -208,14 +262,32 @@ MonoBehaviour:
   canTargetPlayer: 1
   showAttackRange: 1
   showForwardDirection: 1
-  target: {fileID: 0}
-  hasTarget: 0
-  attackCooldownTimer: 0
+  targetId:
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  targetPlayerId:
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  hasTarget:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  attackCooldownTimer:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  attackRange:
+    _value: 10
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
   canSearchForTarget: 1
   canAttackTimer: 1
   entitiesInRange: []
   towerProjectilePrefab: {fileID: 8089092169863178650, guid: 6ff1fabe97157dd4793400b1e1905ffb, type: 3}
-  projectileSpeed: 10
+  projectileSpeed:
+    _value: 5
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
 --- !u!54 &5377689714364696824
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -516,7 +588,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3912326382823364788
 Transform:
   m_ObjectHideFlags: 0
@@ -709,4 +781,78 @@ MonoBehaviour:
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2384800166135074237, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
   m_PrefabInstance: {fileID: 51567706121364092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2656279884145939292
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 7028080623126158596}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 69786c765131f1e489d390265efdd890, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 69786c765131f1e489d390265efdd890, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 69786c765131f1e489d390265efdd890, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 69786c765131f1e489d390265efdd890, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 69786c765131f1e489d390265efdd890, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -3
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 69786c765131f1e489d390265efdd890, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 69786c765131f1e489d390265efdd890, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 69786c765131f1e489d390265efdd890, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 69786c765131f1e489d390265efdd890, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 69786c765131f1e489d390265efdd890, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 69786c765131f1e489d390265efdd890, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 69786c765131f1e489d390265efdd890, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 69786c765131f1e489d390265efdd890, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 69786c765131f1e489d390265efdd890, type: 3}
+      propertyPath: m_Name
+      value: Flower_22
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 69786c765131f1e489d390265efdd890, type: 3}
+--- !u!4 &2546707551202161847 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 69786c765131f1e489d390265efdd890, type: 3}
+  m_PrefabInstance: {fileID: 2656279884145939292}
   m_PrefabAsset: {fileID: 0}

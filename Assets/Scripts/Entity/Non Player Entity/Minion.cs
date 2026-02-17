@@ -10,12 +10,18 @@ public class Minion : NonPlayerEntity
     [Header("Minion Setup")]
     [SerializeField] float attackHeight = 10f;
     [SerializeField] bool attackIsAOE = false;
+    [SerializeField] float waypointRange = 1f;
 
     [Header("Minion Debug")]
     [Tooltip("Purple Circle")]
     [SerializeField] bool showAttackBounds = false;
+    [SerializeField] bool showNavMeshTarget = false;
     [Space]
     [SerializeField] Transform navMeshMoveTarget = null;
+    //Waypoints
+    [SerializeField] List<Transform> waypoints = new List<Transform>();
+    [SerializeField] Transform currentWaypoint = null;
+    [SerializeField] float waypointDistance = Mathf.Infinity;
     
     //Nav Mesh [SERVER CONTROLLED ONLY - CLIENTS SHOULD INTERP POS]
     [SerializeField] Core enemyCore = null;
@@ -40,14 +46,8 @@ public class Minion : NonPlayerEntity
         //Set the half height of attack cylinder
         halfHeight = Vector3.up * (attackHeight / 2f);
 
-        //Set Enemy Core
-        Core[] cores = FindObjectsByType<Core>(FindObjectsSortMode.None);
-        foreach(Core c in cores) {
-            if (GetEnemyTeams().Contains(c.GetTeam())) enemyCore = c;
-        }
-
+        //NavMesh Init
         if (enemyCore) {
-            //NavMesh Init
             agent = GetComponent<NavMeshAgent>();
 
             if (isServer)
@@ -60,6 +60,9 @@ public class Minion : NonPlayerEntity
             }
             else agent.enabled = false;
         }
+
+        //Waypoint Setup
+        if (waypoints.Count > 0) currentWaypoint = waypoints[0];
     }
 
     void Update()
@@ -79,17 +82,17 @@ public class Minion : NonPlayerEntity
 
         //currentTarget = FindTarget();
 
-        FindTarget();
-        currentTarget = GetTarget();
-
         if (enemyCore) 
         {
+            FindTarget();
+            currentTarget = GetTarget();
+            //if (currentTarget) Debug.Log(gameObject.name + " has current target: " + currentTarget.gameObject.name);
+            CheckWaypointDistance();
             Move(currentTarget);
             Rotate(currentTarget);
+            AttackTimer();
+            Attack(currentTarget);
         }
-
-        AttackTimer();
-        Attack(currentTarget);
     }
 
     void ClientUpdate()
@@ -121,15 +124,33 @@ public class Minion : NonPlayerEntity
         if (!isServer) return;
 
         //Set move target
-        navMeshMoveTarget = currentTarget ? currentTarget.transform : enemyCore.transform;
+        //navMeshMoveTarget = currentTarget ? currentTarget.transform : enemyCore.transform;
+
+        if (currentTarget) {
+            //If there is a target, move to it
+            navMeshMoveTarget = currentTarget.transform;
+            //Debug.Log(gameObject.name + " is targeting: currentTarget");
+        } else {
+            if (waypoints.Count <= 0) {
+                //If waypoints list is empty, move to core
+                navMeshMoveTarget = enemyCore.transform;
+                //Debug.Log(gameObject.name + " is targeting: Core");
+            } else if (waypoints.Count > 0) {
+                //If there is a waypoint, move to it
+                navMeshMoveTarget = currentWaypoint;
+                //Debug.Log(gameObject.name + " is targeting: waypoint");
+            }
+        }
 
         //Get distance to target
         distanceToTarget = Vector3.Distance(navMeshMoveTarget.position, transform.position);
 
         // Stop when in attack range AND we have a real target
-        if (distanceToTarget <= attackRange) {
-            agent.isStopped = true;
-            return;
+        if (currentTarget) {
+            if (distanceToTarget <= attackRange) {
+                agent.isStopped = true;
+                return;
+            }
         }
 
         //Continue moving
@@ -225,7 +246,46 @@ public class Minion : NonPlayerEntity
         }
         return false;
     }
+    void CheckWaypointDistance() {
+        if (waypoints.Count < 1) return;
 
+        //Get distance to waypoint
+        waypointDistance = Vector3.Distance(currentWaypoint.position, transform.position);
+
+        //Check if within range of waypoint to get next one
+        if (waypointDistance <= waypointRange) {
+
+            if (waypoints.Count > 1) {
+
+                //If there are 2+ waypoints, make currentWaypoint the next one and remove current
+                currentWaypoint = waypoints[waypoints.IndexOf(currentWaypoint) +1];
+                waypoints.RemoveAt(0);
+            } else if (waypoints.Count == 1) {
+
+                //If there is only 1 waypoint, remove it
+                waypoints.RemoveAt(0);
+            }
+
+            //Reset the distance to waypoint
+            waypointDistance = Mathf.Infinity;
+        }
+    }
+
+
+    //Setter for waypoints array
+    public void SetWaypoints(List<Transform> waypoints) {
+        foreach(Transform w in waypoints) {
+            this.waypoints.Add(w);
+        }
+    }
+    public override void Freeze(bool freezeNPE) {
+        base.Freeze(freezeNPE);
+        agent.isStopped = !freezeNPE;
+    }
+    //Setter for enemy core
+    public void SetEnemyCore(Core core) {
+        enemyCore = core;
+    }
     protected override void OnDrawGizmos()
     {
         base.OnDrawGizmos();
@@ -240,6 +300,11 @@ public class Minion : NonPlayerEntity
             Gizmos.DrawLine(p0 - Vector3.right * attackRange, p1 - Vector3.right * attackRange);
             Gizmos.DrawLine(p0 + Vector3.forward * attackRange, p1 + Vector3.forward * attackRange);
             Gizmos.DrawLine(p0 - Vector3.forward * attackRange, p1 - Vector3.forward * attackRange);
+        }
+        if (showNavMeshTarget) {
+            Gizmos.color = Color.orange;
+
+            Gizmos.DrawLine(transform.position, navMeshMoveTarget.position);
         }
     }
 }
