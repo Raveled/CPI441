@@ -23,12 +23,12 @@ public class Entity : NetworkBehaviour
 
     //Stats that are visible in editor
     [Header("Entity Debug")]
-    [SerializeField] protected int goldReward = 0;
+    /*[SerializeField] protected int goldReward = 0;
     [SerializeField] public int maximumHitPoints = 0;
     [SerializeField] public int currentHitPoints = 0;
     [SerializeField] public float moveSpeed = 0;
     [SerializeField] public int attackPower = 0;
-    [SerializeField] protected float defaultAttackCooldown = 0;
+    [SerializeField] protected float defaultAttackCooldown = 0;*/
     [Space]
 
     // NETWORKED STATS
@@ -192,7 +192,7 @@ public class Entity : NetworkBehaviour
     private void NotifyHealthChanged(int newHealth)
     {
         // This method can be used to trigger client-side effects when health changes, if needed
-        Debug.Log($"{entityName} health: {newHealth}/{maximumHitPoints}");
+        Debug.Log($"{entityName} health: {newHealth}/{maximumHitPoints.value}");
         OnHealthChanged(newHealth);
     }
 
@@ -225,7 +225,7 @@ public class Entity : NetworkBehaviour
             return;
 
         currentHitPoints.value += healAmount;
-        if (currentHitPoints.value > maximumHitPoints) currentHitPoints.value = maximumHitPoints;
+        if (currentHitPoints.value > maximumHitPoints.value) currentHitPoints.value = maximumHitPoints.value;
 
         NotifyHealthChanged(currentHitPoints.value);
     }
@@ -336,10 +336,10 @@ public class Entity : NetworkBehaviour
         }
     }
     protected virtual void OnDrawGizmos() {
-        if (showRewardRange) {
+        /*if (showRewardRange) {
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, rewardRange);
-        }
+        }*/
     }
 
     #region Setters
