@@ -162,7 +162,7 @@ public class Butterfly : MonoBehaviour
             if (shooter != null && target.GetTeam() == shooter.GetTeam())
             {
                 // Ally heal
-                target.currentHitPoints = Mathf.Min(target.currentHitPoints + dazzlingWaveHealAmount, target.maximumHitPoints);
+                target.Heal(dazzlingWaveHealAmount);
             }
             else
             {
@@ -177,11 +177,11 @@ public class Butterfly : MonoBehaviour
 
     private IEnumerator ApplyDamageReduction(Entity target, float multiplier)
     {
-        int originalAttackPower = target.attackPower;
-        target.attackPower = Mathf.RoundToInt(originalAttackPower * multiplier);
-        yield return new WaitForSeconds(3f); // Fixed duration
-        if (target != null)
-            target.attackPower = originalAttackPower;
+        if (target == null) yield break;
+
+        // Entity handles the networked debuff
+        target.ModifyAttackPowerForSeconds(multiplier, 3f);
+        yield break;
     }
 
     #endregion

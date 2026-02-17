@@ -25,7 +25,7 @@ public class Entity : NetworkBehaviour
     [Header("Entity Debug")]
     /*[SerializeField] protected int goldReward = 0;
     [SerializeField] public int maximumHitPoints = 0;
-    [SerializeField] public int currentHitPoints = 0;
+    [SerializeField] public int currentHitPoints = 0;                   //Modified by Theo - made this SyncVar and moved it to networked stats section, since health needs to be synchronized across clients for damage - removed safe mode
     [SerializeField] public float moveSpeed = 0;
     [SerializeField] public int attackPower = 0;
     [SerializeField] protected float defaultAttackCooldown = 0;*/
@@ -258,7 +258,42 @@ public class Entity : NetworkBehaviour
 
         NotifyHealthChanged(currentHitPoints.value);
     }
-    
+
+    //************************************************************************//
+    //New Additions from Theo for Character Abilities
+
+    // *** Attack Power Buff / Debuff *** //
+    public void ModifyAttackPowerForSeconds(float multiplier, float duration)
+    {
+        if (!isServer)
+        {
+            ModifyAttackPowerForSecondsServerRpc(multiplier, duration);
+            return;
+        }
+        StartCoroutine(ModifyAttackPowerCoroutine(multiplier, duration));
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void ModifyAttackPowerForSecondsServerRpc(float multiplier, float duration)
+    {
+        StartCoroutine(ModifyAttackPowerCoroutine(multiplier, duration));
+    }
+
+    private IEnumerator ModifyAttackPowerCoroutine(float multiplier, float duration)
+    {
+        int originalAttackPower = attackPower.value;
+        attackPower.value = Mathf.RoundToInt(originalAttackPower * multiplier);
+
+        yield return new WaitForSeconds(duration);
+
+        if (!isDead.value) // only restore if still alive
+            attackPower.value = originalAttackPower;
+    }
+
+
+
+    //************************************************************************//
+
     // Server Only Death Logic
     protected virtual void OnDeath(NetworkID? damageOriginId)
     {
@@ -348,7 +383,7 @@ public class Entity : NetworkBehaviour
     }
     public void SetStatblock(SO_EntityStatBlock stats) {
         statBlock = Object.Instantiate(stats);
-        SetupStats();
+        StartCoroutine(SetupStats()); //Modified by Theo - will wait until isSpawned to apply stats, ensuring proper network synchronization
     }
     #endregion
     #region Getters
