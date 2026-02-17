@@ -46,8 +46,8 @@ public class MosquitoInputTester : MonoBehaviour
         if (context.started && mosquito != null)
         {
             Entity target = FindNearestEnemy();
-            if (mosquito.TryQuickPoke(target))
-                Debug.Log("Quick Poke HIT!");
+            if (mosquito.TryQuickPoke())
+                Debug.Log("[InputTester] Quick Poke Tried!");
         }
     }
 
@@ -56,7 +56,7 @@ public class MosquitoInputTester : MonoBehaviour
         if (context.started && mosquito != null)
         {
             mosquito.CastGlobShot();
-            Debug.Log("Glob Shot FIRED!");
+            Debug.Log("[InputTester] Glob Shot Tried!");
         }
     }
 
@@ -65,7 +65,7 @@ public class MosquitoInputTester : MonoBehaviour
         if (context.started && mosquito != null)
         {
             mosquito.ActivateAmpUp();
-            Debug.Log("Amp Up ACTIVATED!");
+            Debug.Log("[InputTester] Amp Up Tried!");
         }
     }
 
@@ -74,7 +74,7 @@ public class MosquitoInputTester : MonoBehaviour
         if (context.started && mosquito != null)
         {
             mosquito.CastBloodShot();
-            Debug.Log("Blood Shot FIRED!");
+            Debug.Log("[InputTester] Blood Shot Tried!");
         }
     }
 

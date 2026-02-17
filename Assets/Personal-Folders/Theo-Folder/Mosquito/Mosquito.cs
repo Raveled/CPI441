@@ -143,26 +143,72 @@ public class Mosquito : NetworkBehaviour
         bool hitPlayer = target.GetType().Name == "Player";
         float gain = hitPlayer ? bloodMeterGainOnPlayerHit : bloodMeterGainOnBasicHit;
         ModifyBloodMeter(gain);
-        Debug.Log($"[Mosquito] Blood gained: +{gain:F1} — current blood: {currentBloodMeter:F1}/{maxBloodMeter}");
+        Debug.Log($"[Mosquito] Blood gained: +{gain:F1} - current blood: {currentBloodMeter:F1}/{maxBloodMeter}");
     }
 
     // ========== QUICK POKE - ABILITY 2 ==========
-    public bool TryQuickPoke(Entity target)
+    [Header("Quick Poke - Ability 2 Setup")]
+    [SerializeField] private float quickPokeRange = 2f;
+    [SerializeField] private Transform quickPokeOrigin = null; // Optional: assign a forward point; falls back to self
+
+    public bool TryQuickPoke()
     {
-        if (quickPokeCooldownTimer > 0f || target == null || entity == null)
+        if (quickPokeCooldownTimer > 0f || entity == null)
+        {
+            Debug.Log($"[Mosquito] Quick Poke blocked — cooldown: {quickPokeCooldownTimer:F2}s remaining");
             return false;
+        }
 
         quickPokeCooldownTimer = quickPokeCooldown;
         PlayQuickPokeAnim();
 
-        int damage = GetBasicAttackDamageWithBlood(quickPokeBaseDamage);
-        target.TakeDamage(damage, entity);
-
-        bool hitPlayer = target.GetType().Name == "Player";
-        float gain = hitPlayer ? quickPokeBloodGainPlayer : quickPokeBloodGain;
-        ModifyBloodMeter(gain);
+        // Only server applies damage
+        if (isServer)
+            ApplyQuickPoke();
+        else
+            ApplyQuickPokeServerRpc();
 
         return true;
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void ApplyQuickPokeServerRpc()
+    {
+        ApplyQuickPoke();
+    }
+
+    private void ApplyQuickPoke()
+    {
+        Vector3 origin = quickPokeOrigin != null ? quickPokeOrigin.position : transform.position;
+        Debug.Log($"[Mosquito] Quick Poke — overlap sphere at {origin}, range={quickPokeRange}");
+
+        Collider[] hits = Physics.OverlapSphere(origin, quickPokeRange);
+        int hitCount = 0;
+
+        foreach (Collider hit in hits)
+        {
+            // Ignore own colliders
+            if (hit.transform.IsChildOf(entity.transform) || hit.gameObject == entity.gameObject)
+                continue;
+
+            Entity target = hit.GetComponent<Entity>();
+            if (target == null || target.GetIsDead()) continue;
+            if (!entity.GetEnemyTeams().Contains(target.GetTeam())) continue;
+
+            int damage = GetBasicAttackDamageWithBlood(quickPokeBaseDamage);
+            Debug.Log($"[Mosquito] Quick Poke hit {target.name} for {damage} damage!");
+            target.TakeDamage(damage, entity);
+
+            bool hitPlayer = target.GetType().Name == "Player";
+            float gain = hitPlayer ? quickPokeBloodGainPlayer : quickPokeBloodGain;
+            ModifyBloodMeter(gain);
+            Debug.Log($"[Mosquito] Blood gained: +{gain:F1} — current blood: {currentBloodMeter:F1}/{maxBloodMeter}");
+
+            hitCount++;
+        }
+
+        if (hitCount == 0)
+            Debug.Log("[Mosquito] Quick Poke hit nothing.");
     }
 
     // ========== GLOB SHOT - ABILITY 3 ==========
@@ -173,7 +219,7 @@ public class Mosquito : NetworkBehaviour
     {
         if (currentBloodMeter < globShotMinBloodThreshold)
         {
-            Debug.Log($"[Mosquito] Glob Shot blocked — blood {currentBloodMeter:F1} below threshold {globShotMinBloodThreshold}");
+            Debug.Log($"[Mosquito] Glob Shot blocked - blood {currentBloodMeter:F1} below threshold {globShotMinBloodThreshold}");
             return;
         }
 
@@ -184,7 +230,7 @@ public class Mosquito : NetworkBehaviour
         if (bloodToUse <= 0f) return;
 
         ModifyBloodMeter(-bloodToUse);
-        Debug.Log($"[Mosquito] Glob Shot fired — used {bloodToUse:F1} blood, remaining: {currentBloodMeter:F1}");
+        Debug.Log($"[Mosquito] Glob Shot fired - used {bloodToUse:F1} blood, remaining: {currentBloodMeter:F1}");
         float damage = globBaseDamage + bloodToUse * globDamagePerBloodUnit;
         float sizeScale = 1f + bloodToUse * globSizePerBloodUnit;
 
@@ -276,37 +322,11 @@ public class Mosquito : NetworkBehaviour
     private void TestBloodShot() => CastBloodShot();
 
     [ContextMenu("Test Quick Poke")]
-    private void TestQuickPoke()
-    {
-        Entity target = FindNearestEnemy();
-        if (target != null) TryQuickPoke(target);
-    }
+    private void TestQuickPoke() => TryQuickPoke();
 
     [ContextMenu("Test Glob Shot")]
     private void TestGlobShot() => CastGlobShot();
 
     [ContextMenu("Test Amp Up")]
     private void TestAmpUp() => ActivateAmpUp();
-
-    private Entity FindNearestEnemy()
-    {
-        Collider[] hits = Physics.OverlapSphere(transform.position, 5f);
-        Entity nearest = null;
-        float closestDist = float.MaxValue;
-
-        foreach (var hit in hits)
-        {
-            Entity enemy = hit.GetComponent<Entity>();
-            if (enemy != null && entity != null && enemy.GetTeam() != entity.GetTeam())
-            {
-                float dist = Vector3.Distance(transform.position, enemy.transform.position);
-                if (dist < closestDist)
-                {
-                    closestDist = dist;
-                    nearest = enemy;
-                }
-            }
-        }
-        return nearest;
-    }
 }

@@ -339,6 +339,9 @@ MonoBehaviour:
   ampUpColor: {r: 1, g: 0, b: 0, a: 1}
   animator: {fileID: 8204087541940055493}
   entity: {fileID: 4751865395330377205}
+  quickPokeRange: 2
+  quickPokeOrigin: {fileID: 154977485595512342}
+  globShotMinBloodThreshold: 10
 --- !u!114 &415774168675383472
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -414,7 +417,7 @@ Transform:
   m_GameObject: {fileID: 8912244245821273830}
   serializedVersion: 2
   m_LocalRotation: {x: 0.17364816, y: 0, z: 0, w: 0.9848078}
-  m_LocalPosition: {x: 0.96, y: 10.68, z: -15.49}
+  m_LocalPosition: {x: 0.96, y: 18, z: -15.61}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
