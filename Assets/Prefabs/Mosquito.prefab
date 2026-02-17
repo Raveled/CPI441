@@ -303,11 +303,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5346c57a49ba92a489bd0a5345f97d71, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Mosquito
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
   bloodShotProjectilePrefab: {fileID: 2440982292386426808, guid: db618fa92a4755d4b9dfe8aaf99e759a, type: 3}
   bloodShotFirePoint: {fileID: 154977485595512342}
   bloodShotBaseDamage: 8
   bloodShotSpeed: 12
-  bloodShotRange: 8
+  bloodShotRange: 50
   maxBloodMeter: 100
   bloodMeterGainOnBasicHit: 5
   bloodMeterGainOnPlayerHit: 10

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8804810769712517474}
   - component: {fileID: 5640022133950883587}
   - component: {fileID: -1517828785038179963}
+  - component: {fileID: -8589313994902226928}
   m_Layer: 0
   m_Name: BloodShotProjectile
   m_TagString: Untagged
@@ -107,7 +108,7 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -125,7 +126,54 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 262f502efcbba334f9d855f91c99036d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BloodShotProjectile
-  ownerEntity: {fileID: 0}
-  damage: 0
-  speed: 0
-  maxRange: 8
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  syncDamage:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  syncSpeed:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  syncMaxRange:
+    _value: 50
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  syncOwnerID:
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+--- !u!54 &-8589313994902226928
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2440982292386426808}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
