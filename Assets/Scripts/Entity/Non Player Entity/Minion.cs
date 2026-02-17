@@ -84,6 +84,7 @@ public class Minion : NonPlayerEntity
 
         if (enemyCore) 
         {
+            if (isDead) return;
             FindTarget();
             currentTarget = GetTarget();
             //if (currentTarget) Debug.Log(gameObject.name + " has current target: " + currentTarget.gameObject.name);
@@ -149,12 +150,14 @@ public class Minion : NonPlayerEntity
         if (currentTarget) {
             if (distanceToTarget <= attackRange) {
                 agent.isStopped = true;
+                if(animator.GetBool("isMoving")) animator.SetBool("isMoving", false);
                 return;
             }
         }
 
         //Continue moving
         agent.isStopped = false;
+        if (!animator.GetBool("isMoving")) animator.SetBool("isMoving", true);
 
         // Update path only if needed
         if (!agent.hasPath || Vector3.Distance(previousDestination, navMeshMoveTarget.position) > 0.5f) {
@@ -199,10 +202,13 @@ public class Minion : NonPlayerEntity
                         //Reset attack cooldown
                         attackCooldownTimer.value = defaultAttackCooldown.value;
 
-
+                        //Deal Damage
                         if (e.TakeDamage(attackPower, this)) {
                             ResetTarget();
                         }
+
+                        //Trigger Attack Animation
+                        animator.SetTrigger("Attack");
                     }
                     else
                     {
@@ -212,6 +218,18 @@ public class Minion : NonPlayerEntity
                 }
             }
         }
+    }
+    public override bool TakeDamage(int damage, Entity damageOrigin) {
+        animator.SetTrigger("Hit");
+        return base.TakeDamage(damage, damageOrigin);
+    }
+    protected override void Die(Entity damageOrigin) {
+        base.Die(damageOrigin);
+        animator.SetBool("Death", true);
+        GetComponent<Collider>().enabled = false;
+    }
+    public void DestroyThis() {
+        Destroy(gameObject);
     }
 
     //Rotate the Transform based on the target
@@ -281,6 +299,9 @@ public class Minion : NonPlayerEntity
     public override void Freeze(bool freezeNPE) {
         base.Freeze(freezeNPE);
         agent.isStopped = !freezeNPE;
+        if (agent.isStopped) {
+            if (animator.GetBool("isMoving")) animator.SetBool("isMoving", false);
+        } else if (!animator.GetBool("isMoving")) animator.SetBool("isMoving", true);
     }
     //Setter for enemy core
     public void SetEnemyCore(Core core) {
