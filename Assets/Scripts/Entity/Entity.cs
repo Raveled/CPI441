@@ -23,8 +23,12 @@ public class Entity : NetworkBehaviour
 
     //Stats that are visible in editor
     [Header("Entity Debug")]
-    [Tooltip("Yellow Circle")]
-    [SerializeField] bool showRewardRange = false;
+    [SerializeField] protected int goldReward = 0;
+    [SerializeField] public int maximumHitPoints = 0;
+    [SerializeField] public int currentHitPoints = 0;
+    [SerializeField] public float moveSpeed = 0;
+    [SerializeField] public int attackPower = 0;
+    [SerializeField] protected float defaultAttackCooldown = 0;
     [Space]
 
     // NETWORKED STATS
