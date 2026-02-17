@@ -120,7 +120,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8421519732981533208
 Transform:
   m_ObjectHideFlags: 0
@@ -267,29 +267,74 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74011b4e17d8096478b8b2c583861d53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Core
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
   entityName: Core
   statBlock: {fileID: 11400000, guid: 1b9f3dc4380eca440af0c4294dc006fb, type: 2}
-  team: 2
+  team:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
   canMove: 0
   canDefaultAttack: 0
-  protector:
-  - {fileID: 0}
   rewardRange: 50
   showRewardRange: 0
-  maximumHitPoints: 0
-  currentHitPoints: 0
-  moveSpeed: 0
-  acceleration: 0
-  planarDamping: 0
-  jumpForce: 0
-  jumpCooldown: 0
-  attackPower: 0
-  defaultAttackCooldown: 0
-  reward_Gold: 0
-  reward_XP: 0
-  isDead: 0
+  currentHitPoints:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  maximumHitPoints:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  moveSpeed:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  acceleration:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  planarDamping:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  jumpForce:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  jumpCooldown:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  attackPower:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  defaultAttackCooldown:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  reward_Gold:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  reward_XP:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  isDead:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
   enemyTeams: 
-  attackRange: 1
   attackRangeOrigin: {fileID: 2137427347697556450}
   npeDetectLogic: {fileID: 5608393014048637860}
   healthBar: {fileID: 3081534005758214222}
@@ -299,9 +344,24 @@ MonoBehaviour:
   canTargetPlayer: 0
   showAttackRange: 0
   showForwardDirection: 1
-  target: {fileID: 0}
-  hasTarget: 0
-  attackCooldownTimer: 0
+  targetId:
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  targetPlayerId:
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  hasTarget:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  attackCooldownTimer:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  attackRange:
+    _value: 10
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
   canSearchForTarget: 1
   canAttackTimer: 1
   entitiesInRange: []
@@ -627,9 +687,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f165c045aa6846428600e6786508a51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPEDetectLogic
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
   showDetectRange: 0
   enemiesInRange: []
-  enemyTeams: 
 --- !u!135 &1677431700280378734
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -681,8 +749,83 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8421519732981533208}
+  - {fileID: 3215734846433697972}
   m_Father: {fileID: 163394565540805433}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &3110347641628378975
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1441361294155185630}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: ecc9293a3a97ea74e9dc38ef8dc7e791, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ecc9293a3a97ea74e9dc38ef8dc7e791, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ecc9293a3a97ea74e9dc38ef8dc7e791, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ecc9293a3a97ea74e9dc38ef8dc7e791, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ecc9293a3a97ea74e9dc38ef8dc7e791, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -5
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ecc9293a3a97ea74e9dc38ef8dc7e791, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ecc9293a3a97ea74e9dc38ef8dc7e791, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ecc9293a3a97ea74e9dc38ef8dc7e791, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ecc9293a3a97ea74e9dc38ef8dc7e791, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ecc9293a3a97ea74e9dc38ef8dc7e791, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ecc9293a3a97ea74e9dc38ef8dc7e791, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ecc9293a3a97ea74e9dc38ef8dc7e791, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ecc9293a3a97ea74e9dc38ef8dc7e791, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ecc9293a3a97ea74e9dc38ef8dc7e791, type: 3}
+      propertyPath: m_Name
+      value: Jem_38
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ecc9293a3a97ea74e9dc38ef8dc7e791, type: 3}
+--- !u!4 &3215734846433697972 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: ecc9293a3a97ea74e9dc38ef8dc7e791, type: 3}
+  m_PrefabInstance: {fileID: 3110347641628378975}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &3169432602726841385
 PrefabInstance:
   m_ObjectHideFlags: 0

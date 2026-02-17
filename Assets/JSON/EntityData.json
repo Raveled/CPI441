@@ -1,7 +1,7 @@
 {
   "entityStats": {
     "Core": {
-      "baseHitPoints": 350,
+      "baseHitPoints": 300,
       "baseMoveSpeed": 0.0,
       "baseAcceleration": 0.0,
       "basePlanarDamping": 0.0,
@@ -19,13 +19,13 @@
       "basePlanarDamping": 0.0,
       "baseJumpForce": 0.0,
       "baseJumpCooldown": 0.0,
-      "baseAttackPower": 10,
+      "baseAttackPower": 35,
       "baseDefaultAttackCooldown": 2.0,
       "rewardGold": 10,
       "rewardXP": 10
     },
     "Tower": {
-      "baseHitPoints": 100,
+      "baseHitPoints": 200,
       "baseMoveSpeed": 0.0,
       "baseAcceleration": 0.0,
       "basePlanarDamping": 0.0,

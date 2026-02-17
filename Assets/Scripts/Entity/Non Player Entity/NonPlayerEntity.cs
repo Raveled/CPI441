@@ -240,7 +240,7 @@ public class NonPlayerEntity : Entity
         }
     }
     //For pausing the game
-    public void Freeze(bool freezeNPE) {
+    public virtual void Freeze(bool freezeNPE) {
         canMove = !freezeNPE;
         canDefaultAttack = !freezeNPE;
         canAttackTimer = !freezeNPE;
