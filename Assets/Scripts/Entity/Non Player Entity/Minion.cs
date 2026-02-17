@@ -66,7 +66,7 @@ public class Minion : NonPlayerEntity
     {
         yield return new WaitUntil(() => isSpawned);
 
-        //Debug.Log("Initialize Navigation");
+        Debug.Log("Initialize Navigation");
         agent.speed = moveSpeed.value;
         navMeshMoveTarget = enemyCore.transform;
         agent.SetDestination(enemyCore.transform.position);

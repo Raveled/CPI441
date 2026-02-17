@@ -14,9 +14,12 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Personal-Folders/Theo-Folder/TestLevelScene.unity
     guid: 83241d3d575fa8a46a8086d71ea39f33
-  - enabled: 1
+  - enabled: 0
     path: Assets/Personal-Folders/Jacob-Folder/Jacob-Plane.unity
     guid: 75f0b1d731a810b47ad5efd0feba8908
+  - enabled: 1
+    path: Assets/Personal-Folders/Tyler-Folder/Tyler-TestMap2.unity
+    guid: ffe351f808c2d4d478fdf3e12d227d23
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
