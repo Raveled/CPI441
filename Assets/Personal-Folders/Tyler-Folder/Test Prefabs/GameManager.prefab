@@ -136,7 +136,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3380a30c495ab443b0f333f53ba34c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DisableVisualOnStart
-  disableOnAwake: 1
 --- !u!1 &2895013378547183781
 GameObject:
   m_ObjectHideFlags: 0
@@ -240,7 +239,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3380a30c495ab443b0f333f53ba34c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DisableVisualOnStart
-  disableOnAwake: 1
 --- !u!1 &3041266770838306631
 GameObject:
   m_ObjectHideFlags: 0
@@ -378,7 +376,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3380a30c495ab443b0f333f53ba34c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DisableVisualOnStart
-  disableOnAwake: 1
 --- !u!1 &4048333129934864333
 GameObject:
   m_ObjectHideFlags: 0
@@ -482,7 +479,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3380a30c495ab443b0f333f53ba34c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DisableVisualOnStart
-  disableOnAwake: 1
 --- !u!1 &5403201091729900771
 GameObject:
   m_ObjectHideFlags: 0
@@ -586,7 +582,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3380a30c495ab443b0f333f53ba34c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DisableVisualOnStart
-  disableOnAwake: 1
 --- !u!1 &6714637771588707081
 GameObject:
   m_ObjectHideFlags: 0
@@ -663,7 +658,6 @@ GameObject:
   - component: {fileID: 3604123774642722008}
   - component: {fileID: 4236823861627369861}
   - component: {fileID: 4234075273946786129}
-  - component: {fileID: 4051211316030876387}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -711,7 +705,6 @@ MonoBehaviour:
   minionWaveSpawnInterval: 10
   navMeshSurface: {fileID: 9083819392621653564}
   maxWaves: -1
-  numMinionsInWave: 5
   spawnWaveOnStart: 1
   spawnCharactersOnStart: 1
   bakeOnStart: 0
@@ -772,18 +765,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::JSON_PlayerData
   loadInJSON: {fileID: 4900000, guid: de372e052fd64bd4f841de1d4ec93e2b, type: 3}
---- !u!114 &4051211316030876387
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8154089200534231921}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2162f1bd5493ab948809da52779ee18f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::JSONUpload
 --- !u!1 &8661443751703141602
 GameObject:
   m_ObjectHideFlags: 0
@@ -887,7 +868,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3380a30c495ab443b0f333f53ba34c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DisableVisualOnStart
-  disableOnAwake: 1
 --- !u!1 &8810268461737366763
 GameObject:
   m_ObjectHideFlags: 0
