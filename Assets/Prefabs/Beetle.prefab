@@ -48,9 +48,8 @@ GameObject:
   - component: {fileID: 8069894609849645937}
   - component: {fileID: 5579395928134298048}
   - component: {fileID: 4751865395330377205}
-  - component: {fileID: 6822694615502514086}
-  - component: {fileID: 415774168675383472}
-  - component: {fileID: -1235435505626699047}
+  - component: {fileID: -8418571752929865034}
+  - component: {fileID: -3312488788233335830}
   m_Layer: 6
   m_Name: Beetle
   m_TagString: Untagged
@@ -293,7 +292,7 @@ MonoBehaviour:
     _ownerAuth: 0
     _sendIntervalInSeconds: 0
   predictedMovement: {fileID: 5579395928134298048}
---- !u!114 &6822694615502514086
+--- !u!114 &-8418571752929865034
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -302,36 +301,31 @@ MonoBehaviour:
   m_GameObject: {fileID: 3921032179608766505}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5346c57a49ba92a489bd0a5345f97d71, type: 3}
+  m_Script: {fileID: 11500000, guid: d6d84af96f2654f4c86c0e4084bf1320, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Mosquito
-  bloodShotProjectilePrefab: {fileID: 2440982292386426808, guid: db618fa92a4755d4b9dfe8aaf99e759a, type: 3}
-  bloodShotFirePoint: {fileID: 154977485595512342}
-  bloodShotBaseDamage: 8
-  bloodShotSpeed: 12
-  bloodShotRange: 8
-  maxBloodMeter: 100
-  bloodMeterGainOnBasicHit: 5
-  bloodMeterGainOnPlayerHit: 10
-  bloodMeterDecayPerSecond: 0
-  extraDamagePerBloodUnit: 0.1
-  quickPokeBaseDamage: 5
-  quickPokeCooldown: 2
-  quickPokeBloodGain: 10
-  quickPokeBloodGainPlayer: 20
-  globProjectilePrefab: {fileID: 5426923190247754776, guid: cb04fc2c9ed1de8489498fc3f2bf7fc5, type: 3}
-  globFirePoint: {fileID: 154977485595512342}
-  globBaseDamage: 10
-  globBaseSpeed: 5
-  globMaxMeterUsageFraction: 0.5
-  globDamagePerBloodUnit: 0.3
-  globSizePerBloodUnit: 0.01
-  ampUpDuration: 5
-  ampUpInitialMoveMult: 2
-  ampUpInitialAttackSpeedMult: 2
-  ampUpColor: {r: 1, g: 0, b: 0, a: 1}
-  entity: {fileID: 4751865395330377205}
---- !u!114 &415774168675383472
+  m_EditorClassIdentifier: Assembly-CSharp::Beetle
+  entity: {fileID: 0}
+  mandibleBaseDamage: 12
+  mandibleRange: 2.5
+  mandibleCooldown: 1.2
+  hornImpaleDamage: 25
+  hornDashDistance: 4
+  hornDashDuration: 0.4
+  hornSlowAmount: 0.5
+  hornSlowDuration: 2
+  hornCooldown: 8
+  swaggerMoveSpeedMult: 0.6
+  swaggerDamageReduction: 0.4
+  swaggerDuration: 6
+  rollDamage: 15
+  rollSpeed: 15
+  rollKnockbackForce: 8
+  rollCooldown: 12
+  stompPrefab: {fileID: 0}
+  stompRadius: 4
+  stompDamage: 8
+  stompStunDuration: 1.5
+--- !u!114 &-3312488788233335830
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -340,28 +334,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 3921032179608766505}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ad845074b85451468732a8e465ef283, type: 3}
+  m_Script: {fileID: 11500000, guid: fdd423a9cb692c64c8c51dc44081309a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MosquitoInputTester
-  actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  quickPokeAction: QuickPoke-Ability2
-  globShotAction: GlobShot-Ability3
-  ampUpAction: AmpUp-Ultimate
-  basicAttackAction: BloodShot-BasicAttack
---- !u!114 &-1235435505626699047
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3921032179608766505}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 878c4254a7286d54dbb459209b4d9bfd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Inventory
-  items: []
-  maxSlots: 6
+  m_EditorClassIdentifier: Assembly-CSharp::BeetleInputTester
+  mandibleAttack: {fileID: 0}
+  hornImpale: {fileID: 0}
+  swagger: {fileID: 0}
+  roll: {fileID: 0}
+  groundStomp: {fileID: 0}
 --- !u!1 &8111900342316838556
 GameObject:
   m_ObjectHideFlags: 0

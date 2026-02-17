@@ -45,7 +45,7 @@ public class TempInputTester : MonoBehaviour
         if (context.started)
         {
             Entity target = FindNearestEnemy();
-            if (mosquito != null && mosquito.TryQuickPoke(target))
+            if (mosquito != null && mosquito.TryQuickPoke())
                 Debug.Log("Quick Poke HIT!");
         }
     }

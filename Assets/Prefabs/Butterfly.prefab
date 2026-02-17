@@ -48,9 +48,8 @@ GameObject:
   - component: {fileID: 8069894609849645937}
   - component: {fileID: 5579395928134298048}
   - component: {fileID: 4751865395330377205}
-  - component: {fileID: 6822694615502514086}
-  - component: {fileID: 415774168675383472}
-  - component: {fileID: 1032952723649802743}
+  - component: {fileID: -8601327763796926948}
+  - component: {fileID: 4812959287127913440}
   m_Layer: 6
   m_Name: Butterfly
   m_TagString: Untagged
@@ -293,7 +292,7 @@ MonoBehaviour:
     _ownerAuth: 0
     _sendIntervalInSeconds: 0
   predictedMovement: {fileID: 5579395928134298048}
---- !u!114 &6822694615502514086
+--- !u!114 &-8601327763796926948
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -302,36 +301,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 3921032179608766505}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5346c57a49ba92a489bd0a5345f97d71, type: 3}
+  m_Script: {fileID: 11500000, guid: f10852763fb896f4893e811df83b42ee, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Mosquito
-  bloodShotProjectilePrefab: {fileID: 2440982292386426808, guid: db618fa92a4755d4b9dfe8aaf99e759a, type: 3}
-  bloodShotFirePoint: {fileID: 154977485595512342}
-  bloodShotBaseDamage: 8
-  bloodShotSpeed: 12
-  bloodShotRange: 8
-  maxBloodMeter: 100
-  bloodMeterGainOnBasicHit: 5
-  bloodMeterGainOnPlayerHit: 10
-  bloodMeterDecayPerSecond: 0
-  extraDamagePerBloodUnit: 0.1
-  quickPokeBaseDamage: 5
-  quickPokeCooldown: 2
-  quickPokeBloodGain: 10
-  quickPokeBloodGainPlayer: 20
-  globProjectilePrefab: {fileID: 5426923190247754776, guid: cb04fc2c9ed1de8489498fc3f2bf7fc5, type: 3}
-  globFirePoint: {fileID: 154977485595512342}
-  globBaseDamage: 10
-  globBaseSpeed: 5
-  globMaxMeterUsageFraction: 0.5
-  globDamagePerBloodUnit: 0.3
-  globSizePerBloodUnit: 0.01
-  ampUpDuration: 5
-  ampUpInitialMoveMult: 2
-  ampUpInitialAttackSpeedMult: 2
-  ampUpColor: {r: 1, g: 0, b: 0, a: 1}
-  entity: {fileID: 4751865395330377205}
---- !u!114 &415774168675383472
+  m_EditorClassIdentifier: Assembly-CSharp::ButterflyInputTester
+  actions: {fileID: 0}
+  basicAttackAction: BasicAttack
+  dustWaveAction: DustWave
+  dazzlingWaveAction: DazzlingWave
+  flyDashAction: FlyDash
+  tornadoAction: Tornado
+--- !u!114 &4812959287127913440
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -340,28 +319,40 @@ MonoBehaviour:
   m_GameObject: {fileID: 3921032179608766505}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ad845074b85451468732a8e465ef283, type: 3}
+  m_Script: {fileID: 11500000, guid: 574a32c9abe174a4eafb1fdacf8d5385, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MosquitoInputTester
-  actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  quickPokeAction: QuickPoke-Ability2
-  globShotAction: GlobShot-Ability3
-  ampUpAction: AmpUp-Ultimate
-  basicAttackAction: BloodShot-BasicAttack
---- !u!114 &1032952723649802743
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3921032179608766505}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 878c4254a7286d54dbb459209b4d9bfd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Inventory
-  items: []
-  maxSlots: 6
+  m_EditorClassIdentifier: Assembly-CSharp::Butterfly
+  entity: {fileID: 0}
+  windBurstProjectilePrefab: {fileID: 0}
+  windBurstFirePoint: {fileID: 0}
+  windBurstBaseDamage: 4
+  windBurstSpeed: 10
+  windBurstRange: 6
+  dustWavePrefab: {fileID: 0}
+  dustWaveOrigin: {fileID: 0}
+  dustWaveBaseDamage: 3
+  dustWaveRadius: 4
+  dustWaveCooldown: 5
+  dazzlingWavePrefab: {fileID: 0}
+  dazzlingWaveOrigin: {fileID: 0}
+  dazzlingWaveBaseDamage: 2
+  dazzlingWaveRadius: 4
+  dazzlingWaveHealAmount: 10
+  dazzlingWaveCooldown: 6
+  dazzlingWaveUpgradeReducedDamage: 0
+  dazzlingWaveDamageReductionMultiplier: 0.7
+  flyDashDistance: 8
+  flyDashDuration: 0.35
+  flyCooldown: 7
+  flyUpgradeTwoCharges: 0
+  flyMaxChargesBase: 1
+  flyMaxChargesUpgraded: 2
+  tornadoPrefab: {fileID: 0}
+  tornadoRadius: 5
+  tornadoDuration: 4
+  tornadoBaseDamagePerTick: 2
+  tornadoTickInterval: 0.5
+  tornadoGroupForce: 10
 --- !u!1 &8111900342316838556
 GameObject:
   m_ObjectHideFlags: 0
