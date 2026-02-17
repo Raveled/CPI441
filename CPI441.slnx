@@ -21,6 +21,7 @@
   <Project Path="PurrNet.Editor.csproj" />
   <Project Path="PurrNet.Prediction.csproj" />
   <Project Path="Unity.Searcher.Editor.csproj" />
+  <Project Path="com.rlabrecque.steamworks.net.csproj" />
   <Project Path="PurrDiction.Editor.csproj" />
   <Project Path="Unity.VisualScripting.Core.csproj" />
   <Project Path="Unity.AI.Navigation.Editor.ConversionSystem.csproj" />
@@ -30,6 +31,7 @@
   <Project Path="Unity.VisualScripting.Flow.csproj" />
   <Project Path="Unity.Splines.Editor.csproj" />
   <Project Path="Unity.PerformanceTesting.csproj" />
+  <Project Path="PurrNetLobbySetup.csproj" />
   <Project Path="Unity.Burst.Editor.csproj" />
   <Project Path="Unity.Rider.Editor.csproj" />
   <Project Path="Unity.VisualScripting.State.csproj" />
@@ -37,6 +39,7 @@
   <Project Path="SimpleWebTransport.csproj" />
   <Project Path="Unity.AI.Navigation.Editor.csproj" />
   <Project Path="PurrNet.Profiler.Deltas.csproj" />
+  <Project Path="com.rlabrecque.steamworks.net.editor.csproj" />
   <Project Path="LiteNetLib.csproj" />
   <Project Path="Unity.InputSystem.ForUI.csproj" />
   <Project Path="Unity.AI.Navigation.csproj" />
@@ -48,6 +51,7 @@
   <Project Path="ToolbarExtender.Editor.csproj" />
   <Project Path="ParrelSync.csproj" />
   <Project Path="PurrNet.Profiler.Deltas.Editor.csproj" />
+  <Project Path="PurrNetLobby_Editor.csproj" />
   <Project Path="Unity.Settings.Editor.csproj" />
   <Project Path="Unity.InputSystem.TestFramework.csproj" />
   <Project Path="Unity.CollabProxy.Editor.csproj" />

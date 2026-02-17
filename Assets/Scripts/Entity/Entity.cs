@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using PurrNet.Prediction;
 using PurrNet.Modules;
+using System.Collections;
 
 public class Entity : NetworkBehaviour
 {
@@ -50,27 +51,51 @@ public class Entity : NetworkBehaviour
 
     //Assigns stats to GameObject based on the SO_EntityStatBlock
     private void Setup() {
-        //In case not called from SetStats from spawning in
-        SetupStats();
-        
-        enemyTeams.Clear();
-
         //Enemy Team Setup
-        if (team == Entity.Team.TEAM1) {
+        enemyTeams.Clear();
+        if (team.value == Entity.Team.TEAM1) {
             enemyTeams.Add(Entity.Team.TEAM2);
             enemyTeams.Add(Entity.Team.NEUTRAL);
-        } else if (team == Entity.Team.TEAM2) {
+        } else if (team.value == Entity.Team.TEAM2) {
             enemyTeams.Add(Entity.Team.TEAM1);
             enemyTeams.Add(Entity.Team.NEUTRAL);
-        } else if (team == Entity.Team.NEUTRAL) {
+        } else if (team.value == Entity.Team.NEUTRAL) {
             enemyTeams.Add(Entity.Team.TEAM1);
             enemyTeams.Add(Entity.Team.TEAM2);
         }
+
+        //In case not called from SetStats from spawning in
+        StartCoroutine(SetupStats());
     }
-    //Load in stats from statblock
-    void SetupStats()
+
+    public IEnumerator SetupStats()
     {
-        if (!isServer) return;
+        yield return new WaitUntil(() => isSpawned);
+
+        if (!isServer)
+        {
+            SetupStatsServerRpc();
+        }
+        else
+        {
+            ApplySetupStats();
+        }
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void SetupStatsServerRpc()
+    {
+        ApplySetupStats();
+    }
+
+    // SERVER ONLY - Apply stat setup
+    [ServerRpc]
+    private void ApplySetupStats()
+    {
+        if (!isServer)
+            return;
+
+        Debug.Log($"Applying stats for {entityName} on team {team.value}");
 
         maximumHitPoints.value = statBlock.BaseHitPoints;
         currentHitPoints.value = maximumHitPoints.value;
@@ -85,13 +110,12 @@ public class Entity : NetworkBehaviour
         reward_XP.value = statBlock.RewardXP;
     }
 
-
     //Basic logic for entity taking damage. Returns true on death, false on no death
     public virtual bool TakeDamage(int damage, Entity damageOrigin) 
     {
         if (!isServer)
         {
-            Debug.Log($"[TakeDamage] Client is requesting to take {damage} damage from {damageOrigin?.name}");
+            Debug.Log($"[TakeDamage] {gameObject.name} with ID: {damageOrigin.GetNetworkID(isServer)} is requesting to take {damage} damage from {damageOrigin?.name}");
             // Client requests server to apply damage
             if (damageOrigin != null) RequestDamageServerRpc(damage, damageOrigin.GetNetworkID(isServer));
             else RequestDamageServerRpc(damage, null);
@@ -138,12 +162,12 @@ public class Entity : NetworkBehaviour
             }
         }
 
-        Debug.Log($"[TakeDamage] Protector alive: {protectorAlive}");
+        //Debug.Log($"[TakeDamage] Protector alive: {protectorAlive}");
 
         // Deal damage if no protector alive
         if (!protectorAlive)
         {
-            Debug.Log($"[TakeDamage] {name} is taking damage because no protector is alive.");
+            //Debug.Log($"[TakeDamage] {name} is taking damage because no protector is alive.");
             currentHitPoints.value -= damage;
 
             if (currentHitPoints.value <= 0)
@@ -347,8 +371,6 @@ public class Entity : NetworkBehaviour
         Entity[] allEntities = FindObjectsByType<Entity>(FindObjectsSortMode.None);
         foreach (var entity in allEntities) {
             if (entity.GetNetworkID(isServer) == networkId) {
-                if (entity is Player) Debug.Log($"Found Entity by NetworkID: {networkId} -- It's a Player with ID: {entity.GetNetworkID(isServer)}");
-                
                 return entity;
             }
         }

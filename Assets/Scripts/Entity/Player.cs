@@ -2,6 +2,9 @@ using NUnit.Framework;
 using UnityEngine;
 using System.Collections.Generic;
 using PurrNet;
+using System.Data.Common;
+using PurrNet.Modules;
+using System.Collections;
 
 public class Player : Entity
 {
@@ -9,10 +12,55 @@ public class Player : Entity
     [SerializeField] SyncVar<int> playerLevel = new(1);
     [SerializeField] SyncVar<int> goldTotal = new(0);
     [SerializeField] SyncVar<int> xpTotal = new(0);
+    [SerializeField] PredictedPlayerMovement predictedMovement = null;
     SO_PlayerInfo playerInfo = null;
     List<Tower> friendlyTowers;
-    protected override void Start() {
+
+    private bool hasAttemptedSpawn = false;
+
+    protected override void Start() 
+    {
+        if (predictedMovement == null) predictedMovement = GetComponent<PredictedPlayerMovement>();
+
+        // Attempt to spawn the NetworkIdentity first
+        if (!hasAttemptedSpawn)
+        {
+            hasAttemptedSpawn = true;
+            TrySpawnNetworkIdentity();
+        }
+
+        // If already spawned, initialize normally
         base.Start();
+        InitializePlayer();
+    }
+
+    private void TrySpawnNetworkIdentity()
+    {
+        if (NetworkManager.main == null)
+        {
+            Debug.LogError("NetworkManager.main is null!");
+            return;
+        }
+
+        if (isSpawned)
+        {
+            Debug.Log("Player already spawned");
+            return;
+        }
+
+        if (predictedMovement != null && predictedMovement.owner.HasValue)
+        {
+            Debug.Log($"Spawning NetworkIdentity for player {predictedMovement.owner.Value}");
+            NetworkManager.main.Spawn(this.gameObject);
+        }
+        else
+        {
+            Debug.LogError("Cannot spawn - predictedMovement or owner is null!");
+        }
+    }
+
+    private void InitializePlayer()
+    {
         playerInfo = ScriptableObject.CreateInstance<SO_PlayerInfo>();
 
         //Fill towers with same team towers
@@ -23,6 +71,7 @@ public class Player : Entity
             if (GetTeam() == t.GetTeam()) friendlyTowers.Add(t);
         }
     }
+
     public override bool TakeDamage(int damage, Entity damageOrigin) {
         //Check Friendly Tower Aggro
         Tower closestTower = null;
@@ -54,6 +103,12 @@ public class Player : Entity
 
         return base.TakeDamage(damage, damageOrigin);
     }
+
+    protected override void OnHealthChanged(int newHealth)
+    {
+        base.OnHealthChanged(newHealth);
+    }
+
     protected override void Die(Entity damageOrigin) {
         base.Die(damageOrigin);
         Debug.Log("Player: " + entityName + " has died");
@@ -92,5 +147,18 @@ public class Player : Entity
     //Getts
     public SO_PlayerInfo GetPlayerInfo() {
         return playerInfo;
+    }
+
+    // Helper
+    public PlayerID? GetPlayerID()
+    {
+        foreach (var player in networkManager.players) {
+            if (player == predictedMovement.owner.Value) 
+            {
+                return player;
+            }
+        }
+
+        return null; 
     }
 }

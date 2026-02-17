@@ -35,8 +35,6 @@ public class Tower : NonPlayerEntity
 
         Entity currentTarget = GetTarget();
 
-        if (currentTarget is Player) print("Targetting Player -- Tower");
-
         //If there is a current target and the attack cooldown is ready
         if (currentTarget && attackCooldownTimer.value <= 0) {
             //Reset attack cooldown
