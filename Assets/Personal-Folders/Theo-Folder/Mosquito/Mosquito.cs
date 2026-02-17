@@ -25,6 +25,10 @@ public class Mosquito : NetworkBehaviour
     [SerializeField] private float quickPokeBloodGainPlayer = 20f;
     private float quickPokeCooldownTimer = 0f;
 
+    [Header("Quick Poke - Ability 2 Setup")]
+    [SerializeField] private float quickPokeRange = 2f;
+    [SerializeField] private Transform quickPokeOrigin = null;
+
     [Header("Glob Shot - Ability 3")]
     [SerializeField] private GameObject globProjectilePrefab;
     [SerializeField] private Transform globFirePoint;
@@ -33,6 +37,9 @@ public class Mosquito : NetworkBehaviour
     [SerializeField] private float globMaxMeterUsageFraction = 0.5f;
     [SerializeField] private float globDamagePerBloodUnit = 0.3f;
     [SerializeField] private float globSizePerBloodUnit = 0.01f;
+
+    [Header("Glob Shot Threshold")]
+    [SerializeField] private float globShotMinBloodThreshold = 10f;
 
     [Header("Amp Up - Ultimate")]
     [SerializeField] private float ampUpDuration = 5f;
@@ -46,15 +53,13 @@ public class Mosquito : NetworkBehaviour
     // Runtime state
     private float currentBloodMeter = 0f;
     private float ampUpTimer = 0f;
-    private float ampUpCurrentMoveMult = 1f;
-    private float ampUpCurrentAttackSpeedMult = 1f;
     private Color originalColor;
-    private MeshRenderer meshRenderer;
+    private Renderer meshRenderer;
     public Entity entity;
 
     private void Awake()
     {
-        meshRenderer = GetComponentInChildren<MeshRenderer>();
+        meshRenderer = GetComponentInChildren<Renderer>();
         entity = GetComponent<Entity>();
 
         if (animator == null)
@@ -147,22 +152,17 @@ public class Mosquito : NetworkBehaviour
     }
 
     // ========== QUICK POKE - ABILITY 2 ==========
-    [Header("Quick Poke - Ability 2 Setup")]
-    [SerializeField] private float quickPokeRange = 2f;
-    [SerializeField] private Transform quickPokeOrigin = null; // Optional: assign a forward point; falls back to self
-
     public bool TryQuickPoke()
     {
         if (quickPokeCooldownTimer > 0f || entity == null)
         {
-            Debug.Log($"[Mosquito] Quick Poke blocked — cooldown: {quickPokeCooldownTimer:F2}s remaining");
+            Debug.Log($"[Mosquito] Quick Poke blocked - cooldown: {quickPokeCooldownTimer:F2}s remaining");
             return false;
         }
 
         quickPokeCooldownTimer = quickPokeCooldown;
         PlayQuickPokeAnim();
 
-        // Only server applies damage
         if (isServer)
             ApplyQuickPoke();
         else
@@ -180,14 +180,13 @@ public class Mosquito : NetworkBehaviour
     private void ApplyQuickPoke()
     {
         Vector3 origin = quickPokeOrigin != null ? quickPokeOrigin.position : transform.position;
-        Debug.Log($"[Mosquito] Quick Poke — overlap sphere at {origin}, range={quickPokeRange}");
+        Debug.Log($"[Mosquito] Quick Poke - overlap sphere at {origin}, range={quickPokeRange}");
 
         Collider[] hits = Physics.OverlapSphere(origin, quickPokeRange);
         int hitCount = 0;
 
         foreach (Collider hit in hits)
         {
-            // Ignore own colliders
             if (hit.transform.IsChildOf(entity.transform) || hit.gameObject == entity.gameObject)
                 continue;
 
@@ -202,7 +201,7 @@ public class Mosquito : NetworkBehaviour
             bool hitPlayer = target.GetType().Name == "Player";
             float gain = hitPlayer ? quickPokeBloodGainPlayer : quickPokeBloodGain;
             ModifyBloodMeter(gain);
-            Debug.Log($"[Mosquito] Blood gained: +{gain:F1} — current blood: {currentBloodMeter:F1}/{maxBloodMeter}");
+            Debug.Log($"[Mosquito] Blood gained: +{gain:F1} - current blood: {currentBloodMeter:F1}/{maxBloodMeter}");
 
             hitCount++;
         }
@@ -212,9 +211,6 @@ public class Mosquito : NetworkBehaviour
     }
 
     // ========== GLOB SHOT - ABILITY 3 ==========
-    [Header("Glob Shot Threshold")]
-    [SerializeField] private float globShotMinBloodThreshold = 10f;
-
     public void CastGlobShot()
     {
         if (currentBloodMeter < globShotMinBloodThreshold)
@@ -265,16 +261,33 @@ public class Mosquito : NetworkBehaviour
     // ========== AMP UP - ULTIMATE ==========
     public void ActivateAmpUp()
     {
-        if (ampUpTimer > 0f) return;
-
-        ampUpTimer = ampUpDuration;
-        ampUpCurrentMoveMult = ampUpInitialMoveMult;
-        ampUpCurrentAttackSpeedMult = ampUpInitialAttackSpeedMult;
+        if (ampUpTimer > 0f)
+        {
+            Debug.Log("[Mosquito] Amp Up blocked - already active.");
+            return;
+        }
 
         PlayAmpUpAnimation();
+        ampUpTimer = ampUpDuration;
 
-        if (meshRenderer != null)
-            meshRenderer.material.color = ampUpColor;
+        if (isServer)
+            ApplyAmpUp();
+        else
+            ApplyAmpUpServerRpc();
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void ApplyAmpUpServerRpc()
+    {
+        ApplyAmpUp();
+    }
+
+    private void ApplyAmpUp()
+    {
+        Debug.Log($"[Mosquito] Amp Up activated! Duration={ampUpDuration}s, MoveMult={ampUpInitialMoveMult}, AttackMult={ampUpInitialAttackSpeedMult}");
+        entity.ModifyMoveSpeedMultiplier(ampUpInitialMoveMult, ampUpDuration);
+        entity.ModifyAttackPowerForSeconds(ampUpInitialAttackSpeedMult, ampUpDuration);
+        SetAmpUpColorRpc(true);
     }
 
     private void UpdateAmpUp()
@@ -282,15 +295,26 @@ public class Mosquito : NetworkBehaviour
         if (ampUpTimer <= 0f) return;
 
         ampUpTimer -= Time.deltaTime;
-        float t = 1f - Mathf.Clamp01(ampUpTimer / ampUpDuration);
-        ampUpCurrentMoveMult = Mathf.Lerp(ampUpInitialMoveMult, 1f, t);
-        ampUpCurrentAttackSpeedMult = Mathf.Lerp(ampUpInitialAttackSpeedMult, 1f, t);
 
         if (ampUpTimer <= 0f)
         {
-            if (meshRenderer != null)
-                meshRenderer.material.color = originalColor;
+            ampUpTimer = 0f;
+            if (isServer) SetAmpUpColorRpc(false);
+            Debug.Log("[Mosquito] Amp Up expired.");
         }
+    }
+
+    [ObserversRpc]
+    private void SetAmpUpColorRpc(bool active)
+    {
+        if (meshRenderer == null) {
+            Debug.LogError("[Mosquito] meshRenderer is NULL! Check prefab hierarchy.");
+            // Force find it
+            meshRenderer = GetComponentInChildren<MeshRenderer>();
+            Debug.Log($"Force search found meshRenderer={meshRenderer}");
+        }
+        meshRenderer.material.color = active ? ampUpColor : originalColor;
+        Debug.Log($"[Mosquito] Amp Up color set to {(active ? "active" : "original")}.");
     }
 
     // ========== ANIMATOR METHODS ==========
@@ -315,8 +339,8 @@ public class Mosquito : NetworkBehaviour
         if (animator != null) animator.SetTrigger("Death");
     }
 
-    public float GetMoveSpeedMultiplier() => ampUpCurrentMoveMult;
-    public float GetAttackSpeedMultiplier() => ampUpCurrentAttackSpeedMult;
+    public float GetMoveSpeedMultiplier() => entity != null ? entity.GetMoveSpeed() : 1f;
+    public float GetAttackSpeedMultiplier() => entity != null ? entity.attackPower.value : 1f;
 
     [ContextMenu("Test Blood Shot")]
     private void TestBloodShot() => CastBloodShot();

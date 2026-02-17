@@ -326,6 +326,8 @@ MonoBehaviour:
   quickPokeCooldown: 2
   quickPokeBloodGain: 10
   quickPokeBloodGainPlayer: 20
+  quickPokeRange: 2
+  quickPokeOrigin: {fileID: 154977485595512342}
   globProjectilePrefab: {fileID: 5426923190247754776, guid: cb04fc2c9ed1de8489498fc3f2bf7fc5, type: 3}
   globFirePoint: {fileID: 154977485595512342}
   globBaseDamage: 10
@@ -333,15 +335,13 @@ MonoBehaviour:
   globMaxMeterUsageFraction: 0.5
   globDamagePerBloodUnit: 0.3
   globSizePerBloodUnit: 0.01
+  globShotMinBloodThreshold: 10
   ampUpDuration: 5
   ampUpInitialMoveMult: 2
   ampUpInitialAttackSpeedMult: 2
   ampUpColor: {r: 1, g: 0, b: 0, a: 1}
   animator: {fileID: 8204087541940055493}
   entity: {fileID: 4751865395330377205}
-  quickPokeRange: 2
-  quickPokeOrigin: {fileID: 154977485595512342}
-  globShotMinBloodThreshold: 10
 --- !u!114 &415774168675383472
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -566,7 +566,64 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f60fc797ca0e3b045b393d73163e8ae4, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8204087541940055493}
+    - targetCorrespondingSourceObject: {fileID: -6070892568301380474, guid: f60fc797ca0e3b045b393d73163e8ae4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1717043190220798052}
   m_SourcePrefab: {fileID: 100100000, guid: f60fc797ca0e3b045b393d73163e8ae4, type: 3}
+--- !u!1 &564460815908609905 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -6070892568301380474, guid: f60fc797ca0e3b045b393d73163e8ae4, type: 3}
+  m_PrefabInstance: {fileID: 3200516998631670775}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1717043190220798052
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 564460815908609905}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: dd7d7577a53099b459f27a2057891dfb, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &2354235338635312806 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: f60fc797ca0e3b045b393d73163e8ae4, type: 3}
