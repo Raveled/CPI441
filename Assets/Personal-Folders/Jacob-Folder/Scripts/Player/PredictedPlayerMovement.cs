@@ -26,8 +26,6 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     public InputAction moveAction;
     public InputAction jumpAction;
 
-    public string debugString = "test";
-
     protected override void LateAwake()
     {
         if (_player == null) _player = GetComponent<Player>();

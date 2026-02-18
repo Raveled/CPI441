@@ -4,7 +4,7 @@ using UnityEngine;
 public class Inventory : MonoBehaviour
 {
     [SerializeField] private List<Item> items = new List<Item>();
-    [SerializeField] private int maxSlots = 8;
+    [SerializeField] private int maxSlots = 6;
     
     public System.Action OnInventoryChanged;
     

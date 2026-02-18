@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using PurrNet.Prediction;
 using PurrNet.Modules;
+using System.Collections;
 
 public class Entity : NetworkBehaviour
 {
@@ -22,8 +23,12 @@ public class Entity : NetworkBehaviour
 
     //Stats that are visible in editor
     [Header("Entity Debug")]
-    [Tooltip("Yellow Circle")]
-    [SerializeField] bool showRewardRange = false;
+    /*[SerializeField] protected int goldReward = 0;
+    [SerializeField] public int maximumHitPoints = 0;
+    [SerializeField] public int currentHitPoints = 0;                   //Modified by Theo - made this SyncVar and moved it to networked stats section, since health needs to be synchronized across clients for damage - removed safe mode
+    [SerializeField] public float moveSpeed = 0;
+    [SerializeField] public int attackPower = 0;
+    [SerializeField] protected float defaultAttackCooldown = 0;*/
     [Space]
 
     // NETWORKED STATS
@@ -39,38 +44,69 @@ public class Entity : NetworkBehaviour
     [SerializeField] public SyncVar<int> reward_Gold = new(0);
     [SerializeField] public SyncVar<int> reward_XP = new(0);
     [SerializeField] public SyncVar<bool> isDead = new(false);
-    
+
     //Setup
     [SerializeField] protected List<Team> enemyTeams = null;
 
     //In subclasses, MUST use "base.Start()" line to call this
-    protected virtual void Start() {
+    protected virtual void Start()
+    {
         Setup();
     }
 
     //Assigns stats to GameObject based on the SO_EntityStatBlock
-    private void Setup() {
-        //In case not called from SetStats from spawning in
-        SetupStats();
-        
-        enemyTeams.Clear();
-
+    private void Setup()
+    {
         //Enemy Team Setup
-        if (team == Entity.Team.TEAM1) {
+        enemyTeams.Clear();
+        if (team.value == Entity.Team.TEAM1)
+        {
             enemyTeams.Add(Entity.Team.TEAM2);
             enemyTeams.Add(Entity.Team.NEUTRAL);
-        } else if (team == Entity.Team.TEAM2) {
+        }
+        else if (team.value == Entity.Team.TEAM2)
+        {
             enemyTeams.Add(Entity.Team.TEAM1);
             enemyTeams.Add(Entity.Team.NEUTRAL);
-        } else if (team == Entity.Team.NEUTRAL) {
+        }
+        else if (team.value == Entity.Team.NEUTRAL)
+        {
             enemyTeams.Add(Entity.Team.TEAM1);
             enemyTeams.Add(Entity.Team.TEAM2);
         }
+
+        //In case not called from SetStats from spawning in
+        StartCoroutine(SetupStats());
     }
-    //Load in stats from statblock
-    void SetupStats()
+
+    public IEnumerator SetupStats()
     {
-        if (!isServer) return;
+        yield return new WaitUntil(() => isSpawned);
+
+        if (!isServer)
+        {
+            SetupStatsServerRpc();
+        }
+        else
+        {
+            ApplySetupStats();
+        }
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void SetupStatsServerRpc()
+    {
+        ApplySetupStats();
+    }
+
+    // SERVER ONLY - Apply stat setup
+    [ServerRpc]
+    private void ApplySetupStats()
+    {
+        if (!isServer)
+            return;
+
+        Debug.Log($"Applying stats for {entityName} on team {team.value}");
 
         maximumHitPoints.value = statBlock.BaseHitPoints;
         currentHitPoints.value = maximumHitPoints.value;
@@ -85,13 +121,12 @@ public class Entity : NetworkBehaviour
         reward_XP.value = statBlock.RewardXP;
     }
 
-
     //Basic logic for entity taking damage. Returns true on death, false on no death
-    public virtual bool TakeDamage(int damage, Entity damageOrigin) 
+    public virtual bool TakeDamage(int damage, Entity damageOrigin)
     {
         if (!isServer)
         {
-            Debug.Log($"[TakeDamage] Client is requesting to take {damage} damage from {damageOrigin?.name}");
+            Debug.Log($"[TakeDamage] {gameObject.name} with ID: {damageOrigin.GetNetworkID(isServer)} is requesting to take {damage} damage from {damageOrigin?.name}");
             // Client requests server to apply damage
             if (damageOrigin != null) RequestDamageServerRpc(damage, damageOrigin.GetNetworkID(isServer));
             else RequestDamageServerRpc(damage, null);
@@ -138,12 +173,12 @@ public class Entity : NetworkBehaviour
             }
         }
 
-        Debug.Log($"[TakeDamage] Protector alive: {protectorAlive}");
+        //Debug.Log($"[TakeDamage] Protector alive: {protectorAlive}");
 
         // Deal damage if no protector alive
         if (!protectorAlive)
         {
-            Debug.Log($"[TakeDamage] {name} is taking damage because no protector is alive.");
+            //Debug.Log($"[TakeDamage] {name} is taking damage because no protector is alive.");
             currentHitPoints.value -= damage;
 
             if (currentHitPoints.value <= 0)
@@ -164,7 +199,7 @@ public class Entity : NetworkBehaviour
     private void NotifyHealthChanged(int newHealth)
     {
         // This method can be used to trigger client-side effects when health changes, if needed
-        Debug.Log($"{entityName} health: {newHealth}/{maximumHitPoints}");
+        Debug.Log($"{entityName} health: {newHealth}/{maximumHitPoints.value}");
         OnHealthChanged(newHealth);
     }
 
@@ -197,7 +232,7 @@ public class Entity : NetworkBehaviour
             return;
 
         currentHitPoints.value += healAmount;
-        if (currentHitPoints.value > maximumHitPoints) currentHitPoints.value = maximumHitPoints;
+        if (currentHitPoints.value > maximumHitPoints.value) currentHitPoints.value = maximumHitPoints.value;
 
         NotifyHealthChanged(currentHitPoints.value);
     }
@@ -230,7 +265,70 @@ public class Entity : NetworkBehaviour
 
         NotifyHealthChanged(currentHitPoints.value);
     }
-    
+
+    //************************************************************************//
+    //New Additions from Theo for Character Abilities
+
+    // *** Attack Power Buff / Debuff *** //
+    public void ModifyAttackPowerForSeconds(float multiplier, float duration)
+    {
+        if (!isServer)
+        {
+            ModifyAttackPowerForSecondsServerRpc(multiplier, duration);
+            return;
+        }
+        StartCoroutine(ModifyAttackPowerCoroutine(multiplier, duration));
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void ModifyAttackPowerForSecondsServerRpc(float multiplier, float duration)
+    {
+        StartCoroutine(ModifyAttackPowerCoroutine(multiplier, duration));
+    }
+
+    private IEnumerator ModifyAttackPowerCoroutine(float multiplier, float duration)
+    {
+        int originalAttackPower = attackPower.value;
+        attackPower.value = Mathf.RoundToInt(originalAttackPower * multiplier);
+
+        yield return new WaitForSeconds(duration);
+
+        if (!isDead.value) // only restore if still alive
+            attackPower.value = originalAttackPower;
+    }
+
+    // *** Move Speed Buff / Debuff / Stun *** //
+    public void ModifyMoveSpeedMultiplier(float multiplier, float duration)
+    {
+        if (!isServer)
+        {
+            ModifyMoveSpeedMultiplierServerRpc(multiplier, duration);
+            return;
+        }
+        StartCoroutine(ModifyMoveSpeedCoroutine(multiplier, duration));
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void ModifyMoveSpeedMultiplierServerRpc(float multiplier, float duration)
+    {
+        StartCoroutine(ModifyMoveSpeedCoroutine(multiplier, duration));
+    }
+
+    private IEnumerator ModifyMoveSpeedCoroutine(float multiplier, float duration)
+    {
+        float originalMoveSpeed = moveSpeed.value;
+        moveSpeed.value *= multiplier;
+
+        yield return new WaitForSeconds(duration);
+
+        if (!isDead.value)
+            moveSpeed.value = originalMoveSpeed;
+    }
+
+
+
+    //************************************************************************//
+
     // Server Only Death Logic
     protected virtual void OnDeath(NetworkID? damageOriginId)
     {
@@ -239,18 +337,19 @@ public class Entity : NetworkBehaviour
 
         // Find the entity that caused the death
         Entity damageOrigin = null;
-        
+
         if (damageOriginId.HasValue)
         {
             damageOrigin = GetEntityByNetworkID(damageOriginId.Value);
         }
-        
+
         Die(damageOrigin);
         NotifyDeathObserversRpc(damageOriginId);
     }
-    
+
     //Basic logic for dying/destroying self
-    protected virtual void Die(Entity damageOrigin) {
+    protected virtual void Die(Entity damageOrigin)
+    {
         if (!isServer)
             return;
 
@@ -274,19 +373,23 @@ public class Entity : NetworkBehaviour
     }
 
     //Give the gold+xp reward to the closest players in range. Only called on death
-    protected virtual void DistributeReward() {
+    protected virtual void DistributeReward()
+    {
         if (!isServer)
             return;
-        
+
         //Get All Possible Players
         Player[] players = FindObjectsByType<Player>(FindObjectsSortMode.None);
         List<Player> enemyPlayersInRange = new List<Player>();
 
         //Get the enemy team players that are in reward range
-        foreach (Player p in players) {
-            if (GetEnemyTeams().Contains(p.GetTeam())) {
+        foreach (Player p in players)
+        {
+            if (GetEnemyTeams().Contains(p.GetTeam()))
+            {
                 float distance = Vector3.Distance(p.gameObject.transform.position, transform.position);
-                if(distance < rewardRange) {
+                if (distance < rewardRange)
+                {
                     enemyPlayersInRange.Add(p);
                 }
             }
@@ -296,47 +399,61 @@ public class Entity : NetworkBehaviour
         int xpReward = reward_XP.value;
 
         //If 3+ players in range, split the reward amount
-        if(enemyPlayersInRange.Count > 2) {
+        if (enemyPlayersInRange.Count > 2)
+        {
             goldReward = (int)Mathf.Floor((float)goldReward / 3);
             xpReward = (int)Mathf.Floor((float)xpReward / 3);
         }
 
         //give the reward amount to each player in range
-        foreach (Player p in enemyPlayersInRange) {
+        foreach (Player p in enemyPlayersInRange)
+        {
             p.IncreaseGoldTotal(goldReward);
             p.IncreaseXPTotal(xpReward);
         }
     }
-    protected virtual void OnDrawGizmos() {
-        if (showRewardRange) {
+    protected virtual void OnDrawGizmos()
+    {
+        /*if (showRewardRange) {
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, rewardRange);
-        }
+        }*/
     }
 
     #region Setters
-    public void SetTeam(Team t) {
+    public void SetTeam(Team t)
+    {
         team.value = t;
     }
-    public void SetStatblock(SO_EntityStatBlock stats) {
+    public void SetStatblock(SO_EntityStatBlock stats)
+    {
         statBlock = Object.Instantiate(stats);
-        SetupStats();
+        StartCoroutine(SetupStats()); //Modified by Theo - will wait until isSpawned to apply stats, ensuring proper network synchronization
     }
     #endregion
     #region Getters
-    public Team GetTeam() {
+    public Team GetTeam()
+    {
         return team.value;
     }
-    public List<Team> GetEnemyTeams() {
+    public List<Team> GetEnemyTeams()
+    {
         return enemyTeams;
     }
-    public string GetName() {
+    public string GetName()
+    {
         return name;
     }
-    public bool GetIsDead() {
+    public bool GetIsDead()
+    {
         return isDead.value;
     }
-    public SO_EntityStatBlock GetEntityStatblock() {
+    public float GetMoveSpeed()
+    {
+        return moveSpeed.value;
+    }
+    public SO_EntityStatBlock GetEntityStatblock()
+    {
         return statBlock;
     }
     #endregion
@@ -345,10 +462,10 @@ public class Entity : NetworkBehaviour
     protected Entity GetEntityByNetworkID(NetworkID? networkId)
     {
         Entity[] allEntities = FindObjectsByType<Entity>(FindObjectsSortMode.None);
-        foreach (var entity in allEntities) {
-            if (entity.GetNetworkID(isServer) == networkId) {
-                if (entity is Player) Debug.Log($"Found Entity by NetworkID: {networkId} -- It's a Player with ID: {entity.GetNetworkID(isServer)}");
-                
+        foreach (var entity in allEntities)
+        {
+            if (entity.GetNetworkID(isServer) == networkId)
+            {
                 return entity;
             }
         }
