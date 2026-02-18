@@ -27,6 +27,8 @@ public class Core : NonPlayerEntity
         if (!isServer) return; // Only execute end game logic on the server
 
         gameManager.GameEnd(team);
+
+        //REMOVE WHEN ANIMATION IS IN
         Destroy(gameObject);
     }
     //Start the spawning of a minion wave
@@ -45,6 +47,9 @@ public class Core : NonPlayerEntity
 
         //Spawn a minion every timeBetweenMinionsInWave seconds according to numMinionsInWave
         for(int i = 0; i < numMinionsInWave; i++) {
+            if (!canSpawnMinions) yield break;
+            if (isDead) yield break;
+
             for(int j = 0; j < waveSpawnOrigins.Length; j++) {
                 Minion m = Instantiate(minionPrefab, waveSpawnOrigins[j].position, waveSpawnOrigins[j].rotation, waveSpawnOrigins[j]);
                 m.SetTeam(team);
