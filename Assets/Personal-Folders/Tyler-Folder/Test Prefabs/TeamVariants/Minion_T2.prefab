@@ -56,18 +56,6 @@ PrefabInstance:
       propertyPath: statBlock
       value: 
       objectReference: {fileID: 11400000, guid: 2848ef0da7cdff742a7cc3eba9ec81d6, type: 2}
-    - target: {fileID: 4975382713640353404, guid: 2591120a107ce4244b4c4c6e3db00828, type: 3}
-      propertyPath: 'm_Materials.Array.data[0]'
-      value: 
-      objectReference: {fileID: 2100000, guid: 94e6c3a7543fcb4488bb8878ca87e3bf, type: 2}
-    - target: {fileID: 7178866329049968485, guid: 2591120a107ce4244b4c4c6e3db00828, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7178866329049968485, guid: 2591120a107ce4244b4c4c6e3db00828, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 7434539554110800588, guid: 2591120a107ce4244b4c4c6e3db00828, type: 3}
       propertyPath: m_Name
       value: Minion_T2

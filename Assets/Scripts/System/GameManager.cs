@@ -164,7 +164,6 @@ public class GameManager : MonoBehaviour
     }
     //Handle the game timer
     void GameTimer() {
-        if (gameState != GameState.INPROGRESS) return;
         //Update Timer
         gameTimer += Time.deltaTime;
 
@@ -174,9 +173,8 @@ public class GameManager : MonoBehaviour
     }
     //Handle minion wave spawn timer
     void MinionWaveSpawnTimer() {
-        if (gameState != GameState.INPROGRESS) return;
         //If using max # of waves for debug
-        if (maxWaves != -1) {
+        if(maxWaves != -1) {
             if (currentWaves >= maxWaves) return;
         }
 
@@ -192,7 +190,6 @@ public class GameManager : MonoBehaviour
     }
     //Spawn a Wave
     void SpawnWave() {
-        if (gameState != GameState.INPROGRESS) return;
         for (int i = 0; i < cores.Length; i++) {
             cores[i].SpawnWave();
         }

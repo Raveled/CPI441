@@ -4,7 +4,6 @@ using System.Collections;
 using PurrNet;
 using UnityEngine.SocialPlatforms;
 using NUnit.Framework;
-using UnityEngine.Animations;
 
 public class NonPlayerEntity : Entity
 {
@@ -15,7 +14,6 @@ public class NonPlayerEntity : Entity
     [SerializeField] protected Transform attackRangeOrigin = null;
     [SerializeField] protected NPEDetectLogic npeDetectLogic = null;
     [SerializeField] protected UnityEngine.UI.Slider healthBar = null;
-    [SerializeField] protected Animator animator = null;
     [Space]
     [SerializeField] bool canTargetTower = false;
     [SerializeField] bool canTargetCore = false;
@@ -85,12 +83,11 @@ public class NonPlayerEntity : Entity
         healthBar.maxValue = maximumHitPoints.value;
         healthBar.value = currentHitPoints.value;
     }
-    [SerializeField] bool isMinion = false;
     protected override void Die(Entity damageOrigin) {
         base.Die(damageOrigin);
 
         //Destroy self
-        if(!isMinion)Destroy(gameObject);
+        Destroy(gameObject);
     }
 
     //Move
