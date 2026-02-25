@@ -87,8 +87,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] int towersDestroyed_Team1 = 0; //how many of Team 2's towers Team 1 destroyed
     [SerializeField] int towersDestroyed_Team2 = 0;
 
+    public static GameManager Instance { get; private set;}
 
     private void Awake() {
+        Instance = this;
+
         //Load in the stats from the JSON
         matchData = GetComponent<JSON_MatchData>();
         entityData = GetComponent<JSON_EntityData>();
@@ -386,6 +389,13 @@ public class GameManager : MonoBehaviour
         statBlock.RewardGold = loadFrom.entityStats[entityType].rewardGold;
         statBlock.RewardXP = loadFrom.entityStats[entityType].rewardXP;
     }
+
+    // WIP METHOD FOR SETTING PLAYER CHARACTER
+    public string GetPlayerCharacter()
+    {
+        return "Mosquito";
+    }
+
     #endregion
     #region WORK IN PROGRESS
     void FreezeAllPCs(bool freeze) {

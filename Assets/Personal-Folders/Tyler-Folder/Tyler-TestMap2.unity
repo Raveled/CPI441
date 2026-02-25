@@ -22889,6 +22889,7 @@ GameObject:
   m_Component:
   - component: {fileID: 728040968}
   - component: {fileID: 728040967}
+  - component: {fileID: 728040969}
   - component: {fileID: 728040966}
   m_Layer: 0
   m_Name: PredictionManager
@@ -22904,7 +22905,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 728040965}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1a1392aa1bc3d3b4a9ef31b6e6d8d4b5, type: 3}
   m_Name: 
@@ -22963,6 +22964,30 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &728040969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 728040965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80423224c41d7d84d992727b665f7c9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PurrNet.Prediction.PredictedPlayerSpawnerCustom
+  _playerPrefabs:
+  - {fileID: 3921032179608766505, guid: 999f5cd1ecb707840bce0ab3150103ba, type: 3}
+  - {fileID: 3921032179608766505, guid: 4fbd9031c1f9ed14bbcdbf982fd86d19, type: 3}
+  - {fileID: 3921032179608766505, guid: a1dc1d524fd7bbf4d8cf576951d4a28d, type: 3}
+  _destroyOnDisconnect: 0
+  spawnPoints:
+  - {fileID: 616711886}
+  - {fileID: 616711885}
+  - {fileID: 616711884}
+  - {fileID: 616711883}
+  - {fileID: 616711882}
+  - {fileID: 616711881}
 --- !u!1001 &730041273
 PrefabInstance:
   m_ObjectHideFlags: 0
