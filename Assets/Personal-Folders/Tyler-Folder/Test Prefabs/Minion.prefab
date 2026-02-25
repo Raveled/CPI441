@@ -421,7 +421,7 @@ MonoBehaviour:
   entitiesInRange: []
   attackHeight: 5
   attackIsAOE: 0
-  waypointRange: 3
+  waypointRange: 2
   showAttackBounds: 0
   showNavMeshTarget: 0
   navMeshMoveTarget: {fileID: 0}

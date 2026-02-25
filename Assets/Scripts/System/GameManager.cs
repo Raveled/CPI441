@@ -4,6 +4,7 @@ using Unity.AI.Navigation;
 using TMPro;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -26,6 +27,18 @@ public class GameManager : MonoBehaviour
     [Space]
     [SerializeField] GameState gameState = GameState.NULL;
     [SerializeField] string timerString = "";
+
+    //Win Screen
+    [Space]
+    [Header("Win Screen Setup")]
+    [SerializeField] GameObject winScreenCanvas = null;
+    [SerializeField] TextMeshProUGUI winScreenText = null;
+    [SerializeField] Image winScreenBGImage = null;
+    [SerializeField] string team1Name = "Magenta Team";
+    [SerializeField] string team2Name = "Blue Team";
+    [SerializeField] Color team1Color;
+    [SerializeField] Color team2Color;
+    Color winningTeamColor;
 
     //Character Handling
     [Space]
@@ -99,6 +112,7 @@ public class GameManager : MonoBehaviour
         gameState = GameState.INPROGRESS;
         gameTimer = 0;
         currentMinionWaveSpawnTimer = minionWaveSpawnInterval;
+        winScreenCanvas.SetActive(false);
 
         //Setup Cores+Towers
         cores = FindObjectsByType<Core>(FindObjectsSortMode.None);
@@ -242,10 +256,17 @@ public class GameManager : MonoBehaviour
     //When a core is destroyed, this will be called, ending the game
     public void GameEnd(Entity.Team team) {
         if(team == Entity.Team.TEAM1) {
-            winnerStr = "Team1";
+            winnerStr = team1Name;
+            winningTeamColor = team1Color;
         }else if(team == Entity.Team.TEAM2) {
-            winnerStr = "Team2";
+            winnerStr = team2Name;
+            winningTeamColor = team2Color;
         }
+        winningTeamColor.a = 200;
+        winScreenBGImage.color = winningTeamColor;
+        winScreenText.text = winnerStr + " Wins!";
+        winScreenCanvas.SetActive(true);
+
         ChangeGameState(GameState.END);
         GenerateMatchJSON();
     }
@@ -272,19 +293,23 @@ public class GameManager : MonoBehaviour
     void ChangeGameState(GameState state) {
         switch (state) {
             case GameState.NULL:
+                Debug.Log("Game State: NULL");
                 gameState = GameState.NULL;
                 break;
             case GameState.INPROGRESS:
+                Debug.Log("Game State: In Progress");
                 gameState = GameState.INPROGRESS;
                 FreezeAllNPE(false);
                 FreezeAllPCs(false);
                 break;
             case GameState.PAUSED:
+                Debug.Log("Game State: Paused");
                 gameState = GameState.PAUSED;
                 FreezeAllNPE(true);
                 FreezeAllPCs(true);
                 break;
             case GameState.END:
+                Debug.Log("Game State: Ended");
                 gameState = GameState.END;
                 FreezeAllNPE(true);
                 ShowEndGameVisual();
