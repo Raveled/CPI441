@@ -190,7 +190,7 @@ public class Entity : NetworkBehaviour
         }
 
         // Notify all clients of health update
-        NotifyHealthChanged(currentHitPoints.value);
+        if(!GetIsDead())NotifyHealthChanged(currentHitPoints.value);
 
         return;
     }
@@ -343,8 +343,8 @@ public class Entity : NetworkBehaviour
             damageOrigin = GetEntityByNetworkID(damageOriginId.Value);
         }
 
+        if (!GetIsDead()) NotifyDeathObserversRpc(damageOriginId);
         Die(damageOrigin);
-        NotifyDeathObserversRpc(damageOriginId);
     }
 
     //Basic logic for dying/destroying self
