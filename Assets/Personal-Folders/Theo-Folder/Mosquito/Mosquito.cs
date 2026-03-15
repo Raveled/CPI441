@@ -91,7 +91,17 @@ public class Mosquito : NetworkBehaviour
     protected override void OnSpawned()
     {
         base.OnSpawned();
-        Debug.Log($"[Mosquito] OnSpawned | name={gameObject.name} | isOwner={isOwner} | isController={isController} | isServer={isServer} | owner={owner}");
+        Debug.Log($"[Mosquito] OnSpawned | name={gameObject.name} | isOwner={isOwner} | isController={isController} | isServer={isServer} | owner={owner} | localPlayer={networkManager?.localPlayer}");
+
+        // Use owner == localPlayer instead of isOwner — isOwner returns true for all
+        // objects on the host/server so it cannot distinguish which character belongs
+        // to the local player. This compares the assigned owner PlayerID directly.
+        if (networkManager != null && owner == networkManager.localPlayer)
+        {
+            MosquitoInputTester inputTester = GetComponent<MosquitoInputTester>();
+            if (inputTester != null)
+                inputTester.EnableInput();
+        }
     }
 
     // ========== BASIC ATTACK - BLOOD SHOT ==========

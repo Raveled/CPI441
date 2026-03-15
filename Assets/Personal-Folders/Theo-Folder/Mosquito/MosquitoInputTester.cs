@@ -102,9 +102,15 @@ public class MosquitoInputTester : MonoBehaviour
         return nearest;
     }
 
-    // Enable / Disable
-    private void OnEnable()
+    private bool _inputEnabled = false;
+
+    // Called by Mosquito.OnSpawned — only subscribes input for the local owner
+    public void EnableInput()
     {
+        if (_inputEnabled) return;
+        _inputEnabled = true;
+
+        Debug.Log($"[InputTester] EnableInput called on {mosquito.gameObject.name} | owner={mosquito.owner}");
         quickPoke.started += OnQuickPoke;
         globShot.started += OnGlobShot;
         ampUp.started += OnAmpUp;
