@@ -115,16 +115,21 @@ public class Mosquito : NetworkBehaviour
         if (bloodShotProjectilePrefab == null) { Debug.LogError("[Mosquito] bloodShotProjectilePrefab is NULL!"); return; }
         if (bloodShotFirePoint == null) { Debug.LogError("[Mosquito] bloodShotFirePoint is NULL!"); return; }
 
-        GameObject projGO = Instantiate(bloodShotProjectilePrefab, position, rotation);
+        // Use prediction system to spawn - same pattern as TowerProjectile
+        PurrNet.Prediction.PredictionManager predictionManager = UnityEngine.Object.FindFirstObjectByType<PurrNet.Prediction.PredictionManager>();
+        if (predictionManager == null) { Debug.LogError("[Mosquito] PredictionManager not found!"); return; }
+
+        PurrNet.Prediction.PredictedObjectID? projId = predictionManager.hierarchy.Create(bloodShotProjectilePrefab, position, rotation);
+        if (!projId.HasValue) { Debug.LogError("[Mosquito] Failed to create projectile via hierarchy!"); return; }
+
+        GameObject projGO = predictionManager.hierarchy.GetGameObject(projId);
+        if (projGO == null) { Debug.LogError("[Mosquito] Failed to get projectile GameObject!"); return; }
 
         BloodShotProjectile proj = projGO.GetComponent<BloodShotProjectile>();
-        if (proj == null) { Debug.LogError("[Mosquito] BloodShotProjectile component NOT found on prefab!"); return; }
+        if (proj == null) { Debug.LogError("[Mosquito] BloodShotProjectile component NOT found!"); return; }
 
-        // Use SpawnSetup from Projectile base class — handles all state, velocity, owner, damage
         proj.SpawnSetup(entity, damage, bloodShotFirePoint.forward, bloodShotSpeed);
-
-        NetworkManager.main.Spawn(projGO);
-        Debug.Log($"[Mosquito] Spawned projectile: {projGO.name} - damage={damage}, speed={bloodShotSpeed}");
+        Debug.Log($"[Mosquito] Spawned projectile via hierarchy - damage={damage}, speed={bloodShotSpeed}");
     }
 
     // ========== BLOOD ENERGY PASSIVE (Ability 1) ==========
