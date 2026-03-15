@@ -116,18 +116,15 @@ public class Mosquito : NetworkBehaviour
         if (bloodShotFirePoint == null) { Debug.LogError("[Mosquito] bloodShotFirePoint is NULL!"); return; }
 
         GameObject projGO = Instantiate(bloodShotProjectilePrefab, position, rotation);
-        NetworkManager.main.Spawn(projGO);
-
-        Debug.Log($"[Mosquito] Spawned projectile: {projGO.name}");
 
         BloodShotProjectile proj = projGO.GetComponent<BloodShotProjectile>();
         if (proj == null) { Debug.LogError("[Mosquito] BloodShotProjectile component NOT found on prefab!"); return; }
 
-        proj.syncDamage.value = damage;
-        proj.syncSpeed.value = bloodShotSpeed;
-        proj.syncMaxRange.value = bloodShotRange;
-        proj.syncOwnerID.value = entity.GetNetworkID(isServer);
-        Debug.Log($"[Mosquito] Projectile configured - damage={damage}, speed={bloodShotSpeed}, range={bloodShotRange}, ownerID={entity.GetNetworkID(isServer)}");
+        // Use SpawnSetup from Projectile base class — handles all state, velocity, owner, damage
+        proj.SpawnSetup(entity, damage, bloodShotFirePoint.forward, bloodShotSpeed);
+
+        NetworkManager.main.Spawn(projGO);
+        Debug.Log($"[Mosquito] Spawned projectile: {projGO.name} - damage={damage}, speed={bloodShotSpeed}");
     }
 
     // ========== BLOOD ENERGY PASSIVE (Ability 1) ==========

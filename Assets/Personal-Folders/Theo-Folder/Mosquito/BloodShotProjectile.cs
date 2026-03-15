@@ -1,79 +1,78 @@
 using UnityEngine;
 using PurrNet;
 
-public class BloodShotProjectile : NetworkBehaviour
+public class BloodShotProjectile : Projectile
 {
-    public SyncVar<int> syncDamage = new(0);
-    public SyncVar<float> syncSpeed = new(0f);
-    public SyncVar<float> syncMaxRange = new(8f);
-    public SyncVar<NetworkID?> syncOwnerID = new(null);
-
-    private Vector3 startPos;
-    private bool despawned = false;
-    private Entity cachedOwner = null;
-
-    private void Awake()
+    protected override void LateAwake()
     {
-        startPos = transform.position;
-    }
+        base.LateAwake();
 
-    protected override void OnSpawned()
-    {
-        // Resolve owner from synced NetworkID — works on all clients
-        if (syncOwnerID.value.HasValue)
+        // Apply velocity after base LateAwake initializes the prediction system
+        if (rb != null && currentState.isActive)
         {
-            Entity[] all = FindObjectsByType<Entity>(FindObjectsSortMode.None);
-            foreach (var e in all)
-            {
-                if (e.GetNetworkID(isServer) == syncOwnerID.value)
-                {
-                    cachedOwner = e;
-                    break;
-                }
-            }
+            rb.linearVelocity = currentState.velocity;
+            Debug.Log($"[BloodShot] LateAwake - velocity={currentState.velocity}, isServer={isServer}");
         }
-        Debug.Log($"[BloodShot] OnSpawned — isServer={isServer}, owner={cachedOwner?.name}, syncSpeed={syncSpeed.value}, syncMaxRange={syncMaxRange.value}");
-    }
-
-    private void Update()
-    {
-        if (despawned) return;
-
-        transform.Translate(Vector3.forward * syncSpeed.value * Time.deltaTime);
-
-        if (isServer && syncMaxRange.value > 0 && Vector3.Distance(startPos, transform.position) >= syncMaxRange.value)
+        else
         {
-            despawned = true;
-            Despawn();
+            Debug.LogWarning($"[BloodShot] LateAwake - rb={rb}, isActive={currentState.isActive}");
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    protected override void OnTriggerEnter(Collider other)
     {
-        if (despawned || !isServer) return;
+        if (!isServer) return;
 
-        // Use cachedOwner if available, otherwise skip owner checks
-        if (cachedOwner != null)
+        // Ignore towers and NPE detection logic (inherited behaviour from Projectile)
+        if (other.gameObject.GetComponent<Tower>() || other.gameObject.GetComponent<NPEDetectLogic>())
+            return;
+
+        // Ignore the owner
+        Entity ownerEntity = GetEntityByNetworkID(currentState.ownerId.Value);
+        if (ownerEntity != null)
         {
-            if (other.transform.IsChildOf(cachedOwner.transform) || other.gameObject == cachedOwner.gameObject)
+            if (other.transform.IsChildOf(ownerEntity.transform) || other.gameObject == ownerEntity.gameObject)
                 return;
         }
 
+        // Ignore non-entities
         Entity target = other.GetComponent<Entity>();
         if (target == null) return;
-        if (cachedOwner != null && (target == cachedOwner || target.GetTeam() == cachedOwner.GetTeam())) return;
 
-        Debug.Log($"[BloodShot] Hit {target.name} for {syncDamage.value} damage!");
-        target.TakeDamage(syncDamage.value, cachedOwner);
+        // Ignore friendly targets
+        if (ownerEntity != null && target.GetTeam() == ownerEntity.GetTeam()) return;
 
-        if (cachedOwner != null)
-        {
-            Mosquito mosquito = cachedOwner.GetComponent<Mosquito>();
-            if (mosquito != null)
-                mosquito.OnBasicAttackHit(target);
-        }
-
-        despawned = true;
-        Despawn();
+        Detonate();
     }
+
+    protected override void ApplyDamage()
+    {
+        if (!isServer) return;
+
+        var state = currentState;
+        Entity ownerEntity = GetEntityByNetworkID(state.ownerId.Value);
+        if (ownerEntity == null) return;
+
+        Entity target = GetEntityByNetworkID(state.targetId.HasValue ? state.targetId.Value : default);
+
+        // BloodShot hits whatever it collided with directly via overlap at position
+        Collider[] hitColliders = Physics.OverlapSphere(state.position, GetHitRadius());
+        foreach (Collider c in hitColliders)
+        {
+            Entity e = c.GetComponent<Entity>();
+            if (e == null || e.GetIsDead()) continue;
+            if (e == ownerEntity || e.GetTeam() == ownerEntity.GetTeam()) continue;
+            if (!state.enemyTeams.Contains(e.GetTeam())) continue;
+
+            Debug.Log($"[BloodShot] Hit {e.name} for {state.damage} damage!");
+            e.TakeDamage(state.damage, ownerEntity);
+
+            // Notify Mosquito so it can gain blood meter
+            Mosquito mosquito = ownerEntity.GetComponent<Mosquito>();
+            if (mosquito != null)
+                mosquito.OnBasicAttackHit(e);
+        }
+    }
+
+    protected override float GetHitRadius() => 0.5f;
 }
