@@ -52,6 +52,7 @@ public class Entity : NetworkBehaviour
     protected virtual void Start()
     {
         Setup();
+        SetIconColor();
     }
 
     //Assigns stats to GameObject based on the SO_EntityStatBlock
@@ -412,6 +413,38 @@ public class Entity : NetworkBehaviour
             p.IncreaseXPTotal(xpReward);
         }
     }
+
+    protected virtual void SetIconColor()
+    {
+        Transform iconTransform = transform.Find("MinimapIcon");
+
+        if (iconTransform == null)
+        {
+            Debug.LogWarning($"[SetIconColor] No child GameObject named 'icon' found on {entityName}.");
+            return;
+        }
+
+        SpriteRenderer sr = iconTransform.GetComponent<SpriteRenderer>();
+        if (sr == null)
+        {
+            Debug.LogWarning($"[SetIconColor] Child 'icon' on {entityName} has no SpriteRenderer.");
+            return;
+        }
+
+        sr.color = GetTeamColor(team.value);
+    }
+
+    protected virtual Color GetTeamColor(Team t)
+    {
+        return t switch
+        {
+            Team.TEAM1   => Color.lightPink,
+            Team.TEAM2   => Color.lightBlue,
+            Team.NEUTRAL => Color.yellow,
+            _            => Color.white,
+        };
+    }
+
     protected virtual void OnDrawGizmos()
     {
         /*if (showRewardRange) {
