@@ -41,11 +41,19 @@ public class MosquitoInputTester : MonoBehaviour
     }
 
     // Input Callbacks
+    private void OnBasicAttack(InputAction.CallbackContext context)
+    {
+        if (context.started && mosquito != null && mosquito.isOwner)
+        {
+            mosquito.CastBloodShot();
+            Debug.Log("[InputTester] Blood Shot Tried!");
+        }
+    }
+
     private void OnQuickPoke(InputAction.CallbackContext context)
     {
-        if (context.started && mosquito != null)
+        if (context.started && mosquito != null && mosquito.isOwner)
         {
-            Entity target = FindNearestEnemy();
             if (mosquito.TryQuickPoke())
                 Debug.Log("[InputTester] Quick Poke Tried!");
         }
@@ -53,7 +61,7 @@ public class MosquitoInputTester : MonoBehaviour
 
     private void OnGlobShot(InputAction.CallbackContext context)
     {
-        if (context.started && mosquito != null)
+        if (context.started && mosquito != null && mosquito.isOwner)
         {
             mosquito.CastGlobShot();
             Debug.Log("[InputTester] Glob Shot Tried!");
@@ -62,19 +70,10 @@ public class MosquitoInputTester : MonoBehaviour
 
     private void OnAmpUp(InputAction.CallbackContext context)
     {
-        if (context.started && mosquito != null)
+        if (context.started && mosquito != null && mosquito.isOwner)
         {
             mosquito.ActivateAmpUp();
             Debug.Log("[InputTester] Amp Up Tried!");
-        }
-    }
-
-    private void OnBasicAttack(InputAction.CallbackContext context)
-    {
-        if (context.started && mosquito != null)
-        {
-            mosquito.CastBloodShot();
-            Debug.Log("[InputTester] Blood Shot Tried!");
         }
     }
 

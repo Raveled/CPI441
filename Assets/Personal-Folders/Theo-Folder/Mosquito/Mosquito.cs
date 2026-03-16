@@ -90,6 +90,9 @@ public class Mosquito : NetworkBehaviour
     // ========== BASIC ATTACK - BLOOD SHOT ==========
     public void CastBloodShot()
     {
+        if (!isController) return; // Safety guard
+        Debug.Log($"[Mosquito] CastBloodShot on {gameObject.name} | isController={isController} | isOwner={isOwner} | isServer={isServer}");
+
         Debug.Log($"[Mosquito] CastBloodShot called. isServer={isServer}, isSpawned={isSpawned}, entity={entity?.name}");
         PlayBloodShotAnim();
 
@@ -108,7 +111,7 @@ public class Mosquito : NetworkBehaviour
         }
     }
 
-    [ServerRpc(requireOwnership: false)]
+    [ServerRpc(requireOwnership: true)]
     private void ServerSpawnBloodShotRpc(Vector3 position, Quaternion rotation, int damage)
     {
         Debug.Log($"[Mosquito] ServerSpawnBloodShotRpc received on server. damage={damage}");
@@ -154,6 +157,7 @@ public class Mosquito : NetworkBehaviour
     // ========== QUICK POKE - ABILITY 2 ==========
     public bool TryQuickPoke()
     {
+        if (!isController) return false; // Safety guard
         if (quickPokeCooldownTimer > 0f || entity == null)
         {
             Debug.Log($"[Mosquito] Quick Poke blocked - cooldown: {quickPokeCooldownTimer:F2}s remaining");
@@ -171,7 +175,7 @@ public class Mosquito : NetworkBehaviour
         return true;
     }
 
-    [ServerRpc(requireOwnership: false)]
+    [ServerRpc(requireOwnership: true)]
     private void ApplyQuickPokeServerRpc()
     {
         ApplyQuickPoke();
@@ -213,6 +217,7 @@ public class Mosquito : NetworkBehaviour
     // ========== GLOB SHOT - ABILITY 3 ==========
     public void CastGlobShot()
     {
+        if (!isController) return; // Safety guard
         if (currentBloodMeter < globShotMinBloodThreshold)
         {
             Debug.Log($"[Mosquito] Glob Shot blocked - blood {currentBloodMeter:F1} below threshold {globShotMinBloodThreshold}");
@@ -236,7 +241,7 @@ public class Mosquito : NetworkBehaviour
             ServerSpawnGlobRpc(globFirePoint.position, globFirePoint.rotation, damage, sizeScale);
     }
 
-    [ServerRpc(requireOwnership: false)]
+    [ServerRpc(requireOwnership: true)]
     private void ServerSpawnGlobRpc(Vector3 position, Quaternion rotation, float damage, float sizeScale)
     {
         ServerSpawnGlob(position, rotation, damage, sizeScale);
@@ -261,6 +266,7 @@ public class Mosquito : NetworkBehaviour
     // ========== AMP UP - ULTIMATE ==========
     public void ActivateAmpUp()
     {
+        if (!isController) return; // Safety guard
         if (ampUpTimer > 0f)
         {
             Debug.Log("[Mosquito] Amp Up blocked - already active.");
@@ -276,7 +282,7 @@ public class Mosquito : NetworkBehaviour
             ApplyAmpUpServerRpc();
     }
 
-    [ServerRpc(requireOwnership: false)]
+    [ServerRpc(requireOwnership: true)]
     private void ApplyAmpUpServerRpc()
     {
         ApplyAmpUp();
@@ -318,22 +324,32 @@ public class Mosquito : NetworkBehaviour
     }
 
     // ========== ANIMATOR METHODS ==========
+    [ObserversRpc]
+
     private void PlayBloodShotAnim()
     {
         if (animator != null) animator.SetTrigger("BloodShot");
     }
+    [ObserversRpc]
+
     private void PlayQuickPokeAnim()
     {
         if (animator != null) animator.SetTrigger("QuickPoke");
     }
+    [ObserversRpc]
+
     private void PlayGlobShotAnim()
     {
         if (animator != null) animator.SetTrigger("GlobShot");
     }
+    [ObserversRpc]
+
     private void PlayAmpUpAnimation()
     {
         if (animator != null) animator.SetTrigger("AmpUp");
     }
+    [ObserversRpc]
+
     public void PlayDeathAnimation()
     {
         if (animator != null) animator.SetTrigger("Death");
