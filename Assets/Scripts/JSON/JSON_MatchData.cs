@@ -29,26 +29,42 @@ public class JSON_MatchData : MonoBehaviour
         //For saving to pc
         string filePath = Application.persistentDataPath + "/MatchData.json";
 
-        Debug.Log("saving Match Data JSON to: " + filePath);
-
         //Convert to JSON
         string jsonData = JsonConvert.SerializeObject(match, Formatting.Indented);
         System.IO.File.WriteAllText(filePath, jsonData);
-    }
-    //Load in match data from a file
-    public void LoadFromFile() {
-        if (loadInJSON == null) {
-            return;
-        }
 
-        Debug.Log("Loaded In Match Data");
-        match = JsonConvert.DeserializeObject<Match>(loadInJSON.text);
+        Debug.Log("saving Entity Data JSON to: " + filePath);
+    }
+    //Load JSON from a file
+    public void LoadFromFile() {
+        //Attempt to load from local file
+        string filePath = Application.persistentDataPath + "/MatchData.json";
+
+        if (System.IO.File.Exists(filePath)) {
+            string jsonData = System.IO.File.ReadAllText(filePath);
+
+            match = JsonConvert.DeserializeObject<Match>(jsonData);
+
+            Debug.Log("Loaded Entity Data from: " + filePath);
+        } else {
+            //If no local file, load from the pre-loaded file instead
+            if (loadInJSON == null) return;
+            match = JsonConvert.DeserializeObject<Match>(loadInJSON.text);
+            Debug.Log("Loaded In Match Data");
+        }
     }
     //Getter
     public Match GetMatch() {
         return match;
     }
-    
+    public string GetJSONString() {
+        string filePath = Application.persistentDataPath + "/MatchData.json";
+        string jsonData = "";
+        if (System.IO.File.Exists(filePath)) {
+            jsonData = System.IO.File.ReadAllText(filePath);
+        }
+        return jsonData;
+    }
 }
 //Class to hold match data
 [System.Serializable]

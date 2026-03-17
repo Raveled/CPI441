@@ -66,9 +66,7 @@ public class Core : NonPlayerEntity
     public override void Freeze(bool freezeNPE) {
         base.Freeze(freezeNPE);
         canSpawnMinions = !freezeNPE;
-
     }
-
     //Setter
     public void SetMinionStatblock(SO_EntityStatBlock stats) {
         minionStatblock = stats;

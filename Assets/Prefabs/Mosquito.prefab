@@ -436,7 +436,7 @@ MonoBehaviour:
   ampUpInitialAttackSpeedMult: 2
   ampUpColor: {r: 1, g: 0, b: 0, a: 1}
   animator: {fileID: 8204087541940055493}
-  entity: {fileID: 4751865395330377205}
+  player: {fileID: 4751865395330377205}
 --- !u!114 &415774168675383472
 MonoBehaviour:
   m_ObjectHideFlags: 0

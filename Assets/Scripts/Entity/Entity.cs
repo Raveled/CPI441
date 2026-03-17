@@ -107,7 +107,7 @@ public class Entity : NetworkBehaviour
         if (!isServer)
             return;
 
-        Debug.Log($"Applying stats for {entityName} on team {team.value}");
+        //Debug.Log($"Applying stats for {entityName} on team {team.value}");
 
         maximumHitPoints.value = statBlock.BaseHitPoints;
         currentHitPoints.value = maximumHitPoints.value;
@@ -200,7 +200,7 @@ public class Entity : NetworkBehaviour
     private void NotifyHealthChanged(int newHealth)
     {
         // This method can be used to trigger client-side effects when health changes, if needed
-        Debug.Log($"{entityName} health: {newHealth}/{maximumHitPoints.value}");
+        //Debug.Log($"{entityName} health: {newHealth}/{maximumHitPoints.value}");
         OnHealthChanged(newHealth);
     }
 

@@ -84,6 +84,10 @@ public class NonPlayerEntity : Entity
     {
         base.OnDeathClient(damageOriginId);
     }
+    public override bool TakeDamage(int damage, Entity damageOrigin) {
+        if (animator) animator.SetTrigger("Hit");
+        return base.TakeDamage(damage, damageOrigin);
+    }
     protected override void Die(Entity damageOrigin) {
         base.Die(damageOrigin);
 
@@ -241,6 +245,10 @@ public class NonPlayerEntity : Entity
         SetTarget(null);
     }
     //Visualization for ranges using Gizmos
+
+    public void DestroyThis() {
+        Destroy(gameObject);
+    }
     protected override void OnDrawGizmos() {
         base.OnDrawGizmos();
         if (showAttackRange) {

@@ -192,4 +192,9 @@ public class Player : Entity
 
         return null; 
     }
+
+    public bool isLocalPlayer()
+    {
+        return predictedMovement.predictionManager.localPlayer == GetPlayerID();
+    }
 }

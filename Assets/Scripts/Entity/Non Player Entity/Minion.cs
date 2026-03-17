@@ -169,10 +169,7 @@ public class Minion : NonPlayerEntity
             agent.SetDestination(previousDestination);
         }
     }
-    public override bool TakeDamage(int damage, Entity damageOrigin) {
-        animator.SetTrigger("Hit");
-        return base.TakeDamage(damage, damageOrigin);
-    }
+    
     protected override void Attack(Entity currentTarget) {
         base.Attack();
 
@@ -221,9 +218,7 @@ public class Minion : NonPlayerEntity
             }
         }
     }
-    public void DestroyThis() {
-        Destroy(gameObject);
-    }
+    
 
     //Rotate the Transform based on the target
     void Rotate(Entity currentTarget) {
