@@ -73,7 +73,7 @@ public class TempInputTester : MonoBehaviour
         if (context.started && mosquito != null)
         {
             Entity target = FindNearestEnemy();
-            if (target != null && mosquito.entity != null)
+            if (target != null && mosquito.player != null)
             {
                 mosquito.CastBloodShot();
                 Debug.Log("Blood Shot FIRED!");
@@ -126,7 +126,7 @@ public class TempInputTester : MonoBehaviour
     // *** Helper Functions *** //
     Entity FindNearestEnemy()
     {
-        Entity owner = mosquito?.entity ?? butterfly?.entity;
+        Entity owner = mosquito?.player ?? butterfly?.entity;
         if (owner == null) return null;
 
         Collider[] hits = Physics.OverlapSphere(transform.position, 5f);
