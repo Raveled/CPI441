@@ -5,6 +5,7 @@ using UnityEngine.AI;
 using NUnit.Framework;
 using PurrNet;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class Minion : NonPlayerEntity
 {
@@ -74,14 +75,7 @@ public class Minion : NonPlayerEntity
         agent.updateRotation = true;
     }
 
-    void Update()
-    {
-        if (isServer) ServerUpdate();
-
-        ClientUpdate();
-    }
-
-    void ServerUpdate()
+    protected override void ServerUpdate()
     {
         Entity currentTarget = GetTarget();
         if(hasTarget && !currentTarget) 
@@ -103,9 +97,11 @@ public class Minion : NonPlayerEntity
             AttackTimer();
             Attack(currentTarget);
         }
+
+        base.ServerUpdate();
     }
 
-    void ClientUpdate()
+    protected override void ClientUpdate()
     {
         //Update the cylinder points for attack
         p0 = attackRangeOrigin.position + halfHeight;
@@ -126,6 +122,8 @@ public class Minion : NonPlayerEntity
                 Debug.DrawLine(basePOSThis, basePOSTarget, debugLineColor);
             }
         }
+
+        base.ClientUpdate();
     }
 
     protected override void Move(Entity currentTarget) {
@@ -171,10 +169,7 @@ public class Minion : NonPlayerEntity
             agent.SetDestination(previousDestination);
         }
     }
-    public override bool TakeDamage(int damage, Entity damageOrigin) {
-        animator.SetTrigger("Hit");
-        return base.TakeDamage(damage, damageOrigin);
-    }
+    
     protected override void Attack(Entity currentTarget) {
         base.Attack();
 
@@ -223,9 +218,7 @@ public class Minion : NonPlayerEntity
             }
         }
     }
-    public void DestroyThis() {
-        Destroy(gameObject);
-    }
+    
 
     //Rotate the Transform based on the target
     void Rotate(Entity currentTarget) {

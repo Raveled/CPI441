@@ -55,12 +55,22 @@ public class NonPlayerEntity : Entity
         base.Start();
         entitiesInRange = new List<Entity>();
         npeDetectLogic.SetNPE(this);
-
-        StartCoroutine(DelayedHealthBarUpdate());
     }
 
-    private IEnumerator DelayedHealthBarUpdate() {
-        yield return new WaitUntil(() => isSpawned);
+    private void Update()
+    {
+        if (isServer) ServerUpdate();
+
+        ClientUpdate();
+    }
+
+    protected virtual void ServerUpdate()
+    {
+        // Implement in children
+    }
+
+    protected virtual void ClientUpdate()
+    {
         UpdateHealthBar();
     }
 
@@ -73,6 +83,10 @@ public class NonPlayerEntity : Entity
     protected override void OnDeathClient(NetworkID? damageOriginId)
     {
         base.OnDeathClient(damageOriginId);
+    }
+    public override bool TakeDamage(int damage, Entity damageOrigin) {
+        if (animator) animator.SetTrigger("Hit");
+        return base.TakeDamage(damage, damageOrigin);
     }
     protected override void Die(Entity damageOrigin) {
         base.Die(damageOrigin);
@@ -231,6 +245,10 @@ public class NonPlayerEntity : Entity
         SetTarget(null);
     }
     //Visualization for ranges using Gizmos
+
+    public void DestroyThis() {
+        Destroy(gameObject);
+    }
     protected override void OnDrawGizmos() {
         base.OnDrawGizmos();
         if (showAttackRange) {

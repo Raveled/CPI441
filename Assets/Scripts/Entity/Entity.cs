@@ -52,6 +52,7 @@ public class Entity : NetworkBehaviour
     protected virtual void Start()
     {
         Setup();
+        SetIconColor();
     }
 
     //Assigns stats to GameObject based on the SO_EntityStatBlock
@@ -106,7 +107,7 @@ public class Entity : NetworkBehaviour
         if (!isServer)
             return;
 
-        Debug.Log($"Applying stats for {entityName} on team {team.value}");
+        //Debug.Log($"Applying stats for {entityName} on team {team.value}");
 
         maximumHitPoints.value = statBlock.BaseHitPoints;
         currentHitPoints.value = maximumHitPoints.value;
@@ -126,14 +127,14 @@ public class Entity : NetworkBehaviour
     {
         if (!isServer)
         {
-            Debug.Log($"[TakeDamage] {gameObject.name} with ID: {damageOrigin.GetNetworkID(isServer)} is requesting to take {damage} damage from {damageOrigin?.name}");
+            //Debug.Log($"[TakeDamage] {gameObject.name} with ID: {damageOrigin.GetNetworkID(isServer)} is requesting to take {damage} damage from {damageOrigin?.name}");
             // Client requests server to apply damage
             if (damageOrigin != null) RequestDamageServerRpc(damage, damageOrigin.GetNetworkID(isServer));
             else RequestDamageServerRpc(damage, null);
             return isDead.value; // Return current state for client
         }
 
-        Debug.Log($"[TakeDamage] Server is applying {damage} damage from {damageOrigin?.name} to {name}");
+        //Debug.Log($"[TakeDamage] Server is applying {damage} damage from {damageOrigin?.name} to {name}");
         // Server applies damage directly
         if (damageOrigin != null) ApplyDamageServer(damage, damageOrigin.GetNetworkID(isServer));
         else ApplyDamageServer(damage, null);
@@ -143,7 +144,7 @@ public class Entity : NetworkBehaviour
     [ServerRpc(requireOwnership: false)]
     private void RequestDamageServerRpc(int damage, NetworkID? originId)
     {
-        Debug.Log($"[TakeDamageServerRpc] Received damage request: {damage} from origin ID: {originId}");
+        //Debug.Log($"[TakeDamageServerRpc] Received damage request: {damage} from origin ID: {originId}");
         ApplyDamageServer(damage, originId);
     }
 
@@ -153,7 +154,7 @@ public class Entity : NetworkBehaviour
         if (isDead.value || !isServer)
             return;
 
-        Debug.Log($"[TakeDamage] {name} is taking {damage} damage from {originId}");
+        //Debug.Log($"[TakeDamage] {name} is taking {damage} damage from {originId}");
 
         // Check if protector is alive
         bool protectorAlive = false;
@@ -190,7 +191,7 @@ public class Entity : NetworkBehaviour
         }
 
         // Notify all clients of health update
-        NotifyHealthChanged(currentHitPoints.value);
+        if(!GetIsDead())NotifyHealthChanged(currentHitPoints.value);
 
         return;
     }
@@ -199,7 +200,7 @@ public class Entity : NetworkBehaviour
     private void NotifyHealthChanged(int newHealth)
     {
         // This method can be used to trigger client-side effects when health changes, if needed
-        Debug.Log($"{entityName} health: {newHealth}/{maximumHitPoints.value}");
+        //Debug.Log($"{entityName} health: {newHealth}/{maximumHitPoints.value}");
         OnHealthChanged(newHealth);
     }
 
@@ -343,8 +344,8 @@ public class Entity : NetworkBehaviour
             damageOrigin = GetEntityByNetworkID(damageOriginId.Value);
         }
 
+        if (!GetIsDead()) NotifyDeathObserversRpc(damageOriginId);
         Die(damageOrigin);
-        NotifyDeathObserversRpc(damageOriginId);
     }
 
     //Basic logic for dying/destroying self
@@ -412,6 +413,38 @@ public class Entity : NetworkBehaviour
             p.IncreaseXPTotal(xpReward);
         }
     }
+
+    protected virtual void SetIconColor()
+    {
+        Transform iconTransform = transform.Find("MinimapIcon");
+
+        if (iconTransform == null)
+        {
+            Debug.LogWarning($"[SetIconColor] No child GameObject named 'icon' found on {entityName}.");
+            return;
+        }
+
+        SpriteRenderer sr = iconTransform.GetComponent<SpriteRenderer>();
+        if (sr == null)
+        {
+            Debug.LogWarning($"[SetIconColor] Child 'icon' on {entityName} has no SpriteRenderer.");
+            return;
+        }
+
+        sr.color = GetTeamColor(team.value);
+    }
+
+    protected virtual Color GetTeamColor(Team t)
+    {
+        return t switch
+        {
+            Team.TEAM1   => GameManager.Instance.team1Color,
+            Team.TEAM2   => GameManager.Instance.team2Color,
+            Team.NEUTRAL => Color.yellow,
+            _            => Color.white,
+        };
+    }
+
     protected virtual void OnDrawGizmos()
     {
         /*if (showRewardRange) {

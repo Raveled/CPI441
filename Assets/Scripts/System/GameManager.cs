@@ -4,10 +4,14 @@ using Unity.AI.Navigation;
 using TMPro;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.UI;
+using PurrNet;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
     public enum GameState : int { NULL = 0, INPROGRESS = 1, PAUSED = 2, END = 3}
+    public enum Team : int { NULL = 0, TEAM1 = 1, TEAM2 = 2, NEUTRAL = 3 };
 
     //GameManager
     [Header("GameManager Setup")]
@@ -26,6 +30,18 @@ public class GameManager : MonoBehaviour
     [Space]
     [SerializeField] GameState gameState = GameState.NULL;
     [SerializeField] string timerString = "";
+
+    //Win Screen
+    [Space]
+    [Header("Win Screen Setup")]
+    [SerializeField] GameObject winScreenCanvas = null;
+    [SerializeField] TextMeshProUGUI winScreenText = null;
+    [SerializeField] Image winScreenBGImage = null;
+    [SerializeField] public string team1Name = "Magenta Team";
+    [SerializeField] public string team2Name = "Blue Team";
+    [SerializeField] public Color team1Color;
+    [SerializeField] public Color team2Color;
+    public Color winningTeamColor;
 
     //Character Handling
     [Space]
@@ -87,8 +103,28 @@ public class GameManager : MonoBehaviour
     [SerializeField] int towersDestroyed_Team1 = 0; //how many of Team 2's towers Team 1 destroyed
     [SerializeField] int towersDestroyed_Team2 = 0;
 
+    // Network IDS
+    public struct PlayerInfo
+    {
+        public PlayerID? playerID;
+        public Team team;
+        public string character;
+
+        public PlayerInfo(PlayerID? playerID, Team team, string character)
+        {
+            this.playerID = playerID;
+            this.team = team;
+            this.character = character;
+        }
+    }
+    public List<PlayerID?> playerIDs = new List<PlayerID?>();
+    public List<PlayerInfo> playersInfo = new List<PlayerInfo>();
+
+    public static GameManager Instance { get; private set;}
 
     private void Awake() {
+        Instance = this;
+
         //Load in the stats from the JSON
         matchData = GetComponent<JSON_MatchData>();
         entityData = GetComponent<JSON_EntityData>();
@@ -99,6 +135,7 @@ public class GameManager : MonoBehaviour
         gameState = GameState.INPROGRESS;
         gameTimer = 0;
         currentMinionWaveSpawnTimer = minionWaveSpawnInterval;
+        winScreenCanvas.SetActive(false);
 
         //Setup Cores+Towers
         cores = FindObjectsByType<Core>(FindObjectsSortMode.None);
@@ -161,7 +198,15 @@ public class GameManager : MonoBehaviour
         if (Keyboard.current.nKey.wasPressedThisFrame) {
             LoadEntityJSON();
         }
+        if (Keyboard.current.yKey.wasPressedThisFrame) {
+            if (!aiprompted) {
+                Debug.Log("DEBUG: AI PROMPT");
+                FindFirstObjectByType<AIManager>().AskAIForBalance();
+                aiprompted = true;
+            }
+        }
     }
+    bool aiprompted = false;
     //Handle the game timer
     void GameTimer() {
         if (gameState != GameState.INPROGRESS) return;
@@ -242,12 +287,25 @@ public class GameManager : MonoBehaviour
     //When a core is destroyed, this will be called, ending the game
     public void GameEnd(Entity.Team team) {
         if(team == Entity.Team.TEAM1) {
-            winnerStr = "Team1";
+            winnerStr = team1Name;
+            winningTeamColor = team1Color;
         }else if(team == Entity.Team.TEAM2) {
-            winnerStr = "Team2";
+            winnerStr = team2Name;
+            winningTeamColor = team2Color;
         }
+        winningTeamColor.a = 200;
+        winScreenBGImage.color = winningTeamColor;
+        winScreenText.text = winnerStr + " Wins!";
+        winScreenCanvas.SetActive(true);
+
         ChangeGameState(GameState.END);
         GenerateMatchJSON();
+
+        //WIP
+        if (!aiprompted) {
+            FindFirstObjectByType<AIManager>().AskAIForBalance();
+            aiprompted = true;
+        }
     }
 
     //When a Tower is destroyed, this is called for JSON
@@ -272,19 +330,23 @@ public class GameManager : MonoBehaviour
     void ChangeGameState(GameState state) {
         switch (state) {
             case GameState.NULL:
+                Debug.Log("Game State: NULL");
                 gameState = GameState.NULL;
                 break;
             case GameState.INPROGRESS:
+                Debug.Log("Game State: In Progress");
                 gameState = GameState.INPROGRESS;
                 FreezeAllNPE(false);
                 FreezeAllPCs(false);
                 break;
             case GameState.PAUSED:
+                Debug.Log("Game State: Paused");
                 gameState = GameState.PAUSED;
                 FreezeAllNPE(true);
                 FreezeAllPCs(true);
                 break;
             case GameState.END:
+                Debug.Log("Game State: Ended");
                 gameState = GameState.END;
                 FreezeAllNPE(true);
                 ShowEndGameVisual();
@@ -386,6 +448,18 @@ public class GameManager : MonoBehaviour
         statBlock.RewardGold = loadFrom.entityStats[entityType].rewardGold;
         statBlock.RewardXP = loadFrom.entityStats[entityType].rewardXP;
     }
+
+    // WIP METHOD FOR SETTING PLAYER CHARACTER
+    public (Team, string) GetPlayerSetup()
+    {
+        if (playerIDs.Count % 2 == 0)
+        {
+            return (Team.TEAM1, "Mosquito");
+        }
+
+        return (Team.TEAM2, "Mosquito");
+    }
+
     #endregion
     #region WORK IN PROGRESS
     void FreezeAllPCs(bool freeze) {

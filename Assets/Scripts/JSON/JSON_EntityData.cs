@@ -15,12 +15,14 @@ public class JSON_EntityData : MonoBehaviour
     public void ImportEntityData(SO_EntityStatBlock core, SO_EntityStatBlock minion, SO_EntityStatBlock tower,
                                  SO_EntityStatBlock beetle, SO_EntityStatBlock mosquito, SO_EntityStatBlock butterfly) {
         //Init
+        #region Create Keys
         if (!statblocks.entityStats.ContainsKey("Core")) statblocks.entityStats["Core"] = new EntityStatblock();
         if (!statblocks.entityStats.ContainsKey("Minion")) statblocks.entityStats["Minion"] = new EntityStatblock();
         if (!statblocks.entityStats.ContainsKey("Tower")) statblocks.entityStats["Tower"] = new EntityStatblock();
         if (!statblocks.entityStats.ContainsKey("Beetle")) statblocks.entityStats["Beetle"] = new EntityStatblock();
         if (!statblocks.entityStats.ContainsKey("Mosquito")) statblocks.entityStats["Mosquito"] = new EntityStatblock();
         if (!statblocks.entityStats.ContainsKey("Butterfly")) statblocks.entityStats["Butterfly"] = new EntityStatblock();
+        #endregion
 
         #region NPEs
         ImportEntityDataHelper("Core", core);
@@ -52,24 +54,48 @@ public class JSON_EntityData : MonoBehaviour
         //For saving to pc
         string filePath = Application.persistentDataPath + "/EntityData.json";
 
-        Debug.Log("saving Entity Data JSON to: " + filePath);
-
         //Convert to JSON
         string jsonData = JsonConvert.SerializeObject(statblocks, Formatting.Indented);
         System.IO.File.WriteAllText(filePath, jsonData);
+
+        Debug.Log("saving Entity Data JSON to: " + filePath);
     }
     //Load JSON from a file
     public void LoadFromFile() {
-        if (loadInJSON == null) {
-            return;
-        }
+        //Attempt to load from local file
+        string filePath = Application.persistentDataPath + "/EntityData.json";
 
-        Debug.Log("Loaded In Match Data");
-        statblocks = JsonConvert.DeserializeObject<Statblocks>(loadInJSON.text);
+        if (System.IO.File.Exists(filePath)) {
+            string jsonData = System.IO.File.ReadAllText(filePath);
+
+            statblocks = JsonConvert.DeserializeObject<Statblocks>(jsonData);
+
+            Debug.Log("Loaded Entity Data from: " + filePath);
+        } else {
+            //If no local file, load from the pre-loaded file instead
+            if (loadInJSON == null) return;
+            statblocks = JsonConvert.DeserializeObject<Statblocks>(loadInJSON.text);
+            Debug.Log("Loaded In Match Data");
+        }
+    }
+    //FOR TESTING
+    public void EditMinion(int hp, int attack) {
+        statblocks.entityStats["Minion"].baseHitPoints = hp;
+        statblocks.entityStats["Minion"].baseAttackPower = attack;
+        Debug.Log("Chaning minion HP to: " + hp + "; Changing minion AP to: " + attack);
+        SaveToJSON();
     }
     //Getter
     public Statblocks GetStatblocks() {
         return statblocks;
+    }
+    public string GetJSONString() {
+        string filePath = Application.persistentDataPath + "/EntityData.json";
+        string jsonData = "";
+        if (System.IO.File.Exists(filePath)) {
+            jsonData = System.IO.File.ReadAllText(filePath);
+        }
+        return jsonData;
     }
 }
 
