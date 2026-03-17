@@ -415,10 +415,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: AI Manager
       objectReference: {fileID: 0}
-    - target: {fileID: 2365713712280270762, guid: 939afb7b9e95a0e4392506ee53d12df2, type: 3}
-      propertyPath: prompt
-      value: are you workign?
-      objectReference: {fileID: 0}
     - target: {fileID: 4268357716925106502, guid: 939afb7b9e95a0e4392506ee53d12df2, type: 3}
       propertyPath: matchData
       value: 

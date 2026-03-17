@@ -67,11 +67,6 @@ public class Core : NonPlayerEntity
         base.Freeze(freezeNPE);
         canSpawnMinions = !freezeNPE;
     }
-    public override bool TakeDamage(int damage, Entity damageOrigin) {
-        animator.SetTrigger("Hit");
-        return base.TakeDamage(damage, damageOrigin);
-    }
-
     //Setter
     public void SetMinionStatblock(SO_EntityStatBlock stats) {
         minionStatblock = stats;

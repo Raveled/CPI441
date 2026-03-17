@@ -7,7 +7,7 @@ public class AIManager : MonoBehaviour
     [Header("Setup")]
     [SerializeField] JSON_MatchData matchData = null;
     [SerializeField] JSON_EntityData entityData = null;
-    UnityAndGeminiV3 ai = null;
+    //UnityAndGeminiV3 ai = null;
 
     //Prompt
     [Header("Prompt")]
@@ -22,7 +22,7 @@ public class AIManager : MonoBehaviour
     [TextArea(15, 20)]
     [SerializeField]string response = "";
     private void Awake() {
-        ai = GetComponent<UnityAndGeminiV3>();
+        //ai = GetComponent<UnityAndGeminiV3>();
     }
     private void Update() {
         //Testing Prompt Creation
@@ -34,7 +34,7 @@ public class AIManager : MonoBehaviour
         if (Keyboard.current.oKey.wasPressedThisFrame) {
             Debug.Log("button pressed");
             CreatePrompt();
-            ai.SendNewMessage();
+            //ai.SendNewMessage();
         }
     }
     //Concatenate the mesage to send to ai
