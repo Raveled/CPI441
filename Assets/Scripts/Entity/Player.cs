@@ -85,6 +85,15 @@ public class Player : Entity
     {
         playerInfo = ScriptableObject.CreateInstance<SO_PlayerInfo>();
 
+        foreach(GameManager.PlayerInfo playerInfo in GameManager.Instance.playersInfo)
+        {
+            if (playerInfo.playerID == GetPlayerID())
+            {
+                team.value = (Entity.Team) playerInfo.team;
+                Debug.Log("Player ID: " + playerInfo.playerID + " is on Team: " + playerInfo.team);
+            }
+        }
+
         //Fill towers with same team towers
         friendlyTowers = new List<Tower>();
         Tower[] allTowers = FindObjectsByType<Tower>(FindObjectsSortMode.None);

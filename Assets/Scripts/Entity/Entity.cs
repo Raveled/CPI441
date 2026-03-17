@@ -438,8 +438,8 @@ public class Entity : NetworkBehaviour
     {
         return t switch
         {
-            Team.TEAM1   => Color.lightPink,
-            Team.TEAM2   => Color.lightBlue,
+            Team.TEAM1   => GameManager.Instance.team1Color,
+            Team.TEAM2   => GameManager.Instance.team2Color,
             Team.NEUTRAL => Color.yellow,
             _            => Color.white,
         };

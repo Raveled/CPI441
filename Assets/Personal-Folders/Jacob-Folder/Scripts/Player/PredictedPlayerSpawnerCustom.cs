@@ -3,6 +3,7 @@ using PurrNet.Logging;
 using PurrNet.Packing;
 using PurrNet.Pooling;
 using PurrNet.Utils;
+using Unity.Multiplayer.PlayMode;
 using UnityEditor.Build.Content;
 using UnityEngine;
 
@@ -12,25 +13,28 @@ namespace PurrNet.Prediction
     {
         [SerializeField] private List<GameObject> _playerPrefabs;
         [SerializeField, PurrLock] private bool _destroyOnDisconnect;
-        [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
+        [SerializeField] private List<Transform> T1_spawnPoints = new List<Transform>();
+        [SerializeField] private List<Transform> T2_spawnPoints = new List<Transform>();
 
         // ADDED BY JACOB W
 
+        private (GameManager.Team, string) currentPlayerInfo;
+
         private GameObject GetPlayerPrefab()
         {
-            string selectedCharacter = GameManager.Instance.GetPlayerCharacter();
+            currentPlayerInfo = GameManager.Instance.GetPlayerSetup();
 
-            if (selectedCharacter == "Mosquito")
+            if (currentPlayerInfo.Item2 == "Mosquito")
             {
                 Debug.Log("Selecting Mosquito for Player");
                 return _playerPrefabs[0];
             }
-            else if (selectedCharacter == "Beetle")
+            else if (currentPlayerInfo.Item2 == "Beetle")
             {
                 Debug.Log("Selecting Beetle for Player");
                 return _playerPrefabs[1];
             }
-            else if (selectedCharacter == "Butterfly")
+            else if (currentPlayerInfo.Item2 == "Butterfly")
             {
                 Debug.Log("Selecting Butterfly for Player");
                 return _playerPrefabs[2];
@@ -81,12 +85,26 @@ namespace PurrNet.Prediction
         private void CleanupSpawnPoints()
         {
             bool hadNullEntry = false;
-            for (int i = 0; i < spawnPoints.Count; i++)
+            for (int i = 0; i < T1_spawnPoints.Count; i++)
             {
-                if (!spawnPoints[i])
+                if (!T1_spawnPoints[i])
                 {
                     hadNullEntry = true;
-                    spawnPoints.RemoveAt(i);
+                    T1_spawnPoints.RemoveAt(i);
+                    i--;
+                }
+            }
+
+            if (hadNullEntry)
+                PurrLogger.LogWarning($"Some spawn points were invalid and have been cleaned up.", this);
+
+            hadNullEntry = false;
+            for (int i = 0; i < T2_spawnPoints.Count; i++)
+            {
+                if (!T2_spawnPoints[i])
+                {
+                    hadNullEntry = true;
+                    T2_spawnPoints.RemoveAt(i);
                     i--;
                 }
             }
@@ -121,10 +139,16 @@ namespace PurrNet.Prediction
 
             GameObject playerSelectedPrefab = GetPlayerPrefab();
 
-            if (spawnPoints.Count > 0)
+            if (T1_spawnPoints.Count > 0 && currentPlayerInfo.Item1 == GameManager.Team.TEAM1)
             {
-                var spawnPoint = spawnPoints[currentState.spawnPointIndex];
-                currentState.spawnPointIndex = (currentState.spawnPointIndex + 1) % spawnPoints.Count;
+                var spawnPoint = T1_spawnPoints[currentState.spawnPointIndex];
+                currentState.spawnPointIndex = (currentState.spawnPointIndex + 1) % T1_spawnPoints.Count;
+                newPlayer = hierarchy.Create(playerSelectedPrefab, spawnPoint.position, spawnPoint.rotation, player);
+            }
+            else if (T2_spawnPoints.Count > 0 && currentPlayerInfo.Item1 == GameManager.Team.TEAM2)
+            {
+                var spawnPoint = T2_spawnPoints[currentState.spawnPointIndex];
+                currentState.spawnPointIndex = (currentState.spawnPointIndex + 1) % T2_spawnPoints.Count;
                 newPlayer = hierarchy.Create(playerSelectedPrefab, spawnPoint.position, spawnPoint.rotation, player);
             }
             else
@@ -137,6 +161,10 @@ namespace PurrNet.Prediction
 
             currentState[player] = newPlayer.Value;
             predictionManager.SetOwnership(newPlayer, player);
+
+            // Add Player to GameManagerList
+            GameManager.Instance.playerIDs.Add(player);
+            GameManager.Instance.playersInfo.Add(new GameManager.PlayerInfo(player, currentPlayerInfo.Item1, currentPlayerInfo.Item2));
         }
     }
 }

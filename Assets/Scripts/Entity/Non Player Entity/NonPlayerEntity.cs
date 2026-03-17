@@ -55,12 +55,22 @@ public class NonPlayerEntity : Entity
         base.Start();
         entitiesInRange = new List<Entity>();
         npeDetectLogic.SetNPE(this);
-
-        StartCoroutine(DelayedHealthBarUpdate());
     }
 
-    private IEnumerator DelayedHealthBarUpdate() {
-        yield return new WaitUntil(() => isSpawned);
+    private void Update()
+    {
+        if (isServer) ServerUpdate();
+
+        ClientUpdate();
+    }
+
+    protected virtual void ServerUpdate()
+    {
+        // Implement in children
+    }
+
+    protected virtual void ClientUpdate()
+    {
         UpdateHealthBar();
     }
 

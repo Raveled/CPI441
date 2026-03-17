@@ -19153,17 +19153,61 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1256348374070741935, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.57
+      objectReference: {fileID: 0}
+    - target: {fileID: 2046770791161010532, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+      propertyPath: m_Name
+      value: T2_Spawn3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2771562178992919709, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.57
+      objectReference: {fileID: 0}
+    - target: {fileID: 2895013378547183781, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+      propertyPath: m_Name
+      value: T1_Spawn2
+      objectReference: {fileID: 0}
     - target: {fileID: 3604123774642722008, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: maxWaves
       value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 3604123774642722008, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+      propertyPath: team1Color.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3604123774642722008, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+      propertyPath: team2Color.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3604123774642722008, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: spawnCharactersOnStart
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3674364982704174147, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+      propertyPath: m_Name
+      value: T2_Spawn1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4048333129934864333, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+      propertyPath: m_Name
+      value: T1_Spawn1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5403201091729900771, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+      propertyPath: m_Name
+      value: T2_Spawn2
       objectReference: {fileID: 0}
     - target: {fileID: 8154089200534231921, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: m_Name
       value: GameManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 8661443751703141602, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+      propertyPath: m_Name
+      value: T1_Spawn3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8847827241605076448, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.57
       objectReference: {fileID: 0}
     - target: {fileID: 9083819392621653564, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: m_NavMeshData
@@ -23434,13 +23478,14 @@ MonoBehaviour:
   - {fileID: 3921032179608766505, guid: 4fbd9031c1f9ed14bbcdbf982fd86d19, type: 3}
   - {fileID: 3921032179608766505, guid: a1dc1d524fd7bbf4d8cf576951d4a28d, type: 3}
   _destroyOnDisconnect: 0
-  spawnPoints:
-  - {fileID: 616711886}
-  - {fileID: 616711885}
-  - {fileID: 616711884}
+  T1_spawnPoints:
   - {fileID: 616711883}
   - {fileID: 616711882}
   - {fileID: 616711881}
+  T2_spawnPoints:
+  - {fileID: 616711886}
+  - {fileID: 616711885}
+  - {fileID: 616711884}
 --- !u!1001 &730041273
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -25740,6 +25785,13 @@ MonoBehaviour:
   _address: 127.0.0.1
   _timeoutInSeconds: 5
   _pollEventsInUpdate: 0
+  _networkSimulation:
+    includeInBuild: 0
+    simulateLatency: 0
+    minLatency: 30
+    maxLatency: 100
+    simulatePacketLoss: 0
+    packetLossChance: 10
 --- !u!114 &803435779
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63847,7 +63899,7 @@ Transform:
   m_GameObject: {fileID: 1929614320}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -52, y: 250, z: 38.3}
+  m_LocalPosition: {x: -104.2, y: 250, z: 38.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -67512,6 +67564,13 @@ MonoBehaviour:
   _host: purrtransport-nj-us.purrservers.com
   _timeoutInSeconds: 5
   _pollEventsInUpdate: 0
+  _networkSimulation:
+    includeInBuild: 0
+    simulateLatency: 0
+    minLatency: 30
+    maxLatency: 100
+    simulatePacketLoss: 0
+    packetLossChance: 10
 --- !u!114 &2021159714
 MonoBehaviour:
   m_ObjectHideFlags: 0
