@@ -534,6 +534,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -2427874143186176861, guid: da5a8100e7710a4448923b7c2d31dd1d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 57d3e897cc7f86f4fb82b7213b146593, type: 2}
     - target: {fileID: 919132149155446097, guid: da5a8100e7710a4448923b7c2d31dd1d, type: 3}
       propertyPath: m_Name
       value: 'butterfly basic movement 001 '
