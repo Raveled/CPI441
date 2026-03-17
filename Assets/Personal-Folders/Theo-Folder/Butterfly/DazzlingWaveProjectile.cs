@@ -2,15 +2,10 @@ using UnityEngine;
 
 public class DazzlingWaveProjectile : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    [SerializeField] private float speed = 5f;  // Tune movement speed
 
-    // Update is called once per frame
     void Update()
     {
-        
+        transform.Translate(Vector3.forward * speed * Time.deltaTime);
     }
 }

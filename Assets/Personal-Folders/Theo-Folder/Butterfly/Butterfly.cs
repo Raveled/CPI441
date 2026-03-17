@@ -149,7 +149,10 @@ public class Butterfly : MonoBehaviour
         Entity shooter = entity ?? GetComponent<Entity>();
 
         if (dazzlingWavePrefab != null && dazzlingWaveOrigin != null)
-            Instantiate(dazzlingWavePrefab, dazzlingWaveOrigin.position, dazzlingWaveOrigin.rotation);
+        {
+            GameObject wave = Instantiate(dazzlingWavePrefab, dazzlingWaveOrigin.position, dazzlingWaveOrigin.rotation);
+            StartCoroutine(DestroyDazzlingWaveAfterDelay(wave, 5f));  // Move 5s then destroy
+        }
 
         Vector3 origin = (dazzlingWaveOrigin != null) ? dazzlingWaveOrigin.position : transform.position;
         Collider[] hits = Physics.OverlapSphere(origin, dazzlingWaveRadius);
@@ -173,6 +176,11 @@ public class Butterfly : MonoBehaviour
         }
 
         dazzlingWaveCooldownTimer = dazzlingWaveCooldown;
+    }
+    private IEnumerator DestroyDazzlingWaveAfterDelay(GameObject wave, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (wave != null) Destroy(wave);
     }
 
     private IEnumerator ApplyDamageReduction(Entity target, float multiplier)
