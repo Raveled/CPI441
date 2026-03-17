@@ -1,7 +1,7 @@
-// File: Assets/Scripts/Shop/ShopUI.cs
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public sealed class ShopUI : MonoBehaviour
 {
@@ -11,7 +11,7 @@ public sealed class ShopUI : MonoBehaviour
     [SerializeField] private ShopItemButtonUI itemButtonPrefab;
     [SerializeField] private TextMeshProUGUI statusText;
 
-    [Header("Optional (can be left empty if player spawns at runtime)")]
+    [Header("Optional")]
     [SerializeField] private Inventory playerInventory;
 
     private readonly List<GameObject> spawned = new();
@@ -25,19 +25,32 @@ public sealed class ShopUI : MonoBehaviour
 
     private void Update()
     {
-        if (root.activeSelf && Input.GetKeyDown(KeyCode.Escape))
+        if (!root.activeSelf) return;
+
+        var kb = Keyboard.current;
+        if (kb != null && kb[Key.Escape].wasPressedThisFrame)
             Close();
+    }
+
+    public void Toggle(ShopCatalog catalog)
+    {
+        if (root.activeSelf) Close();
+        else Open(catalog);
     }
 
     public void Open(ShopCatalog catalog)
     {
         currentCatalog = catalog;
 
-        EnsureInventoryReference();
-        Build();
+        if (playerInventory == null)
+        {
+            var player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null) player.TryGetComponent(out playerInventory);
+        }
 
-        SetOpen(true);
+        Rebuild();
         SetStatus(string.Empty);
+        SetOpen(true);
     }
 
     public void Close()
@@ -47,49 +60,56 @@ public sealed class ShopUI : MonoBehaviour
         SetStatus(string.Empty);
     }
 
-    public void Toggle(ShopCatalog catalog)
+    public void CloseFromButton()
     {
-        if (root.activeSelf) Close();
-        else Open(catalog);
+        Debug.Log("[ShopUI] CloseFromButton clicked");
+        Close();
     }
 
-    private void EnsureInventoryReference()
-    {
-        if (playerInventory != null) return;
-
-        // If you tag your spawned player as "Player", this is reliable.
-        var player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null && player.TryGetComponent(out Inventory inv))
-        {
-            playerInventory = inv;
-            return;
-        }
-
-        // Fallback: just find any inventory (works if only player has Inventory)
-        playerInventory = FindObjectOfType<Inventory>();
-    }
-
-    private void SetOpen(bool open)
-    {
-        root.SetActive(open);
-
-        Cursor.visible = open;
-        Cursor.lockState = open ? CursorLockMode.None : CursorLockMode.Locked;
-    }
-
-    private void Build()
+    private void Rebuild()
     {
         Clear();
 
-        if (currentCatalog == null || itemsContainer == null || itemButtonPrefab == null)
-            return;
-
-        foreach (var item in currentCatalog.ItemsForSale)
+        if (currentCatalog == null)
         {
+            Debug.LogWarning("[ShopUI] Rebuild called with NULL catalog.");
+            return;
+        }
+
+        if (itemsContainer == null || itemButtonPrefab == null)
+        {
+            Debug.LogWarning($"[ShopUI] Missing refs. itemsContainer={(itemsContainer ? "OK" : "NULL")} itemButtonPrefab={(itemButtonPrefab ? "OK" : "NULL")}");
+            return;
+        }
+
+        var items = currentCatalog.ItemsForSale;
+        Debug.Log($"[ShopUI] Building {items.Count} items.");
+
+        foreach (var item in items)
+        {
+            if (item == null) continue;
             var entry = Instantiate(itemButtonPrefab, itemsContainer);
             entry.Bind(item, TryBuy);
             spawned.Add(entry.gameObject);
         }
+    }
+
+    private void TryBuy(SO_ItemData item)
+    {
+        if (item == null)
+        {
+            SetStatus("Invalid item.");
+            return;
+        }
+
+        if (playerInventory == null)
+        {
+            SetStatus("Player inventory not found.");
+            return;
+        }
+
+        bool ok = playerInventory.AddItem(item, 1);
+        SetStatus(ok ? $"Bought: {item.itemName}" : "Inventory full.");
     }
 
     private void Clear()
@@ -99,22 +119,15 @@ public sealed class ShopUI : MonoBehaviour
         spawned.Clear();
     }
 
-    private void TryBuy(SO_ItemData item)
+    private void SetOpen(bool open)
     {
-        EnsureInventoryReference();
-
-        if (playerInventory == null)
-        {
-            SetStatus("Player inventory not found.");
-            return;
-        }
-
-        bool ok = playerInventory.AddItem(item, 1);
-        SetStatus(ok ? $"Bought: {item.itemName}" : "Inventory full (6 slots).");
+        root.SetActive(open);
+        Cursor.visible = open;
+        Cursor.lockState = open ? CursorLockMode.None : CursorLockMode.Locked;
     }
 
-    private void SetStatus(string message)
+    private void SetStatus(string msg)
     {
-        if (statusText != null) statusText.text = message ?? string.Empty;
+        if (statusText != null) statusText.text = msg ?? string.Empty;
     }
 }
