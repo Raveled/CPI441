@@ -119,6 +119,31 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &43295711 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 240384476738258471, guid: 939afb7b9e95a0e4392506ee53d12df2, type: 3}
+  m_PrefabInstance: {fileID: 2487106747904653938}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &43295714
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 43295711}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78417bd5ae2625248a4a516c72971fa8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  jsonApi: {fileID: 4900000, guid: 264db6452b3382c419bc2f4399b65c12, type: 3}
+  inputField: {fileID: 0}
+  uiText: {fileID: 0}
+  botInstructions: 
+  prompt: 'can you give me a random number in this format: [RanNum: Number]'
+  mediaFilePath: 
+  mediaPrompt: 
+  mimeType: 0
 --- !u!1 &110962792
 GameObject:
   m_ObjectHideFlags: 0
@@ -423,6 +448,18 @@ PrefabInstance:
       propertyPath: entityData
       value: 
       objectReference: {fileID: 689035417}
+    - target: {fileID: 4268357716925106502, guid: 939afb7b9e95a0e4392506ee53d12df2, type: 3}
+      propertyPath: testPrompt
+      value: 'can you give me balanced stats for a minion in a MOBA game?
+
+        it
+        should be in the form of the following, and include only the stats, no other
+        text. also, please do not use the baseline numbers and only give the two
+        stats listed. include the comma between brackets in output. [baseHitPoints,
+        baseline 100],[baseAttackPower, baseline 35]
+
+'
+      objectReference: {fileID: 0}
     - target: {fileID: 5543195314949916608, guid: 939afb7b9e95a0e4392506ee53d12df2, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -466,7 +503,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 240384476738258471, guid: 939afb7b9e95a0e4392506ee53d12df2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 43295714}
   m_SourcePrefab: {fileID: 100100000, guid: 939afb7b9e95a0e4392506ee53d12df2, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

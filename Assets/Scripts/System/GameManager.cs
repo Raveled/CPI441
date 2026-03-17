@@ -272,6 +272,7 @@ public class GameManager : MonoBehaviour
 
         ChangeGameState(GameState.END);
         GenerateMatchJSON();
+        FindFirstObjectByType<AIManager>().AskAIForBalance();
     }
 
     //When a Tower is destroyed, this is called for JSON

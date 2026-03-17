@@ -7,7 +7,7 @@ public class AIManager : MonoBehaviour
     [Header("Setup")]
     [SerializeField] JSON_MatchData matchData = null;
     [SerializeField] JSON_EntityData entityData = null;
-    //UnityAndGeminiV3 ai = null;
+    UnityAndGeminiV3 ai = null;
 
     //Prompt
     [Header("Prompt")]
@@ -21,8 +21,11 @@ public class AIManager : MonoBehaviour
     [Header("Reponse Debug")]
     [TextArea(15, 20)]
     [SerializeField]string response = "";
+    [Space]
+    [TextArea(15, 20)]
+    [SerializeField] string testPrompt = "";
     private void Awake() {
-        //ai = GetComponent<UnityAndGeminiV3>();
+        ai = GetComponent<UnityAndGeminiV3>();
     }
     private void Update() {
         //Testing Prompt Creation
@@ -34,7 +37,7 @@ public class AIManager : MonoBehaviour
         if (Keyboard.current.oKey.wasPressedThisFrame) {
             Debug.Log("button pressed");
             CreatePrompt();
-            //ai.SendNewMessage();
+            ai.SendNewMessage(testPrompt);
         }
     }
     //Concatenate the mesage to send to ai
@@ -46,8 +49,8 @@ public class AIManager : MonoBehaviour
 
     //Called from gamemanager after a match
     public void AskAIForBalance() {
-        CreatePrompt();
-        //ai.SendNewMessage(prompt);
+        //CreatePrompt();
+        ai.SendNewMessage(testPrompt);
     }
     //Called from UnityAndGeminiV3 for the ai's reponse
     public void ResponseReceived(string response) {
@@ -57,6 +60,12 @@ public class AIManager : MonoBehaviour
         //TODO-------------------------------------------------------------------------------------
         //send to gamemanager to change the entity stats
         //
+        var parts = response.Split("],");
+
+        int hp = int.Parse(parts[0].Split(',')[1].Trim(' ', ']'));
+        int attack = int.Parse(parts[1].Split(',')[1].Trim(' ', ']'));
+
+        FindFirstObjectByType<JSON_EntityData>().EditMinion(hp, attack);
     }
 
 

@@ -78,6 +78,12 @@ public class JSON_EntityData : MonoBehaviour
             Debug.Log("Loaded In Match Data");
         }
     }
+    //FOR TESTING
+    public void EditMinion(int hp, int attack) {
+        statblocks.entityStats["Minion"].baseHitPoints = hp;
+        statblocks.entityStats["Minion"].baseAttackPower = attack;
+        SaveToJSON();
+    }
     //Getter
     public Statblocks GetStatblocks() {
         return statblocks;
