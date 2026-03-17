@@ -115,18 +115,22 @@ public class Butterfly : MonoBehaviour
 
     #region Ability 1 - Dust Wave
 
+    // Ability 1 - Dust Wave (now moves forward 5s then destroys)
     public void CastDustWave()
     {
         if (dustWaveCooldownTimer > 0f) return;
 
-        if (dustWavePrefab != null && dustWaveOrigin != null)
-            Instantiate(dustWavePrefab, dustWaveOrigin.position, dustWaveOrigin.rotation);
-
-        // Make entity optional for team checks
         Entity shooter = entity ?? GetComponent<Entity>();
+
+        if (dustWavePrefab != null && dustWaveOrigin != null)
+        {
+            GameObject wave = Instantiate(dustWavePrefab, dustWaveOrigin.position, dustWaveOrigin.rotation);
+            StartCoroutine(DestroyDustWaveAfterDelay(wave, 5f));  // Move 5s then destroy
+        }
+
+        // Keep damage logic (runs immediately)
         Vector3 origin = (dustWaveOrigin != null) ? dustWaveOrigin.position : transform.position;
         Collider[] hits = Physics.OverlapSphere(origin, dustWaveRadius);
-
         foreach (var hit in hits)
         {
             Entity target = hit.GetComponent<Entity>();
@@ -136,6 +140,12 @@ public class Butterfly : MonoBehaviour
         }
 
         dustWaveCooldownTimer = dustWaveCooldown;
+    }
+
+    private IEnumerator DestroyDustWaveAfterDelay(GameObject wave, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (wave != null) Destroy(wave);
     }
 
     #endregion

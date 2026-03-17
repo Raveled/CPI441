@@ -4722,13 +4722,13 @@ ParticleSystem:
   serializedVersion: 8
   lengthInSec: 2
   simulationSpeed: 1
-  stopAction: 0
+  stopAction: 2
   cullingMode: 3
   ringBufferMode: 0
   ringBufferLoopRange: {x: 0, y: 1}
   emitterVelocityMode: 0
-  looping: 1
-  prewarm: 1
+  looping: 0
+  prewarm: 0
   playOnAwake: 1
   useUnscaledTime: 0
   autoRandomSeed: 1
@@ -14312,6 +14312,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3765375252195187464}
+  - component: {fileID: 5283404037919830724}
   m_Layer: 0
   m_Name: DustWavePrefab
   m_TagString: Untagged
@@ -14335,3 +14336,16 @@ Transform:
   - {fileID: 663368863680326285}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5283404037919830724
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6924391199545212785}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7168db73560d7094c8f81958b04a23a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DustWaveMovement
+  speed: 5
