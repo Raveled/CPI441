@@ -118,18 +118,17 @@ public class Butterfly : MonoBehaviour
         if (dustWavePrefab != null && dustWaveOrigin != null)
         {
             GameObject wave = Instantiate(dustWavePrefab, dustWaveOrigin.position, dustWaveOrigin.rotation);
-            StartCoroutine(DestroyAfterDelay(wave, 5f));
-        }
 
-        // Immediate overlap on cast
-        Vector3 origin = (dustWaveOrigin != null) ? dustWaveOrigin.position : transform.position;
-        Collider[] hits = Physics.OverlapSphere(origin, dustWaveRadius);
-        foreach (var hit in hits)
-        {
-            Entity target = hit.GetComponent<Entity>();
-            if (target == null || (shooter != null && target.GetTeam() == shooter.GetTeam()))
-                continue;
-            target.TakeDamage(dustWaveBaseDamage, shooter);
+            // Pass all fields to the projectile — it handles damage on its own tick
+            DustWaveMovement proj = wave.GetComponent<DustWaveMovement>();
+            if (proj != null)
+            {
+                proj.ownerEntity = shooter;
+                proj.radius = dustWaveRadius;
+                proj.damage = dustWaveBaseDamage;
+            }
+
+            StartCoroutine(DestroyAfterDelay(wave, 5f));
         }
 
         dustWaveCooldownTimer = dustWaveCooldown;
