@@ -127,14 +127,14 @@ public class Entity : NetworkBehaviour
     {
         if (!isServer)
         {
-            Debug.Log($"[TakeDamage] {gameObject.name} with ID: {damageOrigin.GetNetworkID(isServer)} is requesting to take {damage} damage from {damageOrigin?.name}");
+            //Debug.Log($"[TakeDamage] {gameObject.name} with ID: {damageOrigin.GetNetworkID(isServer)} is requesting to take {damage} damage from {damageOrigin?.name}");
             // Client requests server to apply damage
             if (damageOrigin != null) RequestDamageServerRpc(damage, damageOrigin.GetNetworkID(isServer));
             else RequestDamageServerRpc(damage, null);
             return isDead.value; // Return current state for client
         }
 
-        Debug.Log($"[TakeDamage] Server is applying {damage} damage from {damageOrigin?.name} to {name}");
+        //Debug.Log($"[TakeDamage] Server is applying {damage} damage from {damageOrigin?.name} to {name}");
         // Server applies damage directly
         if (damageOrigin != null) ApplyDamageServer(damage, damageOrigin.GetNetworkID(isServer));
         else ApplyDamageServer(damage, null);
@@ -144,7 +144,7 @@ public class Entity : NetworkBehaviour
     [ServerRpc(requireOwnership: false)]
     private void RequestDamageServerRpc(int damage, NetworkID? originId)
     {
-        Debug.Log($"[TakeDamageServerRpc] Received damage request: {damage} from origin ID: {originId}");
+        //Debug.Log($"[TakeDamageServerRpc] Received damage request: {damage} from origin ID: {originId}");
         ApplyDamageServer(damage, originId);
     }
 
@@ -154,7 +154,7 @@ public class Entity : NetworkBehaviour
         if (isDead.value || !isServer)
             return;
 
-        Debug.Log($"[TakeDamage] {name} is taking {damage} damage from {originId}");
+        //Debug.Log($"[TakeDamage] {name} is taking {damage} damage from {originId}");
 
         // Check if protector is alive
         bool protectorAlive = false;

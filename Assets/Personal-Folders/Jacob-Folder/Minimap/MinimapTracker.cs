@@ -1,6 +1,7 @@
+using PurrNet;
 using UnityEngine;
 
-public class MinimapTracker : MonoBehaviour
+public class MinimapTracker : NetworkBehaviour
 {
     [Header("Settings")]
     [SerializeField] private string minimapCameraName = "MinimapCamera";
@@ -9,13 +10,10 @@ public class MinimapTracker : MonoBehaviour
 
     private Transform minimapCameraTransform;
 
-    private void Awake()
+    public void AttachMinimapCamera()
     {
-        AttachMinimapCamera();
-    }
-
-    private void AttachMinimapCamera()
-    {
+        Debug.Log($"[MinimapTracker] AttachMinimapCamera called on '{gameObject.name}'");
+        
         // Find the camera by name anywhere in the scene
         GameObject minimapCameraObject = GameObject.Find(minimapCameraName);
 

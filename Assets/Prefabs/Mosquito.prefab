@@ -1,52 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1613275841206114597
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 5592394302010460894}
-  - component: {fileID: 4524530735444404231}
-  m_Layer: 6
-  m_Name: MinimapRoot
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &5592394302010460894
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1613275841206114597}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -1.43}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2620513460872895128}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4524530735444404231
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1613275841206114597}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 033fd1df7e6c38a4a8626fc695894133, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MinimapPlayerTracker
-  minimapCameraName: MinimapCamera
-  localOffset: {x: 0, y: 200, z: 0}
-  lockRotation: 0
 --- !u!1 &1703563595399880511
 GameObject:
   m_ObjectHideFlags: 0
@@ -189,6 +142,7 @@ GameObject:
   - component: {fileID: 6822694615502514086}
   - component: {fileID: 415774168675383472}
   - component: {fileID: 4850752824145677286}
+  - component: {fileID: 4717540906712963809}
   m_Layer: 6
   m_Name: Mosquito
   m_TagString: Untagged
@@ -211,7 +165,6 @@ Transform:
   m_Children:
   - {fileID: 2712183010624339882}
   - {fileID: 2781509865937213894}
-  - {fileID: 5592394302010460894}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &8053365526157884349
@@ -432,6 +385,7 @@ MonoBehaviour:
     _ownerAuth: 0
     _sendIntervalInSeconds: 0
   predictedMovement: {fileID: 5579395928134298048}
+  minimapTracker: {fileID: 4717540906712963809}
 --- !u!114 &6822694615502514086
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -514,6 +468,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
   items: []
   maxSlots: 6
+--- !u!114 &4717540906712963809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3921032179608766505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 033fd1df7e6c38a4a8626fc695894133, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MinimapPlayerTracker
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  minimapCameraName: MinimapCamera
+  localOffset: {x: 0, y: 200, z: 0}
+  lockRotation: 0
 --- !u!1 &8111900342316838556
 GameObject:
   m_ObjectHideFlags: 0

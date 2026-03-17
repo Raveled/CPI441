@@ -385,6 +385,7 @@ MonoBehaviour:
     _ownerAuth: 0
     _sendIntervalInSeconds: 0
   predictedMovement: {fileID: 5579395928134298048}
+  minimapTracker: {fileID: 8848556529111245560}
 --- !u!114 &-8418571752929865034
 MonoBehaviour:
   m_ObjectHideFlags: 0
