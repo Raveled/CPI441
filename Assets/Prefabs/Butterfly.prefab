@@ -328,8 +328,8 @@ MonoBehaviour:
   windBurstBaseDamage: 4
   windBurstSpeed: 10
   windBurstRange: 6
-  dustWavePrefab: {fileID: 0}
-  dustWaveOrigin: {fileID: 0}
+  dustWavePrefab: {fileID: 1025285306637258, guid: d8f0099df63275647a8bcf646df1ca00, type: 3}
+  dustWaveOrigin: {fileID: 154977485595512342}
   dustWaveBaseDamage: 3
   dustWaveRadius: 4
   dustWaveCooldown: 5

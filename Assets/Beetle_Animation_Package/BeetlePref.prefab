@@ -361,7 +361,7 @@ MonoBehaviour:
     _value: 0
     _ownerAuth: 0
     _sendIntervalInSeconds: 0
-  predictedMovement: {fileID: 0}
+  predictedMovement: {fileID: 5934907757888997875}
 --- !u!114 &7545951904742933898
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -399,7 +399,7 @@ MonoBehaviour:
   rollSpeed: 15
   rollKnockbackForce: 8
   rollCooldown: 12
-  stompPrefab: {fileID: 0}
+  stompPrefab: {fileID: 5615598041355943147, guid: 627e61fe7547f6e47b82eb0e241bfe42, type: 3}
   stompRadius: 4
   stompDamage: 8
   stompStunDuration: 1.5
