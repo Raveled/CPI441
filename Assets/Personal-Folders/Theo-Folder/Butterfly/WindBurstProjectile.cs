@@ -1,34 +1,41 @@
 using UnityEngine;
+using System.Collections;
 
 public class WindBurstProjectile : MonoBehaviour
 {
-    [HideInInspector] public Entity ownerEntity;
-    [HideInInspector] public int damage;
-    [HideInInspector] public float speed;
-    [HideInInspector] public float maxRange = 5f;
+    [SerializeField] private float speed = 10f;
 
-    private Vector3 startPos;
+    [HideInInspector] public Entity ownerEntity;
+    [HideInInspector] public int damage = 4;
+    [HideInInspector] public float maxRange = 6f;
+    [HideInInspector] public float radius = 1f;
+    [HideInInspector] public float tickInterval = 0.25f;
 
     private void Start()
     {
-        startPos = transform.position;
+        StartCoroutine(DamageRoutine());
     }
 
     private void Update()
     {
         transform.Translate(Vector3.forward * speed * Time.deltaTime);
-
-        if (Vector3.Distance(startPos, transform.position) >= maxRange)
-            Destroy(gameObject);
     }
 
-    private void OnTriggerEnter(Collider other)
+    private IEnumerator DamageRoutine()
     {
-        Entity target = other.GetComponent<Entity>();
-        if (target != null && target != ownerEntity && target.GetTeam() != ownerEntity.GetTeam())
+        while (true)
         {
-            target.TakeDamage(damage, ownerEntity);
-            Destroy(gameObject);
+            Collider[] hits = Physics.OverlapSphere(transform.position, radius);
+            foreach (var hit in hits)
+            {
+                Entity target = hit.GetComponent<Entity>();
+                if (target == null || ownerEntity == null) continue;
+                if (target == ownerEntity || target.GetTeam() == ownerEntity.GetTeam()) continue;
+
+                target.TakeDamage(damage, ownerEntity);
+            }
+
+            yield return new WaitForSeconds(tickInterval);
         }
     }
 }

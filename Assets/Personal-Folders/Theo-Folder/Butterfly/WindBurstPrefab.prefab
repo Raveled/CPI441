@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4540188045443143438}
+  - component: {fileID: 8375710834174327518}
   m_Layer: 0
   m_Name: WindBurstPrefab
   m_TagString: Untagged
@@ -32,6 +33,24 @@ Transform:
   - {fileID: 8762765545497814830}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8375710834174327518
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7660528519338353513}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a43ad9853537984c961fa7d51c20266, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WindBurstProjectile
+  speed: 10
+  ownerEntity: {fileID: 0}
+  damage: 4
+  maxRange: 6
+  radius: 1
+  tickInterval: 0.25
 --- !u!1001 &8761040277190123974
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -83,6 +102,14 @@ PrefabInstance:
     - target: {fileID: 4203849390966504, guid: d8f0099df63275647a8bcf646df1ca00, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 198220379293217532, guid: d8f0099df63275647a8bcf646df1ca00, type: 3}
+      propertyPath: looping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 198220379293217532, guid: d8f0099df63275647a8bcf646df1ca00, type: 3}
+      propertyPath: prewarm
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 198220379293217532, guid: d8f0099df63275647a8bcf646df1ca00, type: 3}
       propertyPath: ShapeModule.angle

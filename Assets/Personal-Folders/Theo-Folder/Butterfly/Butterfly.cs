@@ -100,9 +100,9 @@ public class Butterfly : MonoBehaviour
         {
             proj.ownerEntity = shooter;
             proj.damage = windBurstBaseDamage;
-            proj.speed = windBurstSpeed;
             proj.maxRange = windBurstRange;
         }
+        StartCoroutine(DestroyAfterDelay(projGO, 1.5f));
     }
 
     #endregion
@@ -119,7 +119,7 @@ public class Butterfly : MonoBehaviour
         {
             GameObject wave = Instantiate(dustWavePrefab, dustWaveOrigin.position, dustWaveOrigin.rotation);
 
-            // Pass all fields to the projectile — it handles damage on its own tick
+            // Pass all fields to the projectile - it handles damage on its own tick
             DustWaveMovement proj = wave.GetComponent<DustWaveMovement>();
             if (proj != null)
             {
@@ -148,7 +148,7 @@ public class Butterfly : MonoBehaviour
         {
             GameObject wave = Instantiate(dazzlingWavePrefab, dazzlingWaveOrigin.position, dazzlingWaveOrigin.rotation);
 
-            // Pass all fields to the projectile — it handles damage/heal on its own tick
+            // Pass all fields to the projectile - it handles damage/heal on its own tick
             DazzlingWaveProjectile proj = wave.GetComponent<DazzlingWaveProjectile>();
             if (proj != null)
             {
