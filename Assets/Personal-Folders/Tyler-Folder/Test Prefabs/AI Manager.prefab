@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5543195314949916608}
   - component: {fileID: 4268357716925106502}
+  - component: {fileID: 2281255540730664037}
   m_Layer: 0
   m_Name: AI Manager
   m_TagString: Untagged
@@ -63,3 +64,30 @@ MonoBehaviour:
     a real game):'
   promptPart2: 'The Current EntityData from that game: '
   response: 
+  testPrompt: 'can you give me balanced stats for a minion in a MOBA game? it should
+    be in the form of the following, and include only the stats, no other text. also,
+    please do not use the baseline numbers and only give the two stats listed. [baseHitPoints,
+    100],[baseAttackPower, 40] include the comma between brackets in output. for
+    reference, the baseline for hp is 100 and baseline for attackpower is 40
+
+'
+--- !u!114 &2281255540730664037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 240384476738258471}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78417bd5ae2625248a4a516c72971fa8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  jsonApi: {fileID: 4900000, guid: 264db6452b3382c419bc2f4399b65c12, type: 3}
+  inputField: {fileID: 0}
+  uiText: {fileID: 0}
+  botInstructions: 
+  prompt: 'can you give me a random number in this format: [RanNum: Number]'
+  mediaFilePath: 
+  mediaPrompt: 
+  mimeType: 0

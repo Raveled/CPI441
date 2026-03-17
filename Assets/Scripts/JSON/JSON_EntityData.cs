@@ -82,6 +82,7 @@ public class JSON_EntityData : MonoBehaviour
     public void EditMinion(int hp, int attack) {
         statblocks.entityStats["Minion"].baseHitPoints = hp;
         statblocks.entityStats["Minion"].baseAttackPower = attack;
+        Debug.Log("Chaning minion HP to: " + hp + "; Changing minion AP to: " + attack);
         SaveToJSON();
     }
     //Getter

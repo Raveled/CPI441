@@ -36,7 +36,7 @@ public class AIManager : MonoBehaviour
         //Testing Message Send
         if (Keyboard.current.oKey.wasPressedThisFrame) {
             Debug.Log("button pressed");
-            CreatePrompt();
+            //CreatePrompt();
             ai.SendNewMessage(testPrompt);
         }
     }

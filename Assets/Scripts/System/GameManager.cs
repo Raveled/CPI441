@@ -178,7 +178,15 @@ public class GameManager : MonoBehaviour
         if (Keyboard.current.nKey.wasPressedThisFrame) {
             LoadEntityJSON();
         }
+        if (Keyboard.current.yKey.wasPressedThisFrame) {
+            if (!aiprompted) {
+                Debug.Log("DEBUG: AI PROMPT");
+                FindFirstObjectByType<AIManager>().AskAIForBalance();
+                aiprompted = true;
+            }
+        }
     }
+    bool aiprompted = false;
     //Handle the game timer
     void GameTimer() {
         if (gameState != GameState.INPROGRESS) return;
@@ -272,7 +280,12 @@ public class GameManager : MonoBehaviour
 
         ChangeGameState(GameState.END);
         GenerateMatchJSON();
-        FindFirstObjectByType<AIManager>().AskAIForBalance();
+
+        //WIP
+        if (!aiprompted) {
+            FindFirstObjectByType<AIManager>().AskAIForBalance();
+            aiprompted = true;
+        }
     }
 
     //When a Tower is destroyed, this is called for JSON
