@@ -54,6 +54,7 @@ public class Butterfly : MonoBehaviour
     private bool isFlying = false;
     private float flyTimer = 0f;
     private Vector3 flyDirection;
+    private Vector3 flyDashHeight = new Vector3(0, 5, 0);
     private Vector3 flyStartPos;
     private Rigidbody flyRB;
 
@@ -194,7 +195,7 @@ public class Butterfly : MonoBehaviour
     private void HandleFlyMovement()
     {
         flyTimer -= Time.deltaTime;
-        transform.position = Vector3.Lerp(flyStartPos, flyStartPos + flyDirection * flyDashDistance, 1f - (flyTimer / flyDashDuration));
+        transform.position = Vector3.Lerp(flyStartPos, flyStartPos + flyDirection * flyDashDistance + flyDashHeight, 1f - (flyTimer / flyDashDuration));
 
         if (flyTimer <= 0f)
             EndFly();
