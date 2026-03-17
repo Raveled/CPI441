@@ -347,9 +347,9 @@ MonoBehaviour:
   flyUpgradeTwoCharges: 0
   flyMaxChargesBase: 1
   flyMaxChargesUpgraded: 2
-  tornadoPrefab: {fileID: 0}
+  tornadoPrefab: {fileID: 5316606323292454938, guid: 4df3dc496d02c134cad6c07df09a6112, type: 3}
   tornadoRadius: 5
-  tornadoDuration: 4
+  tornadoDuration: 10
   tornadoBaseDamagePerTick: 2
   tornadoTickInterval: 0.5
   tornadoGroupForce: 10

@@ -273,21 +273,48 @@ public class Butterfly : MonoBehaviour
 
     #region Ultimate - Tornado
 
+    // Butterfly.cs - CastTornado with verbose debug
     public void CastTornado(Vector3 position)
     {
-        if (tornadoPrefab == null) return;
+        Debug.Log($"[Tornado] CastTornado called at position {position}");
+        Debug.Log($"[Tornado] tornadoPrefab = {(tornadoPrefab == null ? "NULL" : tornadoPrefab.name)}");
+
+        if (tornadoPrefab == null)
+        {
+            Debug.LogError("[Tornado] Prefab is null — assign it in the Inspector!");
+            return;
+        }
 
         Entity shooter = entity ?? GetComponent<Entity>();
-        GameObject tornadoGO = Instantiate(tornadoPrefab, position, Quaternion.identity);
+        Debug.Log($"[Tornado] shooter = {(shooter == null ? "NULL" : shooter.name)}");
+
+        GameObject tornadoGO = null;
+        try
+        {
+            tornadoGO = Instantiate(tornadoPrefab, position, Quaternion.identity);
+            Debug.Log($"[Tornado] Instantiate succeeded: {(tornadoGO == null ? "NULL result" : tornadoGO.name)} at {position}");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[Tornado] Instantiate threw an exception: {e.Message}");
+            return;
+        }
+
         TornadoArea tornado = tornadoGO.GetComponent<TornadoArea>();
+        Debug.Log($"[Tornado] TornadoArea component = {(tornado == null ? "NULL - missing component on prefab!" : "found")}");
+
         if (tornado != null)
         {
-            tornado.ownerEntity = shooter;  // Can be null
+            tornado.ownerEntity = shooter;
             tornado.radius = tornadoRadius;
             tornado.duration = tornadoDuration;
             tornado.damagePerTick = tornadoBaseDamagePerTick;
             tornado.tickInterval = tornadoTickInterval;
             tornado.groupForce = tornadoGroupForce;
+            tornado.travelDirection = transform.forward;
+            Debug.Log($"[Tornado] All fields set. Calling Init()...");
+            tornado.Init();
+            Debug.Log($"[Tornado] Init() complete.");
         }
     }
 
