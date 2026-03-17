@@ -12,7 +12,7 @@ public class Player : Entity
     [SerializeField] SyncVar<int> playerLevel = new(1);
     [SerializeField] SyncVar<int> goldTotal = new(0);
     [SerializeField] SyncVar<int> xpTotal = new(0);
-    [SerializeField] PredictedPlayerMovement predictedMovement = null;
+    [SerializeField] public PredictedPlayerMovement predictedMovement = null;
     SO_PlayerInfo playerInfo = null;
     List<Tower> friendlyTowers;
 
@@ -160,5 +160,10 @@ public class Player : Entity
         }
 
         return null; 
+    }
+
+    public bool isLocalPlayer()
+    {
+        return predictedMovement.predictionManager.localPlayer == GetPlayerID();
     }
 }

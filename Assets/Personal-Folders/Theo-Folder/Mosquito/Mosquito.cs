@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using PurrNet;
+using UnityEngine.EventSystems;
 
 public class Mosquito : NetworkBehaviour
 {
@@ -55,18 +56,27 @@ public class Mosquito : NetworkBehaviour
     private float ampUpTimer = 0f;
     private Color originalColor;
     private Renderer meshRenderer;
-    public Entity entity;
+    [SerializeField] public Player player;
 
-    private void Awake()
+    protected override void OnSpawned()
     {
+        base.OnSpawned();
+
         meshRenderer = GetComponentInChildren<Renderer>();
-        entity = GetComponent<Entity>();
 
         if (animator == null)
             animator = GetComponentInChildren<Animator>();
 
         if (meshRenderer != null)
             originalColor = meshRenderer.material.color;
+
+        ServerTestRpc();
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void ServerTestRpc()
+    {
+        Debug.Log("Test Server RPC for PlayerID: " + player.GetPlayerID());
     }
 
     private void Update()
@@ -90,18 +100,17 @@ public class Mosquito : NetworkBehaviour
     // ========== BASIC ATTACK - BLOOD SHOT ==========
     public void CastBloodShot()
     {
-        if (!isController) return; // Safety guard
-        Debug.Log($"[Mosquito] CastBloodShot on {gameObject.name} | isController={isController} | isOwner={isOwner} | isServer={isServer}");
+        ServerTestRpc();
+        if (player.isLocalPlayer()) return; // Safety guard -- Check if local player is player shooting
 
-        Debug.Log($"[Mosquito] CastBloodShot called. isServer={isServer}, isSpawned={isSpawned}, entity={entity?.name}");
-        PlayBloodShotAnim();
+        Debug.Log($"[Mosquito] CastBloodShot on {gameObject.name} | Player ID: {player.GetPlayerID()}");
 
         int damage = GetBasicAttackDamageWithBlood(bloodShotBaseDamage);
-        Debug.Log($"[Mosquito] Damage calculated: {damage}. Routing to server...");
 
         if (isServer)
         {
             Debug.Log("[Mosquito] IS server - spawning directly.");
+            PlayBloodShotAnim();
             ServerSpawnBloodShot(bloodShotFirePoint.position, bloodShotFirePoint.rotation, damage);
         }
         else
@@ -111,10 +120,11 @@ public class Mosquito : NetworkBehaviour
         }
     }
 
-    [ServerRpc(requireOwnership: true)]
+    [ServerRpc(requireOwnership: false)]
     private void ServerSpawnBloodShotRpc(Vector3 position, Quaternion rotation, int damage)
     {
-        Debug.Log($"[Mosquito] ServerSpawnBloodShotRpc received on server. damage={damage}");
+        Debug.Log($"[Mosquito] ServerSpawnBloodShotRpc received on server. damage={damage} player id = {player.GetPlayerID()}");
+        PlayBloodShotAnim();
         ServerSpawnBloodShot(position, rotation, damage);
     }
 
@@ -135,8 +145,8 @@ public class Mosquito : NetworkBehaviour
         proj.syncDamage.value = damage;
         proj.syncSpeed.value = bloodShotSpeed;
         proj.syncMaxRange.value = bloodShotRange;
-        proj.syncOwnerID.value = entity.GetNetworkID(isServer);
-        Debug.Log($"[Mosquito] Projectile configured - damage={damage}, speed={bloodShotSpeed}, range={bloodShotRange}, ownerID={entity.GetNetworkID(isServer)}");
+        proj.syncOwnerID.value = player.GetNetworkID(isServer);
+        Debug.Log($"[Mosquito] Projectile configured - damage={damage}, speed={bloodShotSpeed}, range={bloodShotRange}, ownerID={player.GetNetworkID(isServer)}");
     }
 
     // ========== BLOOD ENERGY PASSIVE (Ability 1) ==========
@@ -158,7 +168,7 @@ public class Mosquito : NetworkBehaviour
     public bool TryQuickPoke()
     {
         if (!isController) return false; // Safety guard
-        if (quickPokeCooldownTimer > 0f || entity == null)
+        if (quickPokeCooldownTimer > 0f || player == null)
         {
             Debug.Log($"[Mosquito] Quick Poke blocked - cooldown: {quickPokeCooldownTimer:F2}s remaining");
             return false;
@@ -191,16 +201,16 @@ public class Mosquito : NetworkBehaviour
 
         foreach (Collider hit in hits)
         {
-            if (hit.transform.IsChildOf(entity.transform) || hit.gameObject == entity.gameObject)
+            if (hit.transform.IsChildOf(player.transform) || hit.gameObject == player.gameObject)
                 continue;
 
             Entity target = hit.GetComponent<Entity>();
             if (target == null || target.GetIsDead()) continue;
-            if (!entity.GetEnemyTeams().Contains(target.GetTeam())) continue;
+            if (!player.GetEnemyTeams().Contains(target.GetTeam())) continue;
 
             int damage = GetBasicAttackDamageWithBlood(quickPokeBaseDamage);
             Debug.Log($"[Mosquito] Quick Poke hit {target.name} for {damage} damage!");
-            target.TakeDamage(damage, entity);
+            target.TakeDamage(damage, player);
 
             bool hitPlayer = target.GetType().Name == "Player";
             float gain = hitPlayer ? quickPokeBloodGainPlayer : quickPokeBloodGain;
@@ -259,7 +269,7 @@ public class Mosquito : NetworkBehaviour
         {
             proj.syncDamage.value = Mathf.RoundToInt(damage);
             proj.syncSpeed.value = globBaseSpeed;
-            proj.syncOwnerID.value = entity.GetNetworkID(isServer);
+            proj.syncOwnerID.value = player.GetNetworkID(isServer);
         }
     }
 
@@ -291,8 +301,8 @@ public class Mosquito : NetworkBehaviour
     private void ApplyAmpUp()
     {
         Debug.Log($"[Mosquito] Amp Up activated! Duration={ampUpDuration}s, MoveMult={ampUpInitialMoveMult}, AttackMult={ampUpInitialAttackSpeedMult}");
-        entity.ModifyMoveSpeedMultiplier(ampUpInitialMoveMult, ampUpDuration);
-        entity.ModifyAttackPowerForSeconds(ampUpInitialAttackSpeedMult, ampUpDuration);
+        player.ModifyMoveSpeedMultiplier(ampUpInitialMoveMult, ampUpDuration);
+        player.ModifyAttackPowerForSeconds(ampUpInitialAttackSpeedMult, ampUpDuration);
         SetAmpUpColorRpc(true);
     }
 
@@ -355,8 +365,8 @@ public class Mosquito : NetworkBehaviour
         if (animator != null) animator.SetTrigger("Death");
     }
 
-    public float GetMoveSpeedMultiplier() => entity != null ? entity.GetMoveSpeed() : 1f;
-    public float GetAttackSpeedMultiplier() => entity != null ? entity.attackPower.value : 1f;
+    public float GetMoveSpeedMultiplier() => player != null ? player.GetMoveSpeed() : 1f;
+    public float GetAttackSpeedMultiplier() => player != null ? player.attackPower.value : 1f;
 
     [ContextMenu("Test Blood Shot")]
     private void TestBloodShot() => CastBloodShot();
