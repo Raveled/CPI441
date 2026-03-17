@@ -28,7 +28,7 @@ public class Butterfly : MonoBehaviour
     [SerializeField] private int dazzlingWaveHealAmount = 10;
     [SerializeField] private float dazzlingWaveCooldown = 6f;
     [SerializeField] private bool dazzlingWaveUpgradeReducedDamage = false;
-    [SerializeField] private float dazzlingWaveDamageReductionMultiplier = 0.7f; // 30% reduction
+    [SerializeField] private float dazzlingWaveDamageReductionMultiplier = 0.7f;
 
     [Header("Fly - Ability 3")]
     [SerializeField] private float flyDashDistance = 8f;
@@ -54,6 +54,7 @@ public class Butterfly : MonoBehaviour
     private bool isFlying = false;
     private float flyTimer = 0f;
     private Vector3 flyDirection;
+    private Vector3 flyDashHeight = new Vector3(0, 5, 0);
     private Vector3 flyStartPos;
     private Rigidbody flyRB;
 
@@ -68,7 +69,6 @@ public class Butterfly : MonoBehaviour
 
     private void Update()
     {
-        // Cooldowns
         if (dustWaveCooldownTimer > 0f)
             dustWaveCooldownTimer -= Time.deltaTime;
 
@@ -78,13 +78,9 @@ public class Butterfly : MonoBehaviour
         if (flyCooldownTimer > 0f)
             flyCooldownTimer -= Time.deltaTime;
 
-        // Fly dash update
         if (isFlying)
-        {
             HandleFlyMovement();
-        }
 
-        // Recharge Fly charges
         HandleFlyChargeRecharge();
     }
 
@@ -97,18 +93,17 @@ public class Butterfly : MonoBehaviour
         if (windBurstProjectilePrefab == null || windBurstFirePoint == null)
             return;
 
-        // Make entity optional - work even if null
         Entity shooter = entity ?? GetComponent<Entity>();
 
         GameObject projGO = Instantiate(windBurstProjectilePrefab, windBurstFirePoint.position, windBurstFirePoint.rotation);
         WindBurstProjectile proj = projGO.GetComponent<WindBurstProjectile>();
         if (proj != null)
         {
-            proj.ownerEntity = shooter;  // Can be null
+            proj.ownerEntity = shooter;
             proj.damage = windBurstBaseDamage;
-            proj.speed = windBurstSpeed;
             proj.maxRange = windBurstRange;
         }
+        StartCoroutine(DestroyAfterDelay(projGO, 1.5f));
     }
 
     #endregion
@@ -119,20 +114,22 @@ public class Butterfly : MonoBehaviour
     {
         if (dustWaveCooldownTimer > 0f) return;
 
-        if (dustWavePrefab != null && dustWaveOrigin != null)
-            Instantiate(dustWavePrefab, dustWaveOrigin.position, dustWaveOrigin.rotation);
-
-        // Make entity optional for team checks
         Entity shooter = entity ?? GetComponent<Entity>();
-        Vector3 origin = (dustWaveOrigin != null) ? dustWaveOrigin.position : transform.position;
-        Collider[] hits = Physics.OverlapSphere(origin, dustWaveRadius);
 
-        foreach (var hit in hits)
+        if (dustWavePrefab != null && dustWaveOrigin != null)
         {
-            Entity target = hit.GetComponent<Entity>();
-            if (target == null || (shooter != null && target.GetTeam() == shooter.GetTeam()))
-                continue;
-            target.TakeDamage(dustWaveBaseDamage, shooter);
+            GameObject wave = Instantiate(dustWavePrefab, dustWaveOrigin.position, dustWaveOrigin.rotation);
+
+            // Pass all fields to the projectile - it handles damage on its own tick
+            DustWaveMovement proj = wave.GetComponent<DustWaveMovement>();
+            if (proj != null)
+            {
+                proj.ownerEntity = shooter;
+                proj.radius = dustWaveRadius;
+                proj.damage = dustWaveBaseDamage;
+            }
+
+            StartCoroutine(DestroyAfterDelay(wave, 5f));
         }
 
         dustWaveCooldownTimer = dustWaveCooldown;
@@ -149,39 +146,25 @@ public class Butterfly : MonoBehaviour
         Entity shooter = entity ?? GetComponent<Entity>();
 
         if (dazzlingWavePrefab != null && dazzlingWaveOrigin != null)
-            Instantiate(dazzlingWavePrefab, dazzlingWaveOrigin.position, dazzlingWaveOrigin.rotation);
-
-        Vector3 origin = (dazzlingWaveOrigin != null) ? dazzlingWaveOrigin.position : transform.position;
-        Collider[] hits = Physics.OverlapSphere(origin, dazzlingWaveRadius);
-
-        foreach (var hit in hits)
         {
-            Entity target = hit.GetComponent<Entity>();
-            if (target == null) continue;
+            GameObject wave = Instantiate(dazzlingWavePrefab, dazzlingWaveOrigin.position, dazzlingWaveOrigin.rotation);
 
-            if (shooter != null && target.GetTeam() == shooter.GetTeam())
+            // Pass all fields to the projectile - it handles damage/heal on its own tick
+            DazzlingWaveProjectile proj = wave.GetComponent<DazzlingWaveProjectile>();
+            if (proj != null)
             {
-                // Ally heal
-                target.Heal(dazzlingWaveHealAmount);
+                proj.ownerEntity = shooter;
+                proj.radius = dazzlingWaveRadius;
+                proj.damage = dazzlingWaveBaseDamage;
+                proj.healAmount = dazzlingWaveHealAmount;
+                proj.upgradeReducedDamage = dazzlingWaveUpgradeReducedDamage;
+                proj.damageReductionMultiplier = dazzlingWaveDamageReductionMultiplier;
             }
-            else
-            {
-                target.TakeDamage(dazzlingWaveBaseDamage, shooter);
-                if (dazzlingWaveUpgradeReducedDamage)
-                    StartCoroutine(ApplyDamageReduction(target, dazzlingWaveDamageReductionMultiplier));
-            }
+
+            StartCoroutine(DestroyAfterDelay(wave, 5f));
         }
 
         dazzlingWaveCooldownTimer = dazzlingWaveCooldown;
-    }
-
-    private IEnumerator ApplyDamageReduction(Entity target, float multiplier)
-    {
-        if (target == null) yield break;
-
-        // Entity handles the networked debuff
-        target.ModifyAttackPowerForSeconds(multiplier, 3f);
-        yield break;
     }
 
     #endregion
@@ -199,25 +182,20 @@ public class Butterfly : MonoBehaviour
         flyStartPos = transform.position;
         flyCurrentCharges--;
 
-        // Optional: disable gravity/collision while flying
         if (flyRB != null)
-        {
             flyRB.useGravity = false;
-        }
     }
 
     public void CancelFly()
     {
-        if (!isFlying)
-            return;
-
+        if (!isFlying) return;
         EndFly();
     }
 
     private void HandleFlyMovement()
     {
         flyTimer -= Time.deltaTime;
-        transform.position = Vector3.Lerp(flyStartPos, flyStartPos + flyDirection * flyDashDistance, 1f - (flyTimer / flyDashDuration));
+        transform.position = Vector3.Lerp(flyStartPos, flyStartPos + flyDirection * flyDashDistance + flyDashHeight, 1f - (flyTimer / flyDashDuration));
 
         if (flyTimer <= 0f)
             EndFly();
@@ -228,9 +206,7 @@ public class Butterfly : MonoBehaviour
         isFlying = false;
         flyTimer = 0f;
         if (flyRB != null)
-        {
             flyRB.useGravity = true;
-        }
         flyCooldownTimer = flyCooldown;
     }
 
@@ -257,20 +233,41 @@ public class Butterfly : MonoBehaviour
 
     public void CastTornado(Vector3 position)
     {
-        if (tornadoPrefab == null) return;
+        if (tornadoPrefab == null)
+        {
+            Debug.LogError("[Tornado] Prefab is not assigned in the Inspector!");
+            return;
+        }
 
         Entity shooter = entity ?? GetComponent<Entity>();
         GameObject tornadoGO = Instantiate(tornadoPrefab, position, Quaternion.identity);
         TornadoArea tornado = tornadoGO.GetComponent<TornadoArea>();
+
         if (tornado != null)
         {
-            tornado.ownerEntity = shooter;  // Can be null
+            tornado.ownerEntity = shooter;
             tornado.radius = tornadoRadius;
             tornado.duration = tornadoDuration;
             tornado.damagePerTick = tornadoBaseDamagePerTick;
             tornado.tickInterval = tornadoTickInterval;
             tornado.groupForce = tornadoGroupForce;
+            tornado.travelDirection = transform.forward;
+            tornado.Init();
         }
+        else
+        {
+            Debug.LogError("[Tornado] TornadoArea component missing from prefab root!");
+        }
+    }
+
+    #endregion
+
+    #region Helpers
+
+    private IEnumerator DestroyAfterDelay(GameObject go, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (go != null) Destroy(go);
     }
 
     #endregion

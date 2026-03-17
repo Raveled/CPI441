@@ -1,11 +1,10 @@
+// Beetle.cs - FULLY ADAPTED TO MOSQUITO STRUCTURE
 using UnityEngine;
 using System.Collections;
+using PurrNet;
 
-public class Beetle : MonoBehaviour
+public class Beetle : NetworkBehaviour
 {
-    [Header("Entity Reference")]
-    public Entity entity;
-
     [Header("Basic Attack - Mandible Attack")]
     [SerializeField] private int mandibleBaseDamage = 12;
     [SerializeField] private float mandibleRange = 2.5f;
@@ -26,7 +25,6 @@ public class Beetle : MonoBehaviour
     [SerializeField] private float swaggerDamageReduction = 0.4f;
     [SerializeField] private float swaggerDuration = 6f;
     private float swaggerTimer = 0f;
-    private float originalMoveSpeed;
     private bool isSwaggerActive = false;
 
     [Header("Roll - Ability 3")]
@@ -36,7 +34,6 @@ public class Beetle : MonoBehaviour
     [SerializeField] private float rollCooldown = 12f;
     private float rollCooldownTimer = 0f;
     private bool isRolling = false;
-    private Rigidbody rollRB;
 
     [Header("Ground Stomp - Ultimate")]
     [SerializeField] private GameObject stompPrefab;
@@ -44,19 +41,31 @@ public class Beetle : MonoBehaviour
     [SerializeField] private int stompDamage = 8;
     [SerializeField] private float stompStunDuration = 1.5f;
 
+    [Header("Animator")]
+    [SerializeField] private Animator animator;
+
+    [Header("Entity Reference")]
+    public Entity entity;
+
     private MeshRenderer meshRenderer;
     private Color originalColor;
     private Rigidbody beetleRB;
 
     private void Awake()
     {
-        entity = GetComponent<Entity>();
         meshRenderer = GetComponentInChildren<MeshRenderer>();
         beetleRB = GetComponent<Rigidbody>();
-        rollRB = beetleRB;
+        if (meshRenderer != null) originalColor = meshRenderer.material.color;
+        if (animator == null) animator = GetComponentInChildren<Animator>();
+    }
 
-        if (meshRenderer != null)
-            originalColor = meshRenderer.material.color;
+    protected override void OnSpawned()
+    {
+        base.OnSpawned();
+        Debug.Log($"Beetle OnSpawned {gameObject.name} isOwner:{isOwner} isController:{isController} isServer:{isServer}");
+        entity = GetComponent<Entity>();
+        BeetleInputTester inputTester = GetComponent<BeetleInputTester>();
+        if (inputTester != null) inputTester.EnableInput();
     }
 
     private void Update()
@@ -70,52 +79,89 @@ public class Beetle : MonoBehaviour
         if (swaggerTimer > 0f)
         {
             swaggerTimer -= Time.deltaTime;
-            if (swaggerTimer <= 0f)
-                EndSwagger();
+            if (swaggerTimer <= 0f) EndSwagger();
         }
 
         // Roll Update
-        if (isRolling)
-        {
-            HandleRoll();
-        }
+        if (isRolling) HandleRoll();
     }
 
-    #region Basic Attack - Mandible Attack (MELEE)
-    public void MandibleAttack()
+    // BASIC ATTACK - MANDIBLE ATTACK
+    public void CastMandibleAttack()
     {
-        if (mandibleCooldownTimer > 0f /*|| entity == null*/) return;
+        if (!isController) return;
+        Debug.Log($"Beetle CastMandibleAttack on {gameObject.name} isController:{isController}");
 
-        Entity shooter = entity ?? GetComponent<Entity>();
-        Collider[] hits = Physics.OverlapSphere(transform.position + transform.forward * mandibleRange * 0.5f, mandibleRange);
+        PlayMandibleAnimServerRpc();
+        mandibleCooldownTimer = mandibleCooldown;
 
+        if (isServer) ApplyMandibleAttack();
+        else ApplyMandibleAttackServerRpc();
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void PlayMandibleAnimServerRpc() => PlayMandibleAnim();
+
+    [ObserversRpc]
+    private void PlayMandibleAnim()
+    {
+        if (animator != null) animator.SetTrigger("Mandible");
+    }
+
+    [ServerRpc]
+    private void ApplyMandibleAttackServerRpc() => ApplyMandibleAttack();
+
+    private void ApplyMandibleAttack()
+    {
+        if (entity == null) return;
+
+        Collider[] hits = Physics.OverlapSphere(transform.position + transform.forward * mandibleRange, mandibleRange);
         foreach (var hit in hits)
         {
             Entity target = hit.GetComponent<Entity>();
-            if (target != null && target != shooter && (shooter == null || target.GetTeam() != shooter.GetTeam()))
+            if (target != null && target != entity && !entity.GetEnemyTeams().Contains(target.GetTeam()))
             {
-                target.TakeDamage(mandibleBaseDamage, shooter);
+                target.TakeDamage(mandibleBaseDamage, entity);
             }
         }
-
-        mandibleCooldownTimer = mandibleCooldown;
         Debug.Log("Mandible Attack! - Beetle.cs");
     }
-    #endregion
 
-    #region Ability 1 - Horn Impale (DASH + MELEE)
-    public void HornImpale()
+    // ABILITY 1 - HORN IMPALE
+    public bool TryHornImpale()
     {
-        if (hornCooldownTimer > 0f /*|| entity == null*/) return;
+        if (!isController) return false;
+        if (hornCooldownTimer > 0f || entity == null)
+        {
+            Debug.Log($"Horn Impale blocked - cooldown {hornCooldownTimer:F2}s remaining");
+            return false;
+        }
 
-        StartCoroutine(HornImpaleRoutine());
+        PlayHornImpaleAnimServerRpc();
+        hornCooldownTimer = hornCooldown;
+
+        if (isServer) StartCoroutine(HornImpaleRoutine());
+        else HornImpaleServerRpc();
+
+        return true;
     }
+
+    [ServerRpc(requireOwnership: false)]
+    private void PlayHornImpaleAnimServerRpc() => PlayHornImpaleAnim();
+
+    [ObserversRpc]
+    private void PlayHornImpaleAnim()
+    {
+        if (animator != null) animator.SetTrigger("HornImpale");
+    }
+
+    [ServerRpc]
+    private void HornImpaleServerRpc() => StartCoroutine(HornImpaleRoutine());
 
     private IEnumerator HornImpaleRoutine()
     {
         Entity shooter = entity ?? GetComponent<Entity>();
         Vector3 dashEnd = transform.position + transform.forward * hornDashDistance;
-
         float elapsed = 0f;
         Vector3 startPos = transform.position;
 
@@ -131,74 +177,91 @@ public class Beetle : MonoBehaviour
         foreach (var hit in hits)
         {
             Entity target = hit.GetComponent<Entity>();
-            if (target != null && target != shooter && (shooter == null || target.GetTeam() != shooter.GetTeam()))
+            if (target != null && target != shooter && shooter != null && !shooter.GetEnemyTeams().Contains(target.GetTeam()))
             {
                 target.TakeDamage(hornImpaleDamage, shooter);
-                // Apply slow (direct moveSpeed modification)
                 target.ModifyMoveSpeedMultiplier(1f - hornSlowAmount, hornSlowDuration);
             }
         }
-
-        hornCooldownTimer = hornCooldown;
         Debug.Log("Horn Impale! - Beetle.cs");
     }
-    #endregion
 
-    #region Ability 2 - Swagger (DEFENSIVE BUFF)
+    // ABILITY 2 - SWAGGER
     public void ActivateSwagger()
     {
-        if (swaggerTimer > 0f /*|| entity == null*/) return;
+        if (!isController) return;
+        if (swaggerTimer > 0f)
+        {
+            Debug.Log("Swagger blocked - already active.");
+            return;
+        }
 
-        entity.ModifyMoveSpeedMultiplier(swaggerMoveSpeedMult, swaggerDuration);
-
-        // Damage reduction (reduce incoming damage)
-        StartCoroutine(SwaggerDamageReduction());
+        PlaySwaggerAnimServerRpc();
         swaggerTimer = swaggerDuration;
         isSwaggerActive = true;
 
-        if (meshRenderer != null)
-            meshRenderer.material.color = Color.yellow;
+        if (meshRenderer != null) meshRenderer.material.color = Color.yellow;
+
+        if (isServer) ApplySwagger();
+        else ApplySwaggerServerRpc();
 
         Debug.Log("Swagger ACTIVATED! - Beetle.cs");
     }
 
-    private IEnumerator SwaggerDamageReduction()
+    [ServerRpc(requireOwnership: false)]
+    private void PlaySwaggerAnimServerRpc() => PlaySwaggerAnim();
+
+    [ObserversRpc]
+    private void PlaySwaggerAnim()
     {
-        float originalMaxHP = entity.maximumHitPoints.value;
-        float reducedHP = originalMaxHP * (1f - swaggerDamageReduction);
+        if (animator != null) animator.SetTrigger("Swagger");
+    }
 
-        // Apply reduced max HP during swagger
-        entity.GainMaxHealth((int)(reducedHP - entity.maximumHitPoints.value));
+    [ServerRpc]
+    private void ApplySwaggerServerRpc() => ApplySwagger();
 
-        yield return new WaitUntil(() => swaggerTimer <= 0f);
-
-        // Restore original max HP
-        entity.GainMaxHealth((int)(originalMaxHP - entity.maximumHitPoints.value));
+    private void ApplySwagger()
+    {
+        if (entity != null)
+        {
+            entity.ModifyMoveSpeedMultiplier(swaggerMoveSpeedMult, swaggerDuration);
+        }
     }
 
     private void EndSwagger()
     {
         isSwaggerActive = false;
-        // Move speed already restored by ModifyMoveSpeedMultiplier
-        if (meshRenderer != null)
-            meshRenderer.material.color = originalColor;
+        if (meshRenderer != null) meshRenderer.material.color = originalColor;
         Debug.Log("Swagger ENDED! - Beetle.cs");
     }
-    #endregion
 
-    #region Ability 3 - Roll (DASH + DAMAGE + KNOCKBACK)
-    public void StartRoll()
+    // ABILITY 3 - ROLL
+    public bool TryRoll()
     {
-        if (rollCooldownTimer > 0f || isRolling /*|| entity == null*/) return;
+        if (!isController) return false;
+        if (rollCooldownTimer > 0f || isRolling || entity == null)
+        {
+            Debug.Log("Roll blocked - cooldown or already rolling");
+            return false;
+        }
 
-        Entity shooter = entity ?? GetComponent<Entity>();
-        isRolling = true;
+        PlayRollAnimServerRpc();
         rollCooldownTimer = rollCooldown;
+        isRolling = true;
 
-        // CC Immunity (prevent movement interruption)
-        StartCoroutine(GrantCCImmunity(3f));
+        if (isServer) StartCoroutine(GrantCCImmunity(3f));
 
         Debug.Log("Roll STARTED! - Beetle.cs");
+        return true;
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void PlayRollAnimServerRpc() => PlayRollAnim();
+
+    [ObserversRpc]
+    private void PlayRollAnim()
+    {
+        if (animator != null) animator.SetTrigger("Roll");
     }
 
     private void HandleRoll()
@@ -206,26 +269,23 @@ public class Beetle : MonoBehaviour
         if (beetleRB != null)
         {
             beetleRB.linearVelocity = transform.forward * rollSpeed;
+        }
 
-            // Check for wall/player collision
-            if (Physics.Raycast(transform.position, transform.forward, 0.5f))
-            {
-                EndRoll();
-            }
+        if (Physics.Raycast(transform.position, transform.forward, 0.5f))
+        {
+            EndRoll();
         }
     }
 
     private void EndRoll()
     {
         isRolling = false;
-        if (beetleRB != null)
-            beetleRB.linearVelocity = Vector3.zero;
+        if (beetleRB != null) beetleRB.linearVelocity = Vector3.zero;
         Debug.Log("Roll ENDED! - Beetle.cs");
     }
 
     private IEnumerator GrantCCImmunity(float duration)
     {
-        // Prevent movement interruption during roll
         float elapsed = 0f;
         while (elapsed < duration)
         {
@@ -233,35 +293,71 @@ public class Beetle : MonoBehaviour
             yield return null;
         }
     }
-    #endregion
 
-    #region Ultimate - Ground Stomp (AOE STUN)
-    public void GroundStomp()
+    // ULTIMATE - GROUND STOMP
+    public void CastGroundStomp()
     {
-        if (stompPrefab == null /*|| entity == null*/) return;
+        if (!isController) return;
+        if (stompPrefab == null || entity == null) return;
 
-        Entity shooter = entity ?? GetComponent<Entity>();
+        PlayStompAnimServerRpc();
 
+        if (isServer) ApplyGroundStomp();
+        else GroundStompServerRpc();
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void PlayStompAnimServerRpc() => PlayStompAnim();
+
+    [ObserversRpc]
+    private void PlayStompAnim()
+    {
+        if (animator != null) animator.SetTrigger("Stomp");
+    }
+
+    [ServerRpc]
+    private void GroundStompServerRpc() => ApplyGroundStomp();
+
+    private void ApplyGroundStomp()
+    {
         // Visual effect
-        Instantiate(stompPrefab, transform.position, Quaternion.identity);
+        if (stompPrefab != null)
+        {
+            GameObject stompGO = Instantiate(stompPrefab, transform.position, Quaternion.identity);
+            NetworkManager.main.Spawn(stompGO);
+        }
 
         // AOE damage + stun
         Collider[] hits = Physics.OverlapSphere(transform.position, stompRadius);
         foreach (var hit in hits)
         {
             Entity target = hit.GetComponent<Entity>();
-            if (target != null && target != shooter && (shooter == null || target.GetTeam() != shooter.GetTeam()))
+            if (target != null && target != entity && !entity.GetEnemyTeams().Contains(target.GetTeam()))
             {
-                target.TakeDamage(stompDamage, shooter);
-                // Stun (set moveSpeed to 0 temporarily)
-                target.ModifyMoveSpeedMultiplier(0f, stompStunDuration);  // 0 speed = stun
+                target.TakeDamage(stompDamage, entity);
+                target.ModifyMoveSpeedMultiplier(0f, stompStunDuration);
             }
         }
-
         Debug.Log("GROUND STOMP! - Beetle.cs");
     }
-    #endregion
 
-    // Multipliers for movement scripts
-    public float GetMoveSpeedMultiplier() => isSwaggerActive ? swaggerMoveSpeedMult : 1f;
+    public float GetMoveSpeedMultiplier()
+    {
+        return entity != null ? entity.GetMoveSpeed() : 1f;
+    }
+
+    [ContextMenu("Test Mandible Attack")]
+    private void TestMandibleAttack() => CastMandibleAttack();
+
+    [ContextMenu("Test Horn Impale")]
+    private void TestHornImpale() => TryHornImpale();
+
+    [ContextMenu("Test Swagger")]
+    private void TestSwagger() => ActivateSwagger();
+
+    [ContextMenu("Test Roll")]
+    private void TestRoll() => TryRoll();
+
+    [ContextMenu("Test Ground Stomp")]
+    private void TestGroundStomp() => CastGroundStomp();
 }

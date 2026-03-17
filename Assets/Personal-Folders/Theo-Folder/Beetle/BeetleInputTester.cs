@@ -1,6 +1,7 @@
-// ******************************************* //
-// ****** THEO XENAKIS - 2026 - CPI 441 ****** //
-// ******************************************* //
+// BeetleInputTester.cs - FULLY ADAPTED TO MOSQUITO INPUT TESTER STRUCTURE
+// ******************************************* 
+// ****** THEO XENAKIS - 2026 - CPI 441 ****** 
+// ******************************************* 
 
 using System;
 using UnityEngine;
@@ -13,13 +14,13 @@ public class BeetleInputTester : MonoBehaviour
     [Header("Input Actions")]
     public InputActionAsset actions;
 
-    public string mandibleAttackAction = "MandibleAttack";
-    public string hornImpaleAction = "HornImpale";
-    public string swaggerAction = "Swagger";
-    public string rollAction = "Roll";
-    public string groundStompAction = "GroundStomp";
+    public string mandibleAction = "BasicAttack";
+    public string hornImpaleAction = "QuickPoke";
+    public string swaggerAction = "GlobShot";
+    public string rollAction = "AmpUp";
+    public string groundStompAction = "Ultimate";
 
-    private InputAction mandibleAttack;
+    private InputAction mandible;
     private InputAction hornImpale;
     private InputAction swagger;
     private InputAction roll;
@@ -30,7 +31,7 @@ public class BeetleInputTester : MonoBehaviour
         beetle = GetComponent<Beetle>();
 
         // Resolve actions by name (Unity 6 safe)
-        mandibleAttack = actions.FindAction(mandibleAttackAction, throwIfNotFound: true);
+        mandible = actions.FindAction(mandibleAction, throwIfNotFound: true);
         hornImpale = actions.FindAction(hornImpaleAction, throwIfNotFound: true);
         swagger = actions.FindAction(swaggerAction, throwIfNotFound: true);
         roll = actions.FindAction(rollAction, throwIfNotFound: true);
@@ -46,59 +47,91 @@ public class BeetleInputTester : MonoBehaviour
     // Input Callbacks
     private void OnMandibleAttack(InputAction.CallbackContext context)
     {
-        if (context.started && beetle != null)
+        if (context.started && beetle != null && beetle.isOwner)
         {
-            beetle.MandibleAttack();
-            Debug.Log("Mandible Attack!");
+            beetle.CastMandibleAttack();
+            Debug.Log("[InputTester] Mandible Attack Tried!");
         }
     }
 
     private void OnHornImpale(InputAction.CallbackContext context)
     {
-        if (context.started && beetle != null)
+        if (context.started && beetle != null && beetle.isOwner)
         {
-            beetle.HornImpale();
-            Debug.Log("Horn Impale!");
+            if (beetle.TryHornImpale())
+                Debug.Log("[InputTester] Horn Impale Tried!");
         }
     }
 
     private void OnSwagger(InputAction.CallbackContext context)
     {
-        if (context.started && beetle != null)
+        if (context.started && beetle != null && beetle.isOwner)
         {
             beetle.ActivateSwagger();
-            Debug.Log("Swagger!");
+            Debug.Log("[InputTester] Swagger Tried!");
         }
     }
 
     private void OnRoll(InputAction.CallbackContext context)
     {
-        if (context.started && beetle != null)
+        if (context.started && beetle != null && beetle.isOwner)
         {
-            beetle.StartRoll();
-            Debug.Log("Roll!");
+            if (beetle.TryRoll())
+                Debug.Log("[InputTester] Roll Tried!");
         }
     }
 
     private void OnGroundStomp(InputAction.CallbackContext context)
     {
-        if (context.started && beetle != null)
+        if (context.started && beetle != null && beetle.isOwner)
         {
-            beetle.GroundStomp();
-            Debug.Log("Ground Stomp!");
+            beetle.CastGroundStomp();
+            Debug.Log("[InputTester] Ground Stomp Tried!");
         }
     }
 
-    // Enable / Disable
-    private void OnEnable()
+    // Enemy Search (same as Mosquito)
+    Entity FindNearestEnemy()
     {
-        mandibleAttack.started += OnMandibleAttack;
+        if (beetle?.entity == null) return null;
+
+        Collider[] hits = Physics.OverlapSphere(transform.position, 5f);
+        Entity nearest = null;
+        float closestDist = float.MaxValue;
+
+        foreach (var hit in hits)
+        {
+            Entity enemy = hit.GetComponent<Entity>();
+            if (enemy != null && enemy.GetTeam() != beetle.entity.GetTeam())
+            {
+                float dist = Vector3.Distance(transform.position, enemy.transform.position);
+                if (dist < closestDist)
+                {
+                    closestDist = dist;
+                    nearest = enemy;
+                }
+            }
+        }
+        return nearest;
+    }
+
+    private bool _inputEnabled = false;
+
+    // Called by Beetle.OnSpawned — only subscribes input for the local owner
+    public void EnableInput()
+    {
+        if (_inputEnabled) return;
+        _inputEnabled = true;
+
+        Debug.Log($"[InputTester] EnableInput called on {beetle.gameObject.name} | owner={beetle.owner}");
+
+        mandible.started += OnMandibleAttack;
         hornImpale.started += OnHornImpale;
         swagger.started += OnSwagger;
         roll.started += OnRoll;
         groundStomp.started += OnGroundStomp;
 
-        mandibleAttack.Enable();
+        mandible.Enable();
         hornImpale.Enable();
         swagger.Enable();
         roll.Enable();
@@ -107,13 +140,13 @@ public class BeetleInputTester : MonoBehaviour
 
     private void OnDisable()
     {
-        mandibleAttack.started -= OnMandibleAttack;
+        mandible.started -= OnMandibleAttack;
         hornImpale.started -= OnHornImpale;
         swagger.started -= OnSwagger;
         roll.started -= OnRoll;
         groundStomp.started -= OnGroundStomp;
 
-        mandibleAttack.Disable();
+        mandible.Disable();
         hornImpale.Disable();
         swagger.Disable();
         roll.Disable();
