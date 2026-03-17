@@ -304,12 +304,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f10852763fb896f4893e811df83b42ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ButterflyInputTester
-  actions: {fileID: 0}
-  basicAttackAction: BasicAttack
-  dustWaveAction: DustWave
-  dazzlingWaveAction: DazzlingWave
-  flyDashAction: FlyDash
-  tornadoAction: Tornado
+  actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  basicAttackAction: WindBurst-BasicAttack
+  dustWaveAction: DustWave-Ability1
+  dazzlingWaveAction: DazzlingWave-Ability2
+  flyDashAction: Fly-Ability3
+  tornadoAction: Tornado-Ultimate
 --- !u!114 &4812959287127913440
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -322,19 +322,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 574a32c9abe174a4eafb1fdacf8d5385, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Butterfly
-  entity: {fileID: 0}
-  windBurstProjectilePrefab: {fileID: 0}
-  windBurstFirePoint: {fileID: 0}
+  entity: {fileID: 4751865395330377205}
+  windBurstProjectilePrefab: {fileID: 7660528519338353513, guid: b499944282f2c7b4c99f69d1c1224545, type: 3}
+  windBurstFirePoint: {fileID: 154977485595512342}
   windBurstBaseDamage: 4
   windBurstSpeed: 10
   windBurstRange: 6
-  dustWavePrefab: {fileID: 1025285306637258, guid: d8f0099df63275647a8bcf646df1ca00, type: 3}
+  dustWavePrefab: {fileID: 6924391199545212785, guid: b819ec516e52b894eb2cbc8b3bbca4a7, type: 3}
   dustWaveOrigin: {fileID: 154977485595512342}
   dustWaveBaseDamage: 3
   dustWaveRadius: 4
   dustWaveCooldown: 5
-  dazzlingWavePrefab: {fileID: 0}
-  dazzlingWaveOrigin: {fileID: 0}
+  dazzlingWavePrefab: {fileID: 4794335687598033782, guid: cb2d8024a613aec4da309fd4e12cd1af, type: 3}
+  dazzlingWaveOrigin: {fileID: 154977485595512342}
   dazzlingWaveBaseDamage: 2
   dazzlingWaveRadius: 4
   dazzlingWaveHealAmount: 10
@@ -378,7 +378,7 @@ Transform:
   m_GameObject: {fileID: 8111900342316838556}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.836, y: 0.344, z: 2.981}
+  m_LocalPosition: {x: 0.836, y: 0.344, z: 3.39}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
