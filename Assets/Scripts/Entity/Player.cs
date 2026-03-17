@@ -12,26 +12,48 @@ public class Player : Entity
     [SerializeField] SyncVar<int> playerLevel = new(1);
     [SerializeField] SyncVar<int> goldTotal = new(0);
     [SerializeField] SyncVar<int> xpTotal = new(0);
-    [SerializeField] public PredictedPlayerMovement predictedMovement = null;
+    [SerializeField] PredictedPlayerMovement predictedMovement = null;
+    [SerializeField] MinimapTracker minimapTracker = null;
     SO_PlayerInfo playerInfo = null;
     List<Tower> friendlyTowers;
 
-    private bool hasAttemptedSpawn = false;
+    private SyncVar<bool> hasAttemptedSpawn = new(false);
+    private SyncVar<bool> onSpawnedCalled = new(false);
 
     protected override void Start() 
     {
         if (predictedMovement == null) predictedMovement = GetComponent<PredictedPlayerMovement>();
 
         // Attempt to spawn the NetworkIdentity first
-        if (!hasAttemptedSpawn)
+        if (!hasAttemptedSpawn.value)
         {
-            hasAttemptedSpawn = true;
+            hasAttemptedSpawn.value = true;
             TrySpawnNetworkIdentity();
         }
+
+        Debug.Log("Start Called for: " + GetNetworkID(isServer));
+    }
+
+    protected override void OnSpawned(bool asServer)
+    {
+        if (onSpawnedCalled.value) return;
+        
+        Debug.Log("OnSpawned Called for: " + GetNetworkID(isServer));
+        onSpawnedCalled.value = true;
 
         // If already spawned, initialize normally
         base.Start();
         InitializePlayer();
+
+        // ONLY CALL THE FOLLOWING ON THE CLIENT
+        if (minimapTracker != null) 
+        {
+            if (predictedMovement.predictionManager.localPlayer == GetPlayerID())
+            {
+                Debug.Log("Local Player ID: " + GetPlayerID());
+                minimapTracker.AttachMinimapCamera();
+            }
+        }
     }
 
     private void TrySpawnNetworkIdentity()
@@ -62,6 +84,15 @@ public class Player : Entity
     private void InitializePlayer()
     {
         playerInfo = ScriptableObject.CreateInstance<SO_PlayerInfo>();
+
+        foreach(GameManager.PlayerInfo playerInfo in GameManager.Instance.playersInfo)
+        {
+            if (playerInfo.playerID == GetPlayerID())
+            {
+                team.value = (Entity.Team) playerInfo.team;
+                Debug.Log("Player ID: " + playerInfo.playerID + " is on Team: " + playerInfo.team);
+            }
+        }
 
         //Fill towers with same team towers
         friendlyTowers = new List<Tower>();

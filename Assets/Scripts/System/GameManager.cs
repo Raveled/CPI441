@@ -5,10 +5,13 @@ using TMPro;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.UI;
+using PurrNet;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
     public enum GameState : int { NULL = 0, INPROGRESS = 1, PAUSED = 2, END = 3}
+    public enum Team : int { NULL = 0, TEAM1 = 1, TEAM2 = 2, NEUTRAL = 3 };
 
     //GameManager
     [Header("GameManager Setup")]
@@ -34,11 +37,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] GameObject winScreenCanvas = null;
     [SerializeField] TextMeshProUGUI winScreenText = null;
     [SerializeField] Image winScreenBGImage = null;
-    [SerializeField] string team1Name = "Magenta Team";
-    [SerializeField] string team2Name = "Blue Team";
-    [SerializeField] Color team1Color;
-    [SerializeField] Color team2Color;
-    Color winningTeamColor;
+    [SerializeField] public string team1Name = "Magenta Team";
+    [SerializeField] public string team2Name = "Blue Team";
+    [SerializeField] public Color team1Color;
+    [SerializeField] public Color team2Color;
+    public Color winningTeamColor;
 
     //Character Handling
     [Space]
@@ -99,6 +102,23 @@ public class GameManager : MonoBehaviour
     [SerializeField] string winnerStr = "";
     [SerializeField] int towersDestroyed_Team1 = 0; //how many of Team 2's towers Team 1 destroyed
     [SerializeField] int towersDestroyed_Team2 = 0;
+
+    // Network IDS
+    public struct PlayerInfo
+    {
+        public PlayerID? playerID;
+        public Team team;
+        public string character;
+
+        public PlayerInfo(PlayerID? playerID, Team team, string character)
+        {
+            this.playerID = playerID;
+            this.team = team;
+            this.character = character;
+        }
+    }
+    public List<PlayerID?> playerIDs = new List<PlayerID?>();
+    public List<PlayerInfo> playersInfo = new List<PlayerInfo>();
 
     public static GameManager Instance { get; private set;}
 
@@ -430,9 +450,14 @@ public class GameManager : MonoBehaviour
     }
 
     // WIP METHOD FOR SETTING PLAYER CHARACTER
-    public string GetPlayerCharacter()
+    public (Team, string) GetPlayerSetup()
     {
-        return "Mosquito";
+        if (playerIDs.Count % 2 == 0)
+        {
+            return (Team.TEAM1, "Mosquito");
+        }
+
+        return (Team.TEAM2, "Mosquito");
     }
 
     #endregion
