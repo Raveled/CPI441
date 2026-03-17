@@ -5,6 +5,7 @@ using UnityEngine.AI;
 using NUnit.Framework;
 using PurrNet;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class Minion : NonPlayerEntity
 {
@@ -74,14 +75,7 @@ public class Minion : NonPlayerEntity
         agent.updateRotation = true;
     }
 
-    void Update()
-    {
-        if (isServer) ServerUpdate();
-
-        ClientUpdate();
-    }
-
-    void ServerUpdate()
+    protected override void ServerUpdate()
     {
         Entity currentTarget = GetTarget();
         if(hasTarget && !currentTarget) 
@@ -93,6 +87,7 @@ public class Minion : NonPlayerEntity
 
         if (enemyCore) 
         {
+            if (isDead) return;
             FindTarget();
             currentTarget = GetTarget();
             //if (currentTarget) Debug.Log(gameObject.name + " has current target: " + currentTarget.gameObject.name);
@@ -102,9 +97,11 @@ public class Minion : NonPlayerEntity
             AttackTimer();
             Attack(currentTarget);
         }
+
+        base.ServerUpdate();
     }
 
-    void ClientUpdate()
+    protected override void ClientUpdate()
     {
         //Update the cylinder points for attack
         p0 = attackRangeOrigin.position + halfHeight;
@@ -125,15 +122,14 @@ public class Minion : NonPlayerEntity
                 Debug.DrawLine(basePOSThis, basePOSTarget, debugLineColor);
             }
         }
+
+        base.ClientUpdate();
     }
 
     protected override void Move(Entity currentTarget) {
         base.Move();
 
         if (!isServer) return;
-
-        //Set move target
-        //navMeshMoveTarget = currentTarget ? currentTarget.transform : enemyCore.transform;
 
         if (currentTarget) {
             //If there is a target, move to it
@@ -158,12 +154,14 @@ public class Minion : NonPlayerEntity
         if (currentTarget) {
             if (distanceToTarget <= attackRange) {
                 agent.isStopped = true;
+                if(animator.GetBool("isMoving")) animator.SetBool("isMoving", false);
                 return;
             }
         }
 
         //Continue moving
         agent.isStopped = false;
+        if (!animator.GetBool("isMoving")) animator.SetBool("isMoving", true);
 
         // Update path only if needed
         if (!agent.hasPath || Vector3.Distance(previousDestination, navMeshMoveTarget.position) > 0.5f) {
@@ -171,14 +169,12 @@ public class Minion : NonPlayerEntity
             agent.SetDestination(previousDestination);
         }
     }
-
+    
     protected override void Attack(Entity currentTarget) {
         base.Attack();
 
         
         if (!isServer) return;
-
-
 
         //If there is a target and it is within attack range
         if (currentTarget && CheckTargetInAttackRange(currentTarget) && attackCooldownTimer.value <= 0) {
@@ -188,7 +184,6 @@ public class Minion : NonPlayerEntity
 
                 //Debug.Log($"[Minion Attack] Attempting attack on target: {currentTarget?.name}");
             }
-
 
             //Spawn overlapcapsule and check for enemy entities to deal damage to
             Collider[] hits = Physics.OverlapCapsule(p0, p1, attackRange);
@@ -208,10 +203,11 @@ public class Minion : NonPlayerEntity
                         //Reset attack cooldown
                         attackCooldownTimer.value = defaultAttackCooldown.value;
 
-
                         if (e.TakeDamage(attackPower, this)) {
                             ResetTarget();
                         }
+
+                        animator.SetTrigger("Attack");
                     }
                     else
                     {
@@ -222,6 +218,7 @@ public class Minion : NonPlayerEntity
             }
         }
     }
+    
 
     //Rotate the Transform based on the target
     void Rotate(Entity currentTarget) {
@@ -290,6 +287,11 @@ public class Minion : NonPlayerEntity
     public override void Freeze(bool freezeNPE) {
         base.Freeze(freezeNPE);
         agent.isStopped = !freezeNPE;
+        if (agent.isStopped) {
+            if (animator.GetBool("isMoving")) animator.SetBool("isMoving", false);
+        } else {
+            if (!animator.GetBool("isMoving")) animator.SetBool("isMoving", true);
+        }
     }
     //Setter for enemy core
     public void SetEnemyCore(Core core) {

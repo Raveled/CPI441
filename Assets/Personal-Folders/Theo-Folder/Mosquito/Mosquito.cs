@@ -1,7 +1,9 @@
 using UnityEngine;
 using System.Collections;
+using PurrNet;
+using UnityEngine.EventSystems;
 
-public class Mosquito : MonoBehaviour
+public class Mosquito : NetworkBehaviour
 {
     [Header("Basic Attack - Blood Shot")]
     [SerializeField] private GameObject bloodShotProjectilePrefab;
@@ -24,6 +26,10 @@ public class Mosquito : MonoBehaviour
     [SerializeField] private float quickPokeBloodGainPlayer = 20f;
     private float quickPokeCooldownTimer = 0f;
 
+    [Header("Quick Poke - Ability 2 Setup")]
+    [SerializeField] private float quickPokeRange = 2f;
+    [SerializeField] private Transform quickPokeOrigin = null;
+
     [Header("Glob Shot - Ability 3")]
     [SerializeField] private GameObject globProjectilePrefab;
     [SerializeField] private Transform globFirePoint;
@@ -33,38 +39,51 @@ public class Mosquito : MonoBehaviour
     [SerializeField] private float globDamagePerBloodUnit = 0.3f;
     [SerializeField] private float globSizePerBloodUnit = 0.01f;
 
+    [Header("Glob Shot Threshold")]
+    [SerializeField] private float globShotMinBloodThreshold = 10f;
+
     [Header("Amp Up - Ultimate")]
     [SerializeField] private float ampUpDuration = 5f;
     [SerializeField] private float ampUpInitialMoveMult = 2f;
     [SerializeField] private float ampUpInitialAttackSpeedMult = 2f;
     [SerializeField] private Color ampUpColor = Color.red;
 
+    [Header("Animator")]
+    [SerializeField] private Animator animator;
+
     // Runtime state
     private float currentBloodMeter = 0f;
     private float ampUpTimer = 0f;
-    private float ampUpCurrentMoveMult = 1f;
-    private float ampUpCurrentAttackSpeedMult = 1f;
     private Color originalColor;
-    private MeshRenderer meshRenderer;
-    public Entity entity;
+    private Renderer meshRenderer;
+    [SerializeField] public Player player;
 
-    private void Awake()
+    protected override void OnSpawned()
     {
-        meshRenderer = GetComponentInChildren<MeshRenderer>();
-        entity = GetComponent<Entity>();
+        base.OnSpawned();
+
+        meshRenderer = GetComponentInChildren<Renderer>();
+
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>();
+
         if (meshRenderer != null)
             originalColor = meshRenderer.material.color;
+
+        ServerTestRpc();
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void ServerTestRpc()
+    {
+        Debug.Log("Test Server RPC for PlayerID: " + player.GetPlayerID());
     }
 
     private void Update()
     {
-        // Blood decay
         if (bloodMeterDecayPerSecond > 0f && currentBloodMeter > 0f)
-        {
             ModifyBloodMeter(-bloodMeterDecayPerSecond * Time.deltaTime);
-        }
 
-        // Quick poke cooldown
         if (quickPokeCooldownTimer > 0f)
             quickPokeCooldownTimer -= Time.deltaTime;
 
@@ -81,24 +100,53 @@ public class Mosquito : MonoBehaviour
     // ========== BASIC ATTACK - BLOOD SHOT ==========
     public void CastBloodShot()
     {
-        Debug.Log("Casting Blood Shot");
+        ServerTestRpc();
+        if (player.isLocalPlayer()) return; // Safety guard -- Check if local player is player shooting
 
-        if (bloodShotProjectilePrefab == null || bloodShotFirePoint == null)
-            return;
+        Debug.Log($"[Mosquito] CastBloodShot on {gameObject.name} | Player ID: {player.GetPlayerID()}");
 
-        // Make entity optional - work even if null (like before)
-        Entity shooter = entity ?? GetComponent<Entity>();
         int damage = GetBasicAttackDamageWithBlood(bloodShotBaseDamage);
 
-        GameObject projGO = Instantiate(bloodShotProjectilePrefab, bloodShotFirePoint.position, bloodShotFirePoint.rotation);
-        BloodShotProjectile proj = projGO.GetComponent<BloodShotProjectile>();
-        if (proj != null)
+        if (isServer)
         {
-            proj.ownerEntity = shooter;  // Can be null, projectile handles it
-            proj.damage = damage;
-            proj.speed = bloodShotSpeed;
-            proj.maxRange = bloodShotRange;
+            Debug.Log("[Mosquito] IS server - spawning directly.");
+            PlayBloodShotAnim();
+            ServerSpawnBloodShot(bloodShotFirePoint.position, bloodShotFirePoint.rotation, damage);
         }
+        else
+        {
+            Debug.Log("[Mosquito] NOT server - sending ServerRpc.");
+            ServerSpawnBloodShotRpc(bloodShotFirePoint.position, bloodShotFirePoint.rotation, damage);
+        }
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void ServerSpawnBloodShotRpc(Vector3 position, Quaternion rotation, int damage)
+    {
+        Debug.Log($"[Mosquito] ServerSpawnBloodShotRpc received on server. damage={damage} player id = {player.GetPlayerID()}");
+        PlayBloodShotAnim();
+        ServerSpawnBloodShot(position, rotation, damage);
+    }
+
+    private void ServerSpawnBloodShot(Vector3 position, Quaternion rotation, int damage)
+    {
+        Debug.Log($"[Mosquito] ServerSpawnBloodShot - prefab={bloodShotProjectilePrefab}, firePoint={bloodShotFirePoint}, networkManager={networkManager}");
+
+        if (bloodShotProjectilePrefab == null) { Debug.LogError("[Mosquito] bloodShotProjectilePrefab is NULL!"); return; }
+        if (bloodShotFirePoint == null) { Debug.LogError("[Mosquito] bloodShotFirePoint is NULL!"); return; }
+        if (networkManager == null) { Debug.LogError("[Mosquito] networkManager is NULL!"); return; }
+
+        GameObject projGO = Instantiate(bloodShotProjectilePrefab, position, rotation);
+        Debug.Log($"[Mosquito] Instantiated projectile: {projGO.name}. PurrNet will auto-sync via NetworkBehaviour.");
+
+        BloodShotProjectile proj = projGO.GetComponent<BloodShotProjectile>();
+        if (proj == null) { Debug.LogError("[Mosquito] BloodShotProjectile component NOT found on prefab!"); return; }
+
+        proj.syncDamage.value = damage;
+        proj.syncSpeed.value = bloodShotSpeed;
+        proj.syncMaxRange.value = bloodShotRange;
+        proj.syncOwnerID.value = player.GetNetworkID(isServer);
+        Debug.Log($"[Mosquito] Projectile configured - damage={damage}, speed={bloodShotSpeed}, range={bloodShotRange}, ownerID={player.GetNetworkID(isServer)}");
     }
 
     // ========== BLOOD ENERGY PASSIVE (Ability 1) ==========
@@ -113,74 +161,149 @@ public class Mosquito : MonoBehaviour
         bool hitPlayer = target.GetType().Name == "Player";
         float gain = hitPlayer ? bloodMeterGainOnPlayerHit : bloodMeterGainOnBasicHit;
         ModifyBloodMeter(gain);
+        Debug.Log($"[Mosquito] Blood gained: +{gain:F1} - current blood: {currentBloodMeter:F1}/{maxBloodMeter}");
     }
 
     // ========== QUICK POKE - ABILITY 2 ==========
-    public bool TryQuickPoke(Entity target)
+    public bool TryQuickPoke()
     {
-        Debug.Log("Attempting Quick Poke on target: " + (target != null ? target.name : "null"));
-        Debug.Log("Quick Poke Cooldown Timer: " + quickPokeCooldownTimer);
-        Debug.Log("Current Blood Meter: " + currentBloodMeter);
-
-        if (quickPokeCooldownTimer > 0f || target == null || entity == null)
+        if (!isController) return false; // Safety guard
+        if (quickPokeCooldownTimer > 0f || player == null)
+        {
+            Debug.Log($"[Mosquito] Quick Poke blocked - cooldown: {quickPokeCooldownTimer:F2}s remaining");
             return false;
+        }
 
         quickPokeCooldownTimer = quickPokeCooldown;
-        int damage = GetBasicAttackDamageWithBlood(quickPokeBaseDamage);
-        target.TakeDamage(damage, entity);
+        PlayQuickPokeAnim();
 
-        bool hitPlayer = target.GetType().Name == "Player";
-        float gain = hitPlayer ? quickPokeBloodGainPlayer : quickPokeBloodGain;
-        ModifyBloodMeter(gain);
+        if (isServer)
+            ApplyQuickPoke();
+        else
+            ApplyQuickPokeServerRpc();
 
         return true;
+    }
+
+    [ServerRpc(requireOwnership: true)]
+    private void ApplyQuickPokeServerRpc()
+    {
+        ApplyQuickPoke();
+    }
+
+    private void ApplyQuickPoke()
+    {
+        Vector3 origin = quickPokeOrigin != null ? quickPokeOrigin.position : transform.position;
+        Debug.Log($"[Mosquito] Quick Poke - overlap sphere at {origin}, range={quickPokeRange}");
+
+        Collider[] hits = Physics.OverlapSphere(origin, quickPokeRange);
+        int hitCount = 0;
+
+        foreach (Collider hit in hits)
+        {
+            if (hit.transform.IsChildOf(player.transform) || hit.gameObject == player.gameObject)
+                continue;
+
+            Entity target = hit.GetComponent<Entity>();
+            if (target == null || target.GetIsDead()) continue;
+            if (!player.GetEnemyTeams().Contains(target.GetTeam())) continue;
+
+            int damage = GetBasicAttackDamageWithBlood(quickPokeBaseDamage);
+            Debug.Log($"[Mosquito] Quick Poke hit {target.name} for {damage} damage!");
+            target.TakeDamage(damage, player);
+
+            bool hitPlayer = target.GetType().Name == "Player";
+            float gain = hitPlayer ? quickPokeBloodGainPlayer : quickPokeBloodGain;
+            ModifyBloodMeter(gain);
+            Debug.Log($"[Mosquito] Blood gained: +{gain:F1} - current blood: {currentBloodMeter:F1}/{maxBloodMeter}");
+
+            hitCount++;
+        }
+
+        if (hitCount == 0)
+            Debug.Log("[Mosquito] Quick Poke hit nothing.");
     }
 
     // ========== GLOB SHOT - ABILITY 3 ==========
     public void CastGlobShot()
     {
-        Debug.Log("Attempting to Cast Glob Shot - Blood: " + currentBloodMeter);
-
-        if (globProjectilePrefab == null || globFirePoint == null)
+        if (!isController) return; // Safety guard
+        if (currentBloodMeter < globShotMinBloodThreshold)
+        {
+            Debug.Log($"[Mosquito] Glob Shot blocked - blood {currentBloodMeter:F1} below threshold {globShotMinBloodThreshold}");
             return;
+        }
 
-        Entity shooter = entity ?? GetComponent<Entity>();
+        PlayGlobShotAnim();
+
         float maxUsage = maxBloodMeter * globMaxMeterUsageFraction;
         float bloodToUse = Mathf.Min(currentBloodMeter, maxUsage);
-
         if (bloodToUse <= 0f) return;
 
         ModifyBloodMeter(-bloodToUse);
+        Debug.Log($"[Mosquito] Glob Shot fired - used {bloodToUse:F1} blood, remaining: {currentBloodMeter:F1}");
         float damage = globBaseDamage + bloodToUse * globDamagePerBloodUnit;
         float sizeScale = 1f + bloodToUse * globSizePerBloodUnit;
 
-        GameObject projGO = Instantiate(globProjectilePrefab, globFirePoint.position, globFirePoint.rotation);
+        if (isServer)
+            ServerSpawnGlob(globFirePoint.position, globFirePoint.rotation, damage, sizeScale);
+        else
+            ServerSpawnGlobRpc(globFirePoint.position, globFirePoint.rotation, damage, sizeScale);
+    }
+
+    [ServerRpc(requireOwnership: true)]
+    private void ServerSpawnGlobRpc(Vector3 position, Quaternion rotation, float damage, float sizeScale)
+    {
+        ServerSpawnGlob(position, rotation, damage, sizeScale);
+    }
+
+    private void ServerSpawnGlob(Vector3 position, Quaternion rotation, float damage, float sizeScale)
+    {
+        if (globProjectilePrefab == null || globFirePoint == null) return;
+
+        GameObject projGO = Instantiate(globProjectilePrefab, position, rotation);
         projGO.transform.localScale *= sizeScale;
+
         GlobProjectile proj = projGO.GetComponent<GlobProjectile>();
         if (proj != null)
         {
-            proj.damage = Mathf.RoundToInt(damage);
-            proj.speed = globBaseSpeed;
-            proj.ownerEntity = shooter;  // Can be null
+            proj.syncDamage.value = Mathf.RoundToInt(damage);
+            proj.syncSpeed.value = globBaseSpeed;
+            proj.syncOwnerID.value = player.GetNetworkID(isServer);
         }
     }
 
     // ========== AMP UP - ULTIMATE ==========
     public void ActivateAmpUp()
     {
-        Debug.Log("Attempting to Activate Amp Up");
+        if (!isController) return; // Safety guard
         if (ampUpTimer > 0f)
         {
-            Debug.Log("Amp Up already active!");
+            Debug.Log("[Mosquito] Amp Up blocked - already active.");
             return;
         }
 
+        PlayAmpUpAnimation();
         ampUpTimer = ampUpDuration;
-        ampUpCurrentMoveMult = ampUpInitialMoveMult;
-        ampUpCurrentAttackSpeedMult = ampUpInitialAttackSpeedMult;
 
-        if (meshRenderer != null)
-            meshRenderer.material.color = ampUpColor;
+        if (isServer)
+            ApplyAmpUp();
+        else
+            ApplyAmpUpServerRpc();
+    }
+
+    [ServerRpc(requireOwnership: true)]
+    private void ApplyAmpUpServerRpc()
+    {
+        ApplyAmpUp();
+    }
+
+    private void ApplyAmpUp()
+    {
+        Debug.Log($"[Mosquito] Amp Up activated! Duration={ampUpDuration}s, MoveMult={ampUpInitialMoveMult}, AttackMult={ampUpInitialAttackSpeedMult}");
+        player.ModifyMoveSpeedMultiplier(ampUpInitialMoveMult, ampUpDuration);
+        player.ModifyAttackPowerForSeconds(ampUpInitialAttackSpeedMult, ampUpDuration);
+        SetAmpUpColorRpc(true);
     }
 
     private void UpdateAmpUp()
@@ -188,54 +311,72 @@ public class Mosquito : MonoBehaviour
         if (ampUpTimer <= 0f) return;
 
         ampUpTimer -= Time.deltaTime;
-        float t = 1f - Mathf.Clamp01(ampUpTimer / ampUpDuration);
-        ampUpCurrentMoveMult = Mathf.Lerp(ampUpInitialMoveMult, 1f, t);
-        ampUpCurrentAttackSpeedMult = Mathf.Lerp(ampUpInitialAttackSpeedMult, 1f, t);
 
         if (ampUpTimer <= 0f)
         {
-            if (meshRenderer != null)
-                meshRenderer.material.color = originalColor;
+            ampUpTimer = 0f;
+            if (isServer) SetAmpUpColorRpc(false);
+            Debug.Log("[Mosquito] Amp Up expired.");
         }
     }
 
-    // Multiplier getters for movement/attack scripts
-    public float GetMoveSpeedMultiplier() => ampUpCurrentMoveMult;
-    public float GetAttackSpeedMultiplier() => ampUpCurrentAttackSpeedMult;
+    [ObserversRpc]
+    private void SetAmpUpColorRpc(bool active)
+    {
+        if (meshRenderer == null) {
+            Debug.LogError("[Mosquito] meshRenderer is NULL! Check prefab hierarchy.");
+            // Force find it
+            meshRenderer = GetComponentInChildren<MeshRenderer>();
+            Debug.Log($"Force search found meshRenderer={meshRenderer}");
+        }
+        meshRenderer.material.color = active ? ampUpColor : originalColor;
+        Debug.Log($"[Mosquito] Amp Up color set to {(active ? "active" : "original")}.");
+    }
 
-    // Debug helpers
+    // ========== ANIMATOR METHODS ==========
+    [ObserversRpc]
+
+    private void PlayBloodShotAnim()
+    {
+        if (animator != null) animator.SetTrigger("BloodShot");
+    }
+    [ObserversRpc]
+
+    private void PlayQuickPokeAnim()
+    {
+        if (animator != null) animator.SetTrigger("QuickPoke");
+    }
+    [ObserversRpc]
+
+    private void PlayGlobShotAnim()
+    {
+        if (animator != null) animator.SetTrigger("GlobShot");
+    }
+    [ObserversRpc]
+
+    private void PlayAmpUpAnimation()
+    {
+        if (animator != null) animator.SetTrigger("AmpUp");
+    }
+    [ObserversRpc]
+
+    public void PlayDeathAnimation()
+    {
+        if (animator != null) animator.SetTrigger("Death");
+    }
+
+    public float GetMoveSpeedMultiplier() => player != null ? player.GetMoveSpeed() : 1f;
+    public float GetAttackSpeedMultiplier() => player != null ? player.attackPower.value : 1f;
+
     [ContextMenu("Test Blood Shot")]
     private void TestBloodShot() => CastBloodShot();
 
     [ContextMenu("Test Quick Poke")]
-    private void TestQuickPoke()
-    {
-        Entity target = FindNearestEnemy();
-        if (target != null) TryQuickPoke(target);
-    }
+    private void TestQuickPoke() => TryQuickPoke();
 
     [ContextMenu("Test Glob Shot")]
     private void TestGlobShot() => CastGlobShot();
 
-    private Entity FindNearestEnemy()
-    {
-        Collider[] hits = Physics.OverlapSphere(transform.position, 5f);
-        Entity nearest = null;
-        float closestDist = float.MaxValue;
-
-        foreach (var hit in hits)
-        {
-            Entity enemy = hit.GetComponent<Entity>();
-            if (enemy != null && entity != null && enemy.GetTeam() != entity.GetTeam())
-            {
-                float dist = Vector3.Distance(transform.position, enemy.transform.position);
-                if (dist < closestDist)
-                {
-                    closestDist = dist;
-                    nearest = enemy;
-                }
-            }
-        }
-        return nearest;
-    }
+    [ContextMenu("Test Amp Up")]
+    private void TestAmpUp() => ActivateAmpUp();
 }

@@ -23,6 +23,7 @@ public class Tower : NonPlayerEntity
     }
 
     void ServerUpdate() {
+        if (isDead) return;
         FindTarget();
         Attack();
         AttackTimer();
@@ -57,6 +58,9 @@ public class Tower : NonPlayerEntity
         }
         
         base.Die(damageOrigin);
+
+        //REMOVE WHEN ANIMATION IS IN
+        Destroy(gameObject);
     }
     //When a player attacks another player within the range of the tower
     public void OverrideTarget(Entity damageOrigin) {

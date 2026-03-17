@@ -8,12 +8,12 @@ using NUnit.Framework;
 public class NonPlayerEntity : Entity
 {
     //Setup fields
-    [Header("NPE Setup")]
-
     [Space]
+    [Header("NPE Setup")]
     [SerializeField] protected Transform attackRangeOrigin = null;
     [SerializeField] protected NPEDetectLogic npeDetectLogic = null;
     [SerializeField] protected UnityEngine.UI.Slider healthBar = null;
+    [SerializeField] protected Animator animator = null;
     [Space]
     [SerializeField] bool canTargetTower = false;
     [SerializeField] bool canTargetCore = false;
@@ -55,12 +55,22 @@ public class NonPlayerEntity : Entity
         base.Start();
         entitiesInRange = new List<Entity>();
         npeDetectLogic.SetNPE(this);
-
-        StartCoroutine(DelayedHealthBarUpdate());
     }
 
-    private IEnumerator DelayedHealthBarUpdate() {
-        yield return new WaitUntil(() => isSpawned);
+    private void Update()
+    {
+        if (isServer) ServerUpdate();
+
+        ClientUpdate();
+    }
+
+    protected virtual void ServerUpdate()
+    {
+        // Implement in children
+    }
+
+    protected virtual void ClientUpdate()
+    {
         UpdateHealthBar();
     }
 
@@ -74,6 +84,19 @@ public class NonPlayerEntity : Entity
     {
         base.OnDeathClient(damageOriginId);
     }
+    public override bool TakeDamage(int damage, Entity damageOrigin) {
+        if (animator) animator.SetTrigger("Hit");
+        return base.TakeDamage(damage, damageOrigin);
+    }
+    protected override void Die(Entity damageOrigin) {
+        base.Die(damageOrigin);
+
+        healthBar.gameObject.SetActive(false);
+
+        //Turn off collider and trigger death animation
+        if (animator) animator.SetBool("isDead", true);
+        GetComponent<Collider>().enabled = false;
+    }
 
     //Update healthBar UI Element
     void UpdateHealthBar()
@@ -82,12 +105,6 @@ public class NonPlayerEntity : Entity
 
         healthBar.maxValue = maximumHitPoints.value;
         healthBar.value = currentHitPoints.value;
-    }
-    protected override void Die(Entity damageOrigin) {
-        base.Die(damageOrigin);
-
-        //Destroy self
-        Destroy(gameObject);
     }
 
     //Move
@@ -228,6 +245,10 @@ public class NonPlayerEntity : Entity
         SetTarget(null);
     }
     //Visualization for ranges using Gizmos
+
+    public void DestroyThis() {
+        Destroy(gameObject);
+    }
     protected override void OnDrawGizmos() {
         base.OnDrawGizmos();
         if (showAttackRange) {

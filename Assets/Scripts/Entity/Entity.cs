@@ -44,26 +44,34 @@ public class Entity : NetworkBehaviour
     [SerializeField] public SyncVar<int> reward_Gold = new(0);
     [SerializeField] public SyncVar<int> reward_XP = new(0);
     [SerializeField] public SyncVar<bool> isDead = new(false);
-    
+
     //Setup
     [SerializeField] protected List<Team> enemyTeams = null;
 
     //In subclasses, MUST use "base.Start()" line to call this
-    protected virtual void Start() {
+    protected virtual void Start()
+    {
         Setup();
+        SetIconColor();
     }
 
     //Assigns stats to GameObject based on the SO_EntityStatBlock
-    private void Setup() {
+    private void Setup()
+    {
         //Enemy Team Setup
         enemyTeams.Clear();
-        if (team.value == Entity.Team.TEAM1) {
+        if (team.value == Entity.Team.TEAM1)
+        {
             enemyTeams.Add(Entity.Team.TEAM2);
             enemyTeams.Add(Entity.Team.NEUTRAL);
-        } else if (team.value == Entity.Team.TEAM2) {
+        }
+        else if (team.value == Entity.Team.TEAM2)
+        {
             enemyTeams.Add(Entity.Team.TEAM1);
             enemyTeams.Add(Entity.Team.NEUTRAL);
-        } else if (team.value == Entity.Team.NEUTRAL) {
+        }
+        else if (team.value == Entity.Team.NEUTRAL)
+        {
             enemyTeams.Add(Entity.Team.TEAM1);
             enemyTeams.Add(Entity.Team.TEAM2);
         }
@@ -99,7 +107,7 @@ public class Entity : NetworkBehaviour
         if (!isServer)
             return;
 
-        Debug.Log($"Applying stats for {entityName} on team {team.value}");
+        //Debug.Log($"Applying stats for {entityName} on team {team.value}");
 
         maximumHitPoints.value = statBlock.BaseHitPoints;
         currentHitPoints.value = maximumHitPoints.value;
@@ -115,18 +123,18 @@ public class Entity : NetworkBehaviour
     }
 
     //Basic logic for entity taking damage. Returns true on death, false on no death
-    public virtual bool TakeDamage(int damage, Entity damageOrigin) 
+    public virtual bool TakeDamage(int damage, Entity damageOrigin)
     {
         if (!isServer)
         {
-            Debug.Log($"[TakeDamage] {gameObject.name} with ID: {damageOrigin.GetNetworkID(isServer)} is requesting to take {damage} damage from {damageOrigin?.name}");
+            //Debug.Log($"[TakeDamage] {gameObject.name} with ID: {damageOrigin.GetNetworkID(isServer)} is requesting to take {damage} damage from {damageOrigin?.name}");
             // Client requests server to apply damage
             if (damageOrigin != null) RequestDamageServerRpc(damage, damageOrigin.GetNetworkID(isServer));
             else RequestDamageServerRpc(damage, null);
             return isDead.value; // Return current state for client
         }
 
-        Debug.Log($"[TakeDamage] Server is applying {damage} damage from {damageOrigin?.name} to {name}");
+        //Debug.Log($"[TakeDamage] Server is applying {damage} damage from {damageOrigin?.name} to {name}");
         // Server applies damage directly
         if (damageOrigin != null) ApplyDamageServer(damage, damageOrigin.GetNetworkID(isServer));
         else ApplyDamageServer(damage, null);
@@ -136,7 +144,7 @@ public class Entity : NetworkBehaviour
     [ServerRpc(requireOwnership: false)]
     private void RequestDamageServerRpc(int damage, NetworkID? originId)
     {
-        Debug.Log($"[TakeDamageServerRpc] Received damage request: {damage} from origin ID: {originId}");
+        //Debug.Log($"[TakeDamageServerRpc] Received damage request: {damage} from origin ID: {originId}");
         ApplyDamageServer(damage, originId);
     }
 
@@ -146,7 +154,7 @@ public class Entity : NetworkBehaviour
         if (isDead.value || !isServer)
             return;
 
-        Debug.Log($"[TakeDamage] {name} is taking {damage} damage from {originId}");
+        //Debug.Log($"[TakeDamage] {name} is taking {damage} damage from {originId}");
 
         // Check if protector is alive
         bool protectorAlive = false;
@@ -183,7 +191,7 @@ public class Entity : NetworkBehaviour
         }
 
         // Notify all clients of health update
-        NotifyHealthChanged(currentHitPoints.value);
+        if(!GetIsDead())NotifyHealthChanged(currentHitPoints.value);
 
         return;
     }
@@ -192,7 +200,7 @@ public class Entity : NetworkBehaviour
     private void NotifyHealthChanged(int newHealth)
     {
         // This method can be used to trigger client-side effects when health changes, if needed
-        Debug.Log($"{entityName} health: {newHealth}/{maximumHitPoints.value}");
+        //Debug.Log($"{entityName} health: {newHealth}/{maximumHitPoints.value}");
         OnHealthChanged(newHealth);
     }
 
@@ -330,18 +338,19 @@ public class Entity : NetworkBehaviour
 
         // Find the entity that caused the death
         Entity damageOrigin = null;
-        
+
         if (damageOriginId.HasValue)
         {
             damageOrigin = GetEntityByNetworkID(damageOriginId.Value);
         }
-        
+
+        if (!GetIsDead()) NotifyDeathObserversRpc(damageOriginId);
         Die(damageOrigin);
-        NotifyDeathObserversRpc(damageOriginId);
     }
-    
+
     //Basic logic for dying/destroying self
-    protected virtual void Die(Entity damageOrigin) {
+    protected virtual void Die(Entity damageOrigin)
+    {
         if (!isServer)
             return;
 
@@ -365,19 +374,23 @@ public class Entity : NetworkBehaviour
     }
 
     //Give the gold+xp reward to the closest players in range. Only called on death
-    protected virtual void DistributeReward() {
+    protected virtual void DistributeReward()
+    {
         if (!isServer)
             return;
-        
+
         //Get All Possible Players
         Player[] players = FindObjectsByType<Player>(FindObjectsSortMode.None);
         List<Player> enemyPlayersInRange = new List<Player>();
 
         //Get the enemy team players that are in reward range
-        foreach (Player p in players) {
-            if (GetEnemyTeams().Contains(p.GetTeam())) {
+        foreach (Player p in players)
+        {
+            if (GetEnemyTeams().Contains(p.GetTeam()))
+            {
                 float distance = Vector3.Distance(p.gameObject.transform.position, transform.position);
-                if(distance < rewardRange) {
+                if (distance < rewardRange)
+                {
                     enemyPlayersInRange.Add(p);
                 }
             }
@@ -387,18 +400,53 @@ public class Entity : NetworkBehaviour
         int xpReward = reward_XP.value;
 
         //If 3+ players in range, split the reward amount
-        if(enemyPlayersInRange.Count > 2) {
+        if (enemyPlayersInRange.Count > 2)
+        {
             goldReward = (int)Mathf.Floor((float)goldReward / 3);
             xpReward = (int)Mathf.Floor((float)xpReward / 3);
         }
 
         //give the reward amount to each player in range
-        foreach (Player p in enemyPlayersInRange) {
+        foreach (Player p in enemyPlayersInRange)
+        {
             p.IncreaseGoldTotal(goldReward);
             p.IncreaseXPTotal(xpReward);
         }
     }
-    protected virtual void OnDrawGizmos() {
+
+    protected virtual void SetIconColor()
+    {
+        Transform iconTransform = transform.Find("MinimapIcon");
+
+        if (iconTransform == null)
+        {
+            Debug.LogWarning($"[SetIconColor] No child GameObject named 'icon' found on {entityName}.");
+            return;
+        }
+
+        SpriteRenderer sr = iconTransform.GetComponent<SpriteRenderer>();
+        if (sr == null)
+        {
+            Debug.LogWarning($"[SetIconColor] Child 'icon' on {entityName} has no SpriteRenderer.");
+            return;
+        }
+
+        sr.color = GetTeamColor(team.value);
+    }
+
+    protected virtual Color GetTeamColor(Team t)
+    {
+        return t switch
+        {
+            Team.TEAM1   => GameManager.Instance.team1Color,
+            Team.TEAM2   => GameManager.Instance.team2Color,
+            Team.NEUTRAL => Color.yellow,
+            _            => Color.white,
+        };
+    }
+
+    protected virtual void OnDrawGizmos()
+    {
         /*if (showRewardRange) {
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, rewardRange);
@@ -406,28 +454,39 @@ public class Entity : NetworkBehaviour
     }
 
     #region Setters
-    public void SetTeam(Team t) {
+    public void SetTeam(Team t)
+    {
         team.value = t;
     }
-    public void SetStatblock(SO_EntityStatBlock stats) {
+    public void SetStatblock(SO_EntityStatBlock stats)
+    {
         statBlock = Object.Instantiate(stats);
         StartCoroutine(SetupStats()); //Modified by Theo - will wait until isSpawned to apply stats, ensuring proper network synchronization
     }
     #endregion
     #region Getters
-    public Team GetTeam() {
+    public Team GetTeam()
+    {
         return team.value;
     }
-    public List<Team> GetEnemyTeams() {
+    public List<Team> GetEnemyTeams()
+    {
         return enemyTeams;
     }
-    public string GetName() {
+    public string GetName()
+    {
         return name;
     }
-    public bool GetIsDead() {
+    public bool GetIsDead()
+    {
         return isDead.value;
     }
-    public SO_EntityStatBlock GetEntityStatblock() {
+    public float GetMoveSpeed()
+    {
+        return moveSpeed.value;
+    }
+    public SO_EntityStatBlock GetEntityStatblock()
+    {
         return statBlock;
     }
     #endregion
@@ -436,8 +495,10 @@ public class Entity : NetworkBehaviour
     protected Entity GetEntityByNetworkID(NetworkID? networkId)
     {
         Entity[] allEntities = FindObjectsByType<Entity>(FindObjectsSortMode.None);
-        foreach (var entity in allEntities) {
-            if (entity.GetNetworkID(isServer) == networkId) {
+        foreach (var entity in allEntities)
+        {
+            if (entity.GetNetworkID(isServer) == networkId)
+            {
                 return entity;
             }
         }

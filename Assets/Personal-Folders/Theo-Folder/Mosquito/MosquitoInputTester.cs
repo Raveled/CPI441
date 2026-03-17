@@ -41,47 +41,46 @@ public class MosquitoInputTester : MonoBehaviour
     }
 
     // Input Callbacks
+    private void OnBasicAttack(InputAction.CallbackContext context)
+    {
+        if (context.started && mosquito != null && mosquito.isOwner)
+        {
+            mosquito.CastBloodShot();
+            Debug.Log("[InputTester] Blood Shot Tried!");
+        }
+    }
+
     private void OnQuickPoke(InputAction.CallbackContext context)
     {
-        if (context.started && mosquito != null)
+        if (context.started && mosquito != null && mosquito.isOwner)
         {
-            Entity target = FindNearestEnemy();
-            if (mosquito.TryQuickPoke(target))
-                Debug.Log("Quick Poke HIT!");
+            if (mosquito.TryQuickPoke())
+                Debug.Log("[InputTester] Quick Poke Tried!");
         }
     }
 
     private void OnGlobShot(InputAction.CallbackContext context)
     {
-        if (context.started && mosquito != null)
+        if (context.started && mosquito != null && mosquito.isOwner)
         {
             mosquito.CastGlobShot();
-            Debug.Log("Glob Shot FIRED!");
+            Debug.Log("[InputTester] Glob Shot Tried!");
         }
     }
 
     private void OnAmpUp(InputAction.CallbackContext context)
     {
-        if (context.started && mosquito != null)
+        if (context.started && mosquito != null && mosquito.isOwner)
         {
             mosquito.ActivateAmpUp();
-            Debug.Log("Amp Up ACTIVATED!");
-        }
-    }
-
-    private void OnBasicAttack(InputAction.CallbackContext context)
-    {
-        if (context.started && mosquito != null)
-        {
-            mosquito.CastBloodShot();
-            Debug.Log("Blood Shot FIRED!");
+            Debug.Log("[InputTester] Amp Up Tried!");
         }
     }
 
     // Enemy Search
     Entity FindNearestEnemy()
     {
-        if (mosquito?.entity == null) return null;
+        if (mosquito?.player == null) return null;
 
         Collider[] hits = Physics.OverlapSphere(transform.position, 5f);
         Entity nearest = null;
@@ -90,7 +89,7 @@ public class MosquitoInputTester : MonoBehaviour
         foreach (var hit in hits)
         {
             Entity enemy = hit.GetComponent<Entity>();
-            if (enemy != null && enemy.GetTeam() != mosquito.entity.GetTeam())
+            if (enemy != null && enemy.GetTeam() != mosquito.player.GetTeam())
             {
                 float dist = Vector3.Distance(transform.position, enemy.transform.position);
                 if (dist < closestDist)
