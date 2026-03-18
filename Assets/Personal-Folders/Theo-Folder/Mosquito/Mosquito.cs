@@ -98,7 +98,7 @@ public class Mosquito : NetworkBehaviour
     public float GetBloodMeter01() => maxBloodMeter <= 0f ? 0f : currentBloodMeter / maxBloodMeter;
 
     // *** DEBUG THEO *** //
-    protected override void OnSpawned()
+/*    protected override void OnSpawned()
     {
         base.OnSpawned();
         Debug.Log($"[Mosquito] OnSpawned | name={gameObject.name} | isOwner={isOwner} | isController={isController} | isServer={isServer} | owner={owner} | localPlayer={networkManager?.localPlayer}");
@@ -112,44 +112,58 @@ public class Mosquito : NetworkBehaviour
             if (inputTester != null)
                 inputTester.EnableInput();
         }
-    }
+    }*/
 
     // ========== BASIC ATTACK - BLOOD SHOT ==========
     public void CastBloodShot()
     {
-        if (!isController) return;
-        Debug.Log($"[Mosquito] CastBloodShot on {gameObject.name} | isController={isController} | isOwner={isOwner} | isServer={isServer}");
+        ServerTestRpc();
+        if (player.isLocalPlayer()) return; // Safety guard -- Check if local player is player shooting
 
-        // FIX: Play animation through server so all clients see it
-        PlayBloodShotAnimServerRpc();
+        Debug.Log($"[Mosquito] CastBloodShot on {gameObject.name} | Player ID: {player.GetPlayerID()}");
 
         int damage = GetBasicAttackDamageWithBlood(bloodShotBaseDamage);
-        Debug.Log($"[Mosquito] Damage calculated: {damage}. Spawning projectile...");
 
-        // FIX: Use NetworkManager.main.Spawn instead of ServerRpc — same pattern as Player.cs
-        SpawnBloodShot(bloodShotFirePoint.position, bloodShotFirePoint.rotation, damage);
+        if (isServer)
+        {
+            Debug.Log("[Mosquito] IS server - spawning directly.");
+            PlayBloodShotAnim();
+            ServerSpawnBloodShot(bloodShotFirePoint.position, bloodShotFirePoint.rotation, damage);
+        }
+        else
+        {
+            Debug.Log("[Mosquito] NOT server - sending ServerRpc.");
+            ServerSpawnBloodShotRpc(bloodShotFirePoint.position, bloodShotFirePoint.rotation, damage);
+        }
     }
 
-    private void SpawnBloodShot(Vector3 position, Quaternion rotation, int damage)
+    [ServerRpc(requireOwnership: false)]
+    private void ServerSpawnBloodShotRpc(Vector3 position, Quaternion rotation, int damage)
     {
+        Debug.Log($"[Mosquito] ServerSpawnBloodShotRpc received on server. damage={damage} player id = {player.GetPlayerID()}");
+        PlayBloodShotAnim();
+        ServerSpawnBloodShot(position, rotation, damage);
+    }
+
+    private void ServerSpawnBloodShot(Vector3 position, Quaternion rotation, int damage)
+    {
+        Debug.Log($"[Mosquito] ServerSpawnBloodShot - prefab={bloodShotProjectilePrefab}, firePoint={bloodShotFirePoint}, networkManager={networkManager}");
+
         if (bloodShotProjectilePrefab == null) { Debug.LogError("[Mosquito] bloodShotProjectilePrefab is NULL!"); return; }
         if (bloodShotFirePoint == null) { Debug.LogError("[Mosquito] bloodShotFirePoint is NULL!"); return; }
+        if (networkManager == null) { Debug.LogError("[Mosquito] networkManager is NULL!"); return; }
 
-        // Use prediction system to spawn - same pattern as TowerProjectile
-        PurrNet.Prediction.PredictionManager predictionManager = UnityEngine.Object.FindFirstObjectByType<PurrNet.Prediction.PredictionManager>();
-        if (predictionManager == null) { Debug.LogError("[Mosquito] PredictionManager not found!"); return; }
-
-        PurrNet.Prediction.PredictedObjectID? projId = predictionManager.hierarchy.Create(bloodShotProjectilePrefab, position, rotation);
-        if (!projId.HasValue) { Debug.LogError("[Mosquito] Failed to create projectile via hierarchy!"); return; }
-
-        GameObject projGO = predictionManager.hierarchy.GetGameObject(projId);
-        if (projGO == null) { Debug.LogError("[Mosquito] Failed to get projectile GameObject!"); return; }
+        GameObject projGO = Instantiate(bloodShotProjectilePrefab, position, rotation);
+        Debug.Log($"[Mosquito] Instantiated projectile: {projGO.name}. PurrNet will auto-sync via NetworkBehaviour.");
 
         BloodShotProjectile proj = projGO.GetComponent<BloodShotProjectile>();
-        if (proj == null) { Debug.LogError("[Mosquito] BloodShotProjectile component NOT found!"); return; }
-
-        proj.SpawnSetup(entity, damage, bloodShotFirePoint.forward, bloodShotSpeed);
-        Debug.Log($"[Mosquito] Spawned projectile via hierarchy - damage={damage}, speed={bloodShotSpeed}");
+        if (proj == null) { Debug.LogError("[Mosquito] BloodShotProjectile component NOT found on prefab!"); return; }
+/*
+        proj.syncDamage.value = damage;
+        proj.syncSpeed.value = bloodShotSpeed;
+        proj.syncMaxRange.value = bloodShotRange;
+        proj.syncOwnerID.value = player.GetNetworkID(isServer);*/
+        Debug.Log($"[Mosquito] Projectile configured - damage={damage}, speed={bloodShotSpeed}, range={bloodShotRange}, ownerID={player.GetNetworkID(isServer)}");
     }
 
     // ========== BLOOD ENERGY PASSIVE (Ability 1) ==========
@@ -171,7 +185,7 @@ public class Mosquito : NetworkBehaviour
     public bool TryQuickPoke()
     {
         if (!isController) return false;
-        if (quickPokeCooldownTimer > 0f || entity == null)
+        if (quickPokeCooldownTimer > 0f || player == null)
         {
             Debug.Log($"[Mosquito] Quick Poke blocked - cooldown: {quickPokeCooldownTimer:F2}s remaining");
             return false;

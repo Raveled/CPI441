@@ -19245,9 +19245,6 @@ PrefabInstance:
       propertyPath: spawnCharactersOnStart
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5391069861843759595, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1.9
     - target: {fileID: 3674364982704174147, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: m_Name
       value: T2_Spawn1
@@ -19256,9 +19253,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: T1_Spawn1
       objectReference: {fileID: 0}
+    - target: {fileID: 5391069861843759595, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.9
+      objectReference: {fileID: 0}
     - target: {fileID: 5403201091729900771, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: m_Name
-      value: T2_Spawn2      objectReference: {fileID: 0}
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 8154089200534231921, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: m_Name
       value: GameManager
@@ -23558,9 +23560,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PurrNet.Prediction.PredictedPlayerSpawnerCustom
   _playerPrefabs:
-  - {fileID: 3921032179608766505, guid: 999f5cd1ecb707840bce0ab3150103ba, type: 3}
-  - {fileID: 3921032179608766505, guid: 4fbd9031c1f9ed14bbcdbf982fd86d19, type: 3}
+  - {fileID: 8286419546937254081, guid: e511ccdc8e7874c4986f5423ad2358bd, type: 3}
   - {fileID: 3921032179608766505, guid: a1dc1d524fd7bbf4d8cf576951d4a28d, type: 3}
+  - {fileID: 3921032179608766505, guid: 999f5cd1ecb707840bce0ab3150103ba, type: 3}
   _destroyOnDisconnect: 0
   T1_spawnPoints:
   - {fileID: 616711883}
@@ -25869,13 +25871,6 @@ MonoBehaviour:
   _address: 127.0.0.1
   _timeoutInSeconds: 5
   _pollEventsInUpdate: 0
-  _networkSimulation:
-    includeInBuild: 0
-    simulateLatency: 0
-    minLatency: 30
-    maxLatency: 100
-    simulatePacketLoss: 0
-    packetLossChance: 10
 --- !u!114 &803435779
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32142,13 +32137,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 977469164}
   serializedVersion: 2
-<<<<<<< HEAD
-  m_LocalRotation: {x: 0.25340134, y: 5.489533e-11, z: -1.43798905e-11, w: 0.9673613}
-  m_LocalPosition: {x: -14.743877, y: 12.54, z: 65.3079}
-=======
   m_LocalRotation: {x: 0.17364816, y: 0, z: 0, w: 0.9848078}
   m_LocalPosition: {x: 0.48, y: 9, z: -7.805}
->>>>>>> main
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -67601,13 +67591,6 @@ MonoBehaviour:
   _host: purrtransport-nj-us.purrservers.com
   _timeoutInSeconds: 5
   _pollEventsInUpdate: 0
-  _networkSimulation:
-    includeInBuild: 0
-    simulateLatency: 0
-    minLatency: 30
-    maxLatency: 100
-    simulatePacketLoss: 0
-    packetLossChance: 10
 --- !u!114 &2021159714
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -71426,8 +71409,5 @@ SceneRoots:
   - {fileID: 216265760}
   - {fileID: 2140336791}
   - {fileID: 2019255229}
-<<<<<<< HEAD
-  - {fileID: 198886787}
-=======
   - {fileID: 1376871758}
->>>>>>> main
+  - {fileID: 198886787}
