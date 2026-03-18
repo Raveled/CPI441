@@ -19245,11 +19245,9 @@ PrefabInstance:
       propertyPath: spawnCharactersOnStart
       value: 0
       objectReference: {fileID: 0}
-<<<<<<< HEAD
     - target: {fileID: 5391069861843759595, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: m_LocalPosition.y
       value: 1.9
-=======
     - target: {fileID: 3674364982704174147, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: m_Name
       value: T2_Spawn1
@@ -19260,9 +19258,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5403201091729900771, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: m_Name
-      value: T2_Spawn2
->>>>>>> main
-      objectReference: {fileID: 0}
+      value: T2_Spawn2      objectReference: {fileID: 0}
     - target: {fileID: 8154089200534231921, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: m_Name
       value: GameManager
