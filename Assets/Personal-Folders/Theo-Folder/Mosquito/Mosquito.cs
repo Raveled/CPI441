@@ -1,7 +1,9 @@
 using UnityEngine;
 using System.Collections;
 using PurrNet;
+using PurrNet.Prediction;
 using UnityEngine.EventSystems;
+using System;
 
 public class Mosquito : NetworkBehaviour
 {
@@ -57,6 +59,7 @@ public class Mosquito : NetworkBehaviour
     private Color originalColor;
     private Renderer meshRenderer;
     [SerializeField] public Player player;
+    [SerializeField] public MosquitoInputTester inputTester;
 
     protected override void OnSpawned()
     {
@@ -70,7 +73,14 @@ public class Mosquito : NetworkBehaviour
         if (meshRenderer != null)
             originalColor = meshRenderer.material.color;
 
-        ServerTestRpc();
+        if (inputTester != null)
+                inputTester.EnableInput();
+
+        //ServerTestRpc();
+        if (networkManager != null && player.isLocalPlayer())
+        {
+            
+        }
     }
 
     [ServerRpc(requireOwnership: false)]
@@ -97,30 +107,13 @@ public class Mosquito : NetworkBehaviour
 
     public float GetBloodMeter01() => maxBloodMeter <= 0f ? 0f : currentBloodMeter / maxBloodMeter;
 
-    // *** DEBUG THEO *** //
-/*    protected override void OnSpawned()
-    {
-        base.OnSpawned();
-        Debug.Log($"[Mosquito] OnSpawned | name={gameObject.name} | isOwner={isOwner} | isController={isController} | isServer={isServer} | owner={owner} | localPlayer={networkManager?.localPlayer}");
-
-        // Use owner == localPlayer instead of isOwner — isOwner returns true for all
-        // objects on the host/server so it cannot distinguish which character belongs
-        // to the local player. This compares the assigned owner PlayerID directly.
-        if (networkManager != null && owner == networkManager.localPlayer)
-        {
-            MosquitoInputTester inputTester = GetComponent<MosquitoInputTester>();
-            if (inputTester != null)
-                inputTester.EnableInput();
-        }
-    }*/
-
     // ========== BASIC ATTACK - BLOOD SHOT ==========
     public void CastBloodShot()
     {
         ServerTestRpc();
-        if (player.isLocalPlayer()) return; // Safety guard -- Check if local player is player shooting
+        if (!player.isLocalPlayer()) return; // Safety guard -- Check if local player is player shooting
 
-        Debug.Log($"[Mosquito] CastBloodShot on {gameObject.name} | Player ID: {player.GetPlayerID()}");
+        Debug.Log($"[Mosquito] CastBloodShot on {gameObject.name} | Player ID: {player.GetPlayerID()} | Player is Local: {player.isLocalPlayer()}");
 
         int damage = GetBasicAttackDamageWithBlood(bloodShotBaseDamage);
 
@@ -153,17 +146,14 @@ public class Mosquito : NetworkBehaviour
         if (bloodShotFirePoint == null) { Debug.LogError("[Mosquito] bloodShotFirePoint is NULL!"); return; }
         if (networkManager == null) { Debug.LogError("[Mosquito] networkManager is NULL!"); return; }
 
-        GameObject projGO = Instantiate(bloodShotProjectilePrefab, position, rotation);
-        Debug.Log($"[Mosquito] Instantiated projectile: {projGO.name}. PurrNet will auto-sync via NetworkBehaviour.");
+        // NETCODED
+        // Instantiate new projectile and set it's properties
+        PredictionManager predictionManager = FindFirstObjectByType<PredictionManager>();
+        PredictedObjectID? projPredictedId = predictionManager.hierarchy.Create(bloodShotProjectilePrefab.gameObject, position, rotation);
+        GameObject proj = predictionManager.hierarchy.GetGameObject(projPredictedId);
+        proj.GetComponent<BloodShotProjectile>().SpawnSetup(player, damage, player.transform.forward, bloodShotSpeed, null);
 
-        BloodShotProjectile proj = projGO.GetComponent<BloodShotProjectile>();
-        if (proj == null) { Debug.LogError("[Mosquito] BloodShotProjectile component NOT found on prefab!"); return; }
-/*
-        proj.syncDamage.value = damage;
-        proj.syncSpeed.value = bloodShotSpeed;
-        proj.syncMaxRange.value = bloodShotRange;
-        proj.syncOwnerID.value = player.GetNetworkID(isServer);*/
-        Debug.Log($"[Mosquito] Projectile configured - damage={damage}, speed={bloodShotSpeed}, range={bloodShotRange}, ownerID={player.GetNetworkID(isServer)}");
+        Debug.Log($"[Mosquito] Instantiated projectile: {proj.name}. PurrNet will auto-sync via NetworkBehaviour.");
     }
 
     // ========== BLOOD ENERGY PASSIVE (Ability 1) ==========

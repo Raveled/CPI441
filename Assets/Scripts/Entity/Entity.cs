@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using PurrNet.Prediction;
 using PurrNet.Modules;
 using System.Collections;
+using NUnit.Framework;
 
 public class Entity : NetworkBehaviour
 {
@@ -50,6 +51,11 @@ public class Entity : NetworkBehaviour
 
     //In subclasses, MUST use "base.Start()" line to call this
     protected virtual void Start()
+    {
+        // Depreciated, use OnSpawned
+    }
+
+    protected override void OnSpawned(bool asServer)
     {
         Setup();
         SetIconColor();

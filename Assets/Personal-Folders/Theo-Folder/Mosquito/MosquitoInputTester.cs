@@ -8,7 +8,7 @@ using UnityEngine.InputSystem;
 
 public class MosquitoInputTester : MonoBehaviour
 {
-    private Mosquito mosquito;
+    public Mosquito mosquito;
 
     [Header("Input Actions")]
     public InputActionAsset actions;
@@ -18,6 +18,7 @@ public class MosquitoInputTester : MonoBehaviour
     public string ampUpAction = "AmpUp";
     public string basicAttackAction = "BasicAttack";
 
+
     private InputAction quickPoke;
     private InputAction globShot;
     private InputAction ampUp;
@@ -25,8 +26,6 @@ public class MosquitoInputTester : MonoBehaviour
 
     void Awake()
     {
-        mosquito = GetComponent<Mosquito>();
-
         // Resolve actions by name (Unity 6 safe)
         quickPoke = actions.FindAction(quickPokeAction, throwIfNotFound: true);
         globShot = actions.FindAction(globShotAction, throwIfNotFound: true);
@@ -43,7 +42,7 @@ public class MosquitoInputTester : MonoBehaviour
     // Input Callbacks
     private void OnBasicAttack(InputAction.CallbackContext context)
     {
-        if (context.started && mosquito != null && mosquito.isOwner)
+        if (context.started && mosquito != null && mosquito.player.isLocalPlayer())
         {
             mosquito.CastBloodShot();
             Debug.Log("[InputTester] Blood Shot Tried!");
@@ -52,7 +51,7 @@ public class MosquitoInputTester : MonoBehaviour
 
     private void OnQuickPoke(InputAction.CallbackContext context)
     {
-        if (context.started && mosquito != null && mosquito.isOwner)
+        if (context.started && mosquito != null && mosquito.player.isLocalPlayer())
         {
             if (mosquito.TryQuickPoke())
                 Debug.Log("[InputTester] Quick Poke Tried!");
@@ -61,7 +60,7 @@ public class MosquitoInputTester : MonoBehaviour
 
     private void OnGlobShot(InputAction.CallbackContext context)
     {
-        if (context.started && mosquito != null && mosquito.isOwner)
+        if (context.started && mosquito != null && mosquito.player.isLocalPlayer())
         {
             mosquito.CastGlobShot();
             Debug.Log("[InputTester] Glob Shot Tried!");
@@ -70,7 +69,7 @@ public class MosquitoInputTester : MonoBehaviour
 
     private void OnAmpUp(InputAction.CallbackContext context)
     {
-        if (context.started && mosquito != null && mosquito.isOwner)
+        if (context.started && mosquito != null && mosquito.player.isLocalPlayer())
         {
             mosquito.ActivateAmpUp();
             Debug.Log("[InputTester] Amp Up Tried!");
@@ -110,7 +109,7 @@ public class MosquitoInputTester : MonoBehaviour
         if (_inputEnabled) return;
         _inputEnabled = true;
 
-        Debug.Log($"[InputTester] EnableInput called on {mosquito.gameObject.name} | owner={mosquito.owner}");
+        Debug.Log($"[InputTester] EnableInput called on {mosquito.gameObject.name} | owner={mosquito.player.isLocalPlayer()}");
         quickPoke.started += OnQuickPoke;
         globShot.started += OnGlobShot;
         ampUp.started += OnAmpUp;
@@ -122,7 +121,7 @@ public class MosquitoInputTester : MonoBehaviour
         basicAttack.Enable();
     }
 
-    private void OnDisable()
+    public void OnDisable()
     {
         quickPoke.started -= OnQuickPoke;
         globShot.started -= OnGlobShot;

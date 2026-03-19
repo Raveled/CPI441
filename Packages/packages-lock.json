@@ -253,16 +253,16 @@
       "url": "https://packages.unity.com"
     },
     "dev.purrnet.purrdiction": {
-      "version": "https://github.com/PurrNet/PurrDiction.git?path=/Assets/PurrDiction#dev",
+      "version": "https://github.com/PurrNet/PurrDiction.git?path=/Assets/PurrDiction#release",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.nuget.mono-cecil": "1.11.4"
       },
-      "hash": "8abced868870663ebdc88e251f336421ed6a9edd"
+      "hash": "5e35e71b29c688bedcd03f9f1ca2399cdd6548ef"
     },
     "dev.purrnet.purrnet": {
-      "version": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#dev",
+      "version": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#release",
       "depth": 0,
       "source": "git",
       "dependencies": {
@@ -270,7 +270,7 @@
         "com.unity.nuget.newtonsoft-json": "3.2.1",
         "com.unity.collections": "2.6.2"
       },
-      "hash": "5260b8c5201bdb2993dd71036f63e7abd75fdfa2"
+      "hash": "266cb63efd3d858d6d2fce68c2b0b2364ca78c24"
     },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",

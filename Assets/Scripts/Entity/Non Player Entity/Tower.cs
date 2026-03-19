@@ -22,7 +22,7 @@ public class Tower : NonPlayerEntity
         }
     }
 
-    void ServerUpdate() {
+    protected override void ServerUpdate() {
         if (isDead) return;
         FindTarget();
         Attack();

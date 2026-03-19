@@ -116,6 +116,11 @@ public class GameManager : MonoBehaviour
             this.team = team;
             this.character = character;
         }
+
+        public void DebugLog()
+        {
+            Debug.Log($"[PlayerInfo] PlayerID: {(playerID.HasValue ? playerID.Value.ToString() : "null")} | Team: {team} | Character: {character}");
+        }
     }
     public List<PlayerID?> playerIDs = new List<PlayerID?>();
     public List<PlayerInfo> playersInfo = new List<PlayerInfo>();

@@ -19,6 +19,7 @@ public struct ProjectileState : IPredictedData<ProjectileState>
     public int damage;
     public bool isActive;
     public List<Entity.Team> enemyTeams;
+    public float lifetime;
 
     public void Dispose() { }
 }
@@ -29,6 +30,9 @@ public class Projectile : PredictedIdentity<ProjectileState>
     [Tooltip("Must be set in inspector")]
     [SerializeField] protected PredictedRigidbody rb;
     [SerializeField] protected SphereCollider hitCollider;
+
+    [Header("Projectile Settings")]
+    [SerializeField] protected float maxLifetime = 3f;
 
     //Info when spawned
     [Header("Projectile Debug")]
@@ -90,6 +94,7 @@ public class Projectile : PredictedIdentity<ProjectileState>
         newState.damage = damage;
         newState.isActive = true;
         newState.enemyTeams = ownerEntity.GetEnemyTeams();
+        newState.lifetime = maxLifetime;
 
         currentState = newState;
 
@@ -109,6 +114,16 @@ public class Projectile : PredictedIdentity<ProjectileState>
     {
         if (!state.isActive)
             return;
+
+        if (isServer)
+        {
+            state.lifetime -= delta;
+            if (state.lifetime <= 0f)
+            {
+                Detonate();
+                return;
+            }
+        }
 
         // Apply velocity to rigidbody instead of manual position update
         if (rb)
