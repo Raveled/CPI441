@@ -3,6 +3,7 @@ using System.Collections;
 using PurrNet;
 using PurrNet.Prediction;
 using UnityEngine.EventSystems;
+using System;
 
 public class Mosquito : NetworkBehaviour
 {
@@ -58,6 +59,7 @@ public class Mosquito : NetworkBehaviour
     private Color originalColor;
     private Renderer meshRenderer;
     [SerializeField] public Player player;
+    [SerializeField] public MosquitoInputTester inputTester;
 
     protected override void OnSpawned()
     {
@@ -71,12 +73,13 @@ public class Mosquito : NetworkBehaviour
         if (meshRenderer != null)
             originalColor = meshRenderer.material.color;
 
+        if (inputTester != null)
+                inputTester.EnableInput();
+
         //ServerTestRpc();
         if (networkManager != null && player.isLocalPlayer())
         {
-            MosquitoInputTester inputTester = GetComponent<MosquitoInputTester>();
-            if (inputTester != null)
-                inputTester.EnableInput();
+            
         }
     }
 
@@ -107,7 +110,7 @@ public class Mosquito : NetworkBehaviour
     // ========== BASIC ATTACK - BLOOD SHOT ==========
     public void CastBloodShot()
     {
-        //ServerTestRpc();
+        ServerTestRpc();
         if (!player.isLocalPlayer()) return; // Safety guard -- Check if local player is player shooting
 
         Debug.Log($"[Mosquito] CastBloodShot on {gameObject.name} | Player ID: {player.GetPlayerID()} | Player is Local: {player.isLocalPlayer()}");
@@ -148,7 +151,7 @@ public class Mosquito : NetworkBehaviour
         PredictionManager predictionManager = FindFirstObjectByType<PredictionManager>();
         PredictedObjectID? projPredictedId = predictionManager.hierarchy.Create(bloodShotProjectilePrefab.gameObject, position, rotation);
         GameObject proj = predictionManager.hierarchy.GetGameObject(projPredictedId);
-        proj.GetComponent<BloodShotProjectile>().SpawnSetup(player, damage, player.transform.forward, 30, null);
+        proj.GetComponent<BloodShotProjectile>().SpawnSetup(player, damage, player.transform.forward, bloodShotSpeed, null);
 
         Debug.Log($"[Mosquito] Instantiated projectile: {proj.name}. PurrNet will auto-sync via NetworkBehaviour.");
     }

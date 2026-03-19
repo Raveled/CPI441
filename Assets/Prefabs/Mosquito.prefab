@@ -437,6 +437,7 @@ MonoBehaviour:
   ampUpColor: {r: 1, g: 0, b: 0, a: 1}
   animator: {fileID: 8204087541940055493}
   player: {fileID: 4751865395330377205}
+  inputTester: {fileID: 415774168675383472}
 --- !u!114 &415774168675383472
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -449,6 +450,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ad845074b85451468732a8e465ef283, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MosquitoInputTester
+  mosquito: {fileID: 6822694615502514086}
   actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   quickPokeAction: QuickPoke-Ability2
   globShotAction: GlobShot-Ability3

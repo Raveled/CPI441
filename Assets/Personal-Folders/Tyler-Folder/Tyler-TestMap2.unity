@@ -23563,7 +23563,7 @@ MonoBehaviour:
   - {fileID: 3921032179608766505, guid: 999f5cd1ecb707840bce0ab3150103ba, type: 3}
   - {fileID: 3921032179608766505, guid: a1dc1d524fd7bbf4d8cf576951d4a28d, type: 3}
   - {fileID: 8286419546937254081, guid: e511ccdc8e7874c4986f5423ad2358bd, type: 3}
-  _destroyOnDisconnect: 0
+  _destroyOnDisconnect: 1
   T1_spawnPoints:
   - {fileID: 616711883}
   - {fileID: 616711882}
@@ -25871,13 +25871,6 @@ MonoBehaviour:
   _address: 127.0.0.1
   _timeoutInSeconds: 5
   _pollEventsInUpdate: 0
-  _networkSimulation:
-    includeInBuild: 0
-    simulateLatency: 0
-    minLatency: 30
-    maxLatency: 100
-    simulatePacketLoss: 0
-    packetLossChance: 10
 --- !u!114 &803435779
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25901,7 +25894,7 @@ MonoBehaviour:
   _networkRules: {fileID: 11400000, guid: d8799083b96579a42b8b2d03e4ceae98, type: 2}
   _visibilityRules: {fileID: 11400000, guid: 8f014a5bd8dc68646a2a3c0b18c5bbd8, type: 2}
   _authenticator: {fileID: 0}
-  _tickRate: 128
+  _tickRate: 30
   _patchLingeringProcessBug: 0
 --- !u!4 &803435780
 Transform:
@@ -67598,13 +67591,6 @@ MonoBehaviour:
   _host: purrtransport-nj-us.purrservers.com
   _timeoutInSeconds: 5
   _pollEventsInUpdate: 0
-  _networkSimulation:
-    includeInBuild: 0
-    simulateLatency: 0
-    minLatency: 30
-    maxLatency: 100
-    simulatePacketLoss: 0
-    packetLossChance: 10
 --- !u!114 &2021159714
 MonoBehaviour:
   m_ObjectHideFlags: 0

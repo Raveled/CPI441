@@ -133,6 +133,8 @@ namespace PurrNet.Prediction
             if (currentState.ContainsKey(player))
                 return;
 
+            //Debug.Log("Running OnPlayerLoadedScene for " + player);
+
             PredictedObjectID? newPlayer;
 
             CleanupSpawnPoints();
@@ -163,8 +165,11 @@ namespace PurrNet.Prediction
             predictionManager.SetOwnership(newPlayer, player);
 
             // Add Player to GameManagerList
-            GameManager.Instance.playerIDs.Add(player);
-            GameManager.Instance.playersInfo.Add(new GameManager.PlayerInfo(player, currentPlayerInfo.Item1, currentPlayerInfo.Item2));
+            if (!GameManager.Instance.playerIDs.Contains(player))
+            {
+                GameManager.Instance.playerIDs.Add(player);
+                GameManager.Instance.playersInfo.Add(new GameManager.PlayerInfo(player, currentPlayerInfo.Item1, currentPlayerInfo.Item2));
+            }
         }
     }
 }

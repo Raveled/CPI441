@@ -5,6 +5,7 @@ using PurrNet;
 using System.Data.Common;
 using PurrNet.Modules;
 using System.Collections;
+using System.Linq;
 
 public class Player : Entity
 {
@@ -30,24 +31,54 @@ public class Player : Entity
             TrySpawnNetworkIdentity();
         }
 
-        Debug.Log("Start Called for: " + GetNetworkID(isServer));
+        Debug.Log("Start Called for: " + GetNetworkID(isServer) + " | Player ID: " + GetPlayerID() + " | IsLocalPlayer: " + isLocalPlayer());
     }
 
     protected override void OnSpawned(bool asServer)
     {
-        // If already spawned, initialize normally
         base.OnSpawned(asServer);
-        InitializePlayer();
 
-        // ONLY CALL THE FOLLOWING ON THE CLIENT
-        if (minimapTracker != null) 
+        if (asServer)
+        {
+            // Set team ONLY on server — SyncVar replicates it automatically
+            foreach (GameManager.PlayerInfo info in GameManager.Instance.playersInfo)
+            {
+                if (info.playerID == GetPlayerID())
+                {
+                    team.value = (Entity.Team)info.team; // SyncVar handles replication
+                    Debug.Log($"[Server] Player {info.playerID} assigned to team {info.team}");
+                    break;
+                }
+            }
+
+            // Tell all clients to do their LOCAL-only setup
+            RPC_InitializePlayerLocals();
+        }
+
+        if (!asServer && minimapTracker != null)
         {
             if (predictedMovement.predictionManager.localPlayer == GetPlayerID())
             {
-                Debug.Log("Local Player ID: " + GetPlayerID());
                 minimapTracker.AttachMinimapCamera();
             }
         }
+    }
+
+    [ObserversRpc(bufferLast: true)]
+    private void RPC_InitializePlayerLocals()
+    {
+        // ScriptableObject is local-only, fine here
+        playerInfo = ScriptableObject.CreateInstance<SO_PlayerInfo>();
+
+        // team.value is already synced by the SyncVar — safe to read here
+        friendlyTowers = new List<Tower>();
+        Tower[] allTowers = FindObjectsByType<Tower>(FindObjectsSortMode.None);
+        foreach (Tower t in allTowers)
+        {
+            if (GetTeam() == t.GetTeam()) friendlyTowers.Add(t);
+        }
+
+        Debug.Log($"[Client] Player {GetPlayerID()} locals initialized, team: {GetTeam()}");
     }
 
     private void TrySpawnNetworkIdentity()

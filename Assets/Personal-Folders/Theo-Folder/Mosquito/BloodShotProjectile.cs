@@ -15,7 +15,7 @@ public class BloodShotProjectile : Projectile
         }
         else
         {
-            Debug.LogWarning($"[BloodShot] LateAwake - rb={rb}, isActive={currentState.isActive}");
+            //Debug.LogWarning($"[BloodShot] LateAwake - rb={rb}, isActive={currentState.isActive}");
         }
     }
 

@@ -8,7 +8,7 @@ using UnityEngine.InputSystem;
 
 public class MosquitoInputTester : MonoBehaviour
 {
-    private Mosquito mosquito;
+    public Mosquito mosquito;
 
     [Header("Input Actions")]
     public InputActionAsset actions;
@@ -18,6 +18,7 @@ public class MosquitoInputTester : MonoBehaviour
     public string ampUpAction = "AmpUp";
     public string basicAttackAction = "BasicAttack";
 
+
     private InputAction quickPoke;
     private InputAction globShot;
     private InputAction ampUp;
@@ -25,8 +26,6 @@ public class MosquitoInputTester : MonoBehaviour
 
     void Awake()
     {
-        mosquito = GetComponent<Mosquito>();
-
         // Resolve actions by name (Unity 6 safe)
         quickPoke = actions.FindAction(quickPokeAction, throwIfNotFound: true);
         globShot = actions.FindAction(globShotAction, throwIfNotFound: true);
@@ -122,7 +121,7 @@ public class MosquitoInputTester : MonoBehaviour
         basicAttack.Enable();
     }
 
-    private void OnDisable()
+    public void OnDisable()
     {
         quickPoke.started -= OnQuickPoke;
         globShot.started -= OnGlobShot;
