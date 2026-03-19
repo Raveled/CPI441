@@ -12,7 +12,7 @@ public class MinimapTracker : NetworkBehaviour
 
     public void AttachMinimapCamera()
     {
-        Debug.Log($"[MinimapTracker] AttachMinimapCamera called on '{gameObject.name}'");
+        //Debug.Log($"[MinimapTracker] AttachMinimapCamera called on '{gameObject.name}'");
         
         // Find the camera by name anywhere in the scene
         GameObject minimapCameraObject = GameObject.Find(minimapCameraName);
@@ -28,7 +28,7 @@ public class MinimapTracker : NetworkBehaviour
         minimapCameraTransform.localPosition = localOffset;
         minimapCameraTransform.localRotation = Quaternion.Euler(90f, 0f, 0f);
 
-        Debug.Log($"[MinimapCameraFollow] '{minimapCameraName}' successfully attached to '{gameObject.name}'.");
+        //Debug.Log($"[MinimapCameraFollow] '{minimapCameraName}' successfully attached to '{gameObject.name}'.");
     }
 
     private void LateUpdate()

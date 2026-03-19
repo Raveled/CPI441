@@ -23560,9 +23560,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PurrNet.Prediction.PredictedPlayerSpawnerCustom
   _playerPrefabs:
-  - {fileID: 8286419546937254081, guid: e511ccdc8e7874c4986f5423ad2358bd, type: 3}
-  - {fileID: 3921032179608766505, guid: a1dc1d524fd7bbf4d8cf576951d4a28d, type: 3}
   - {fileID: 3921032179608766505, guid: 999f5cd1ecb707840bce0ab3150103ba, type: 3}
+  - {fileID: 3921032179608766505, guid: a1dc1d524fd7bbf4d8cf576951d4a28d, type: 3}
+  - {fileID: 8286419546937254081, guid: e511ccdc8e7874c4986f5423ad2358bd, type: 3}
   _destroyOnDisconnect: 0
   T1_spawnPoints:
   - {fileID: 616711883}
@@ -25871,6 +25871,13 @@ MonoBehaviour:
   _address: 127.0.0.1
   _timeoutInSeconds: 5
   _pollEventsInUpdate: 0
+  _networkSimulation:
+    includeInBuild: 0
+    simulateLatency: 0
+    minLatency: 30
+    maxLatency: 100
+    simulatePacketLoss: 0
+    packetLossChance: 10
 --- !u!114 &803435779
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -67591,6 +67598,13 @@ MonoBehaviour:
   _host: purrtransport-nj-us.purrservers.com
   _timeoutInSeconds: 5
   _pollEventsInUpdate: 0
+  _networkSimulation:
+    includeInBuild: 0
+    simulateLatency: 0
+    minLatency: 30
+    maxLatency: 100
+    simulatePacketLoss: 0
+    packetLossChance: 10
 --- !u!114 &2021159714
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -43,7 +43,7 @@ public class MosquitoInputTester : MonoBehaviour
     // Input Callbacks
     private void OnBasicAttack(InputAction.CallbackContext context)
     {
-        if (context.started && mosquito != null && mosquito.isOwner)
+        if (context.started && mosquito != null && mosquito.player.isLocalPlayer())
         {
             mosquito.CastBloodShot();
             Debug.Log("[InputTester] Blood Shot Tried!");
@@ -52,7 +52,7 @@ public class MosquitoInputTester : MonoBehaviour
 
     private void OnQuickPoke(InputAction.CallbackContext context)
     {
-        if (context.started && mosquito != null && mosquito.isOwner)
+        if (context.started && mosquito != null && mosquito.player.isLocalPlayer())
         {
             if (mosquito.TryQuickPoke())
                 Debug.Log("[InputTester] Quick Poke Tried!");
@@ -61,7 +61,7 @@ public class MosquitoInputTester : MonoBehaviour
 
     private void OnGlobShot(InputAction.CallbackContext context)
     {
-        if (context.started && mosquito != null && mosquito.isOwner)
+        if (context.started && mosquito != null && mosquito.player.isLocalPlayer())
         {
             mosquito.CastGlobShot();
             Debug.Log("[InputTester] Glob Shot Tried!");
@@ -70,7 +70,7 @@ public class MosquitoInputTester : MonoBehaviour
 
     private void OnAmpUp(InputAction.CallbackContext context)
     {
-        if (context.started && mosquito != null && mosquito.isOwner)
+        if (context.started && mosquito != null && mosquito.player.isLocalPlayer())
         {
             mosquito.ActivateAmpUp();
             Debug.Log("[InputTester] Amp Up Tried!");
@@ -110,7 +110,7 @@ public class MosquitoInputTester : MonoBehaviour
         if (_inputEnabled) return;
         _inputEnabled = true;
 
-        Debug.Log($"[InputTester] EnableInput called on {mosquito.gameObject.name} | owner={mosquito.owner}");
+        Debug.Log($"[InputTester] EnableInput called on {mosquito.gameObject.name} | owner={mosquito.player.isLocalPlayer()}");
         quickPoke.started += OnQuickPoke;
         globShot.started += OnGlobShot;
         ampUp.started += OnAmpUp;
