@@ -18,7 +18,6 @@ public class Player : Entity
     List<Tower> friendlyTowers;
 
     private SyncVar<bool> hasAttemptedSpawn = new(false);
-    private SyncVar<bool> onSpawnedCalled = new(false);
 
     protected override void Start() 
     {
@@ -36,13 +35,8 @@ public class Player : Entity
 
     protected override void OnSpawned(bool asServer)
     {
-        if (onSpawnedCalled.value) return;
-        
-        Debug.Log("OnSpawned Called for: " + GetNetworkID(isServer));
-        onSpawnedCalled.value = true;
-
         // If already spawned, initialize normally
-        base.Start();
+        base.OnSpawned(asServer);
         InitializePlayer();
 
         // ONLY CALL THE FOLLOWING ON THE CLIENT
