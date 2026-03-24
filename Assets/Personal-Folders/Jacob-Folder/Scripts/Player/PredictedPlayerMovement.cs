@@ -10,6 +10,9 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     [SerializeField] private PlayerCamera _playerCamera;
     [SerializeField] private PredictedRigidbody _rigidbody;
     [SerializeField] private Player _player;
+    [SerializeField] public GameObject firingPoint;
+
+    [SerializeField] private GameObject playerObj;
 
     [Header("Movement Settings - Pull from SO_EntityStatBlock")]
     [SerializeField] private float moveSpeed = 0f;
@@ -28,7 +31,25 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
 
     protected override void LateAwake()
     {
-        if (_player == null) _player = GetComponent<Player>();
+        if (_player == null)
+        {
+            _player = GetComponentInChildren<Player>();
+        }
+
+        if (_player == null)
+        {
+            if (isServer)
+            {
+                Debug.Log("Player "+ owner.Value + " spawning playerRoot prefab");
+                GameObject playerObject = Instantiate(playerObj, this.transform);
+                playerObject.transform.SetParent(this.transform);
+
+                _player = playerObject.GetComponent<Player>();
+                _player.predictedMovement = this;
+
+                _player.GiveOwnership(owner.Value);
+            }
+        }
 
         if (_player != null)
         {

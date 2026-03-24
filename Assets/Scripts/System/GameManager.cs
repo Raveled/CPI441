@@ -7,8 +7,9 @@ using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.UI;
 using PurrNet;
 using System.Collections.Generic;
+using Steamworks;
 
-public class GameManager : MonoBehaviour
+public class GameManager : NetworkBehaviour
 {
     public enum GameState : int { NULL = 0, INPROGRESS = 1, PAUSED = 2, END = 3}
     public enum Team : int { NULL = 0, TEAM1 = 1, TEAM2 = 2, NEUTRAL = 3 };
@@ -106,11 +107,11 @@ public class GameManager : MonoBehaviour
     // Network IDS
     public struct PlayerInfo
     {
-        public PlayerID? playerID;
+        public PlayerID playerID;
         public Team team;
         public string character;
 
-        public PlayerInfo(PlayerID? playerID, Team team, string character)
+        public PlayerInfo(PlayerID playerID, Team team, string character)
         {
             this.playerID = playerID;
             this.team = team;
@@ -119,11 +120,11 @@ public class GameManager : MonoBehaviour
 
         public void DebugLog()
         {
-            Debug.Log($"[PlayerInfo] PlayerID: {(playerID.HasValue ? playerID.Value.ToString() : "null")} | Team: {team} | Character: {character}");
+            Debug.Log($"[PlayerInfo] PlayerID: {playerID} | Team: {team} | Character: {character}");
         }
     }
-    public List<PlayerID?> playerIDs = new List<PlayerID?>();
-    public List<PlayerInfo> playersInfo = new List<PlayerInfo>();
+    public SyncList<PlayerID?> playerIDs = new SyncList<PlayerID?>();
+    public SyncList<PlayerInfo> playersInfo = new SyncList<PlayerInfo>();
 
     public static GameManager Instance { get; private set;}
 
@@ -174,6 +175,16 @@ public class GameManager : MonoBehaviour
                 team2_Players[t2Idx] = p;
                 t2Idx++;
             }
+        }
+    }
+
+    public void DebugLogAllNetworkIdentities()
+    {
+        var allNetworked = FindObjectsByType<NetworkIdentity>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        Debug.Log($"[GameManager] All NetworkIdentities at join time: {allNetworked.Length} objects");
+        for (int i = 0; i < allNetworked.Length; i++)
+        {
+            Debug.Log($"  [{i}] {allNetworked[i].gameObject.name} | ID: {allNetworked[i].id} | IsSpawned: {allNetworked[i].isSpawned} | Prefab: {allNetworked[i].gameObject.scene.name == "DontDestroyOnLoad"}");
         }
     }
 
@@ -374,7 +385,7 @@ public class GameManager : MonoBehaviour
         int killCount = 0;
         for(int i = 0; i < team.Length; i++) {
             if (!team[i]) continue;
-            killCount += team[i].GetPlayerInfo().KillCount;
+            killCount += team[i].GetPlayerInfoSO().KillCount;
         }
         return killCount;
     }
@@ -382,7 +393,7 @@ public class GameManager : MonoBehaviour
         int deathCount = 0;
         for (int i = 0; i < team.Length; i++) {
             if (!team[i]) continue;
-            deathCount += team[i].GetPlayerInfo().DeathCount;
+            deathCount += team[i].GetPlayerInfoSO().DeathCount;
         }
         return deathCount;
     }
@@ -455,14 +466,52 @@ public class GameManager : MonoBehaviour
     }
 
     // WIP METHOD FOR SETTING PLAYER CHARACTER
-    public (Team, string) GetPlayerSetup()
+    // Returns basic team and character informaiton for spawning a player
+    public (Team, string) GetPlayerSetup(PlayerID player)
     {
-        if (playerIDs.Count % 2 == 0)
+        foreach (PlayerInfo i in playersInfo)
         {
-            return (Team.TEAM1, "Mosquito");
+            if (i.playerID == player)
+                return (i.team, i.character);
         }
 
-        return (Team.TEAM2, "Mosquito");
+        // New Player
+        Team playerTeam;
+        String playerCharacter = "Mosquito"; // Temp just mosquitos
+
+        if (playerIDs.Count % 2 == 0) playerTeam = Team.TEAM1;
+        else playerTeam = Team.TEAM2;
+
+        playerIDs.Add(player);
+        playersInfo.Add(new PlayerInfo(player, playerTeam, playerCharacter));
+
+        return (playerTeam, playerCharacter);
+    }
+
+    // Returns all player configuration information for use in the player script
+    public PlayerInfo? GetPlayerConfiguration(PlayerID player)
+    {
+        foreach (PlayerInfo i in playersInfo)
+        {
+            if (i.playerID == player)
+                return i;
+        }
+
+        return null;
+    }
+
+    public void DebugPrintPlayersInfo()
+    {
+        if (playersInfo.Count == 0)
+        {
+            Debug.Log("[GameManager] playersInfo is empty.");
+            return;
+        }
+
+        for (int i = 0; i < playersInfo.Count; i++)
+        {
+            Debug.Log($"GAMEMANAGER -- [{i+1}/{playersInfo.Count}] PlayerID: {playersInfo[i].playerID} | Team: {playersInfo[i].team} | Character: {playersInfo[i].character}");
+        }
     }
 
     #endregion

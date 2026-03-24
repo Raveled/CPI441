@@ -1,7 +1,7 @@
 using PurrNet;
 using UnityEngine;
 
-public class MinimapTracker : NetworkBehaviour
+public class MinimapTracker : MonoBehaviour
 {
     [Header("Settings")]
     [SerializeField] private string minimapCameraName = "MinimapCamera";

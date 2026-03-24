@@ -65,10 +65,14 @@ public class Mosquito : NetworkBehaviour
     {
         base.OnSpawned();
 
-        meshRenderer = GetComponentInChildren<Renderer>();
+        GameObject parentObject = transform.parent.gameObject;
+
+        bloodShotFirePoint = parentObject.GetComponent<PredictedPlayerMovement>().firingPoint.transform;
+        quickPokeOrigin = bloodShotFirePoint;
+        globFirePoint = bloodShotFirePoint;
 
         if (animator == null)
-            animator = GetComponentInChildren<Animator>();
+            animator = parentObject.GetComponentInChildren<Animator>();
 
         if (meshRenderer != null)
             originalColor = meshRenderer.material.color;
