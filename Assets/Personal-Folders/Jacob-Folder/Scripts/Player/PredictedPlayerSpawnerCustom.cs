@@ -19,28 +19,28 @@ namespace PurrNet.Prediction
         // ADDED BY JACOB W
 
         private (GameManager.Team, string) currentPlayerInfo;
-
-        private GameObject GetPlayerPrefab()
+        
+        private GameObject GetPlayerPrefab(PlayerID player)
         {
-            currentPlayerInfo = GameManager.Instance.GetPlayerSetup();
+            currentPlayerInfo = GameManager.Instance.GetPlayerSetup(player);
 
             if (currentPlayerInfo.Item2 == "Mosquito")
             {
-                Debug.Log("Selecting Mosquito for Player");
+                //Debug.Log("Selecting Mosquito for Player");
                 return _playerPrefabs[0];
             }
             else if (currentPlayerInfo.Item2 == "Beetle")
             {
-                Debug.Log("Selecting Beetle for Player");
+                //Debug.Log("Selecting Beetle for Player");
                 return _playerPrefabs[1];
             }
             else if (currentPlayerInfo.Item2 == "Butterfly")
             {
-                Debug.Log("Selecting Butterfly for Player");
+                //Debug.Log("Selecting Butterfly for Player");
                 return _playerPrefabs[2];
             }
 
-            Debug.Log("Defaulting to Mosquito for Player");
+            //Debug.Log("Defaulting to Mosquito for Player");
             return _playerPrefabs[0];
         }
 
@@ -127,19 +127,20 @@ namespace PurrNet.Prediction
 
         private void OnPlayerLoadedScene(PlayerID player)
         {
+            //Debug.Log($"[Spawner] Player {player} joining — dumping network state:");
+            //GameManager.Instance.DebugLogAllNetworkIdentities();
+
             if (!enabled)
                 return;
 
             if (currentState.ContainsKey(player))
                 return;
 
-            //Debug.Log("Running OnPlayerLoadedScene for " + player);
-
             PredictedObjectID? newPlayer;
 
             CleanupSpawnPoints();
 
-            GameObject playerSelectedPrefab = GetPlayerPrefab();
+            GameObject playerSelectedPrefab = GetPlayerPrefab(player);
 
             if (T1_spawnPoints.Count > 0 && currentPlayerInfo.Item1 == GameManager.Team.TEAM1)
             {
@@ -163,13 +164,6 @@ namespace PurrNet.Prediction
 
             currentState[player] = newPlayer.Value;
             predictionManager.SetOwnership(newPlayer, player);
-
-            // Add Player to GameManagerList
-            if (!GameManager.Instance.playerIDs.Contains(player))
-            {
-                GameManager.Instance.playerIDs.Add(player);
-                GameManager.Instance.playersInfo.Add(new GameManager.PlayerInfo(player, currentPlayerInfo.Item1, currentPlayerInfo.Item2));
-            }
         }
     }
 }
