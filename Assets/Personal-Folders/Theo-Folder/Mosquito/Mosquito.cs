@@ -61,8 +61,15 @@ public class Mosquito : NetworkBehaviour
     [SerializeField] public Player player;
     [SerializeField] public MosquitoInputTester inputTester;
 
-    protected override void OnSpawned()
+    protected override void OnSpawned(bool asServer)
     {
+        StartCoroutine(DelayedSpawn(asServer));
+    }
+
+    private IEnumerator DelayedSpawn(bool asServer)
+    {
+        yield return new WaitForSeconds(0.05f);
+
         base.OnSpawned();
 
         GameObject parentObject = transform.parent.gameObject;
@@ -79,13 +86,9 @@ public class Mosquito : NetworkBehaviour
 
         if (inputTester != null)
                 inputTester.EnableInput();
-
-        //ServerTestRpc();
-        if (networkManager != null && player.isLocalPlayer())
-        {
-            
-        }
     }
+
+
 
     [ServerRpc(requireOwnership: false)]
     private void ServerTestRpc()

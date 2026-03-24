@@ -41,11 +41,12 @@ public class Player : Entity
             PredictedPlayerMovement[] ppMovements = FindObjectsByType<PredictedPlayerMovement>(FindObjectsSortMode.None);
             for (int i = 0; i < ppMovements.Count(); i++)
             {
-                Debug.Log($"Checking PP OWNER: {ppMovements[i].owner} [{i}/{ppMovements.Count()}] for player owner: {owner}");
+                //Debug.Log($"Checking PP OWNER: {ppMovements[i].owner} [{i}/{ppMovements.Count()}] for player owner: {owner}");
                 if (ppMovements[i].owner == owner)
                 {
-                    Debug.Log($"PP OWNER: {ppMovements[i].owner} found for player owner: {owner}");
+                    //Debug.Log($"PP OWNER: {ppMovements[i].owner} found for player owner: {owner}");
                     predictedMovement = ppMovements[i];
+                    predictedMovement._player = this;
                     transform.SetParent(predictedMovement.transform);
                     transform.position = transform.parent.transform.position;
                 }
@@ -75,34 +76,24 @@ public class Player : Entity
                 team.value = (Entity.Team) playerInfoNN.team;
                 character.value = playerInfoNN.character;
 
-                Debug.Log("[PLAYER]  Player ID: " + playerID + " | Team: " + team.value);
-
-                GameManager.Instance.DebugPrintPlayersInfo();
+                //Debug.Log("[PLAYER]  Player ID: " + playerID + " | Team: " + team.value);
+                //GameManager.Instance.DebugPrintPlayersInfo();
 
                 // Tell all clients to do their LOCAL-only setup
-                RPC_InitializePlayerLocals((int)playerInfoNN.team, playerInfoNN.character);
+                RPC_InitializePlayerLocals();
             }
             else Debug.Log("[PLAYER - WARNING] NO PLAYER INFO FOUND");
         }
 
-        if (!isServer)
+        if (isLocalPlayer() && minimapTracker != null)
         {
-            if (isLocalPlayer() && minimapTracker != null)
-            {
-                minimapTracker.AttachMinimapCamera();
-            }
+            minimapTracker.AttachMinimapCamera();
         }
     }
 
     [ObserversRpc(bufferLast: true)]
-    private void RPC_InitializePlayerLocals(int assignedTeam, string assignedCharacter)
+    private void RPC_InitializePlayerLocals()
     {
-        // BACKUP
-        team.value = (Entity.Team) assignedTeam;
-        character.value = assignedCharacter;
-
-        Debug.Log("[PLAYER -- CLIENT] Player ID: " + playerID + " | Team: " + team.value);
-
         // ScriptableObject is local-only, fine here
         playerInfoSO = ScriptableObject.CreateInstance<SO_PlayerInfo>();
 

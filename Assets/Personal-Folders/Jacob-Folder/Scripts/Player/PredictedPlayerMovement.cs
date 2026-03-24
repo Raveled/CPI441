@@ -9,7 +9,7 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     [Header("References")]
     [SerializeField] private PlayerCamera _playerCamera;
     [SerializeField] private PredictedRigidbody _rigidbody;
-    [SerializeField] private Player _player;
+    [SerializeField] public Player _player;
     [SerializeField] public GameObject firingPoint;
 
     [SerializeField] private GameObject playerObj;
@@ -40,7 +40,7 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
         {
             if (isServer)
             {
-                Debug.Log("Player "+ owner.Value + " spawning playerRoot prefab");
+                //Debug.Log("Player "+ owner.Value + " spawning playerRoot prefab");
                 GameObject playerObject = Instantiate(playerObj, this.transform);
                 playerObject.transform.SetParent(this.transform);
 
@@ -57,7 +57,7 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
         }
         else
         {
-            Debug.LogError("PredictedPlayerMovement: No Player component found on the GameObject.");
+            Debug.LogWarning("PredictedPlayerMovement: No Player component found on the GameObject.");
         }
 
         if (isOwner)
@@ -74,12 +74,15 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
 
     private void LoadStatsFromPlayer()
     {
-        SO_EntityStatBlock playerStatBlock = _player.GetEntityStatblock();
-        moveSpeed = playerStatBlock.BaseMoveSpeed;
-        jumpForce = playerStatBlock.BaseJumpForce;
-        jumpCooldownTime = playerStatBlock.BaseJumpCooldown;
-        acceleration = playerStatBlock.BaseAcceleration;
-        planarDamping = playerStatBlock.BasePlanarDamping;
+        if (_player.GetEntityStatblock() != null)
+        {
+            SO_EntityStatBlock playerStatBlock = _player.GetEntityStatblock();
+            moveSpeed = playerStatBlock.BaseMoveSpeed;
+            jumpForce = playerStatBlock.BaseJumpForce;
+            jumpCooldownTime = playerStatBlock.BaseJumpCooldown;
+            acceleration = playerStatBlock.BaseAcceleration;
+            planarDamping = playerStatBlock.BasePlanarDamping;
+        }
     }
 
 
