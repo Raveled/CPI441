@@ -12,8 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db0902f963f2b9c47b983059c623f1b0, type: 3}
   m_Name: Core
   m_EditorClassIdentifier: Assembly-CSharp::SO_EntityStatBlock
-  goldReward: 20
   baseHitPoints: 100
   baseMoveSpeed: 0
-  baseAttackPower: 10
-  baseDefaultAttackCooldown: 5
+  baseAcceleration: 0
+  basePlanarDamping: 0
+  baseJumpForce: 0
+  baseJumpCooldown: 0
+  baseAttackPower: 30
+  baseDefaultAttackCooldown: 3
+  rewardGold: 0
+  rewardXP: 0
