@@ -109,7 +109,7 @@ public class MosquitoInputTester : MonoBehaviour
         if (_inputEnabled) return;
         _inputEnabled = true;
 
-        Debug.Log($"[InputTester] EnableInput called on {mosquito.gameObject.name} | owner={mosquito.player.isLocalPlayer()}");
+        //Debug.Log($"[InputTester] EnableInput called on {mosquito.gameObject.name} | owner={mosquito.player.isLocalPlayer()}");
         quickPoke.started += OnQuickPoke;
         globShot.started += OnGlobShot;
         ampUp.started += OnAmpUp;

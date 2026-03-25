@@ -1,0 +1,112 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3694299048840760153
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8101256341057531089}
+  - component: {fileID: 6775642938441649792}
+  - component: {fileID: 2110375539617432515}
+  - component: {fileID: 6678383119578980811}
+  m_Layer: 0
+  m_Name: PredictionManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8101256341057531089
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3694299048840760153}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6775642938441649792
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3694299048840760153}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0112282cee605384cb1835dbd2b236de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Prediction::PurrNet.Prediction.PredictionManager
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _physicsProvider: 1
+  _updateViewMode: 1
+  _builtInSystems: -1
+  _predictedPrefabs: {fileID: 11400000, guid: a15f808360ff53542aa604565b56eb0c, type: 2}
+  _inputQueueSettings:
+    extrapolateForMissing: 1
+    minInputs: 1
+    maxInputs: 2
+  _validateDeterministicData: 0
+--- !u!114 &2110375539617432515
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3694299048840760153}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80423224c41d7d84d992727b665f7c9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PurrNet.Prediction.PredictedPlayerSpawnerCustom
+  _playerPrefabs:
+  - {fileID: 3921032179608766505, guid: 999f5cd1ecb707840bce0ab3150103ba, type: 3}
+  - {fileID: 8286419546937254081, guid: e511ccdc8e7874c4986f5423ad2358bd, type: 3}
+  - {fileID: 3921032179608766505, guid: a1dc1d524fd7bbf4d8cf576951d4a28d, type: 3}
+  _destroyOnDisconnect: 1
+  T1_spawnPoints:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  T2_spawnPoints:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+--- !u!114 &6678383119578980811
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3694299048840760153}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a1392aa1bc3d3b4a9ef31b6e6d8d4b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Prediction::PurrNet.Prediction.PredictedPlayerSpawner
+  _playerPrefab: {fileID: 3921032179608766505, guid: a1dc1d524fd7bbf4d8cf576951d4a28d, type: 3}
+  _destroyOnDisconnect: 0
+  spawnPoints:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}

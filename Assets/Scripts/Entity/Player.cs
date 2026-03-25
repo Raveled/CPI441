@@ -6,6 +6,8 @@ using System.Data.Common;
 using PurrNet.Modules;
 using System.Collections;
 using System.Linq;
+using System;
+using Unity.VisualScripting;
 
 public class Player : Entity
 {
@@ -13,54 +15,79 @@ public class Player : Entity
     [SerializeField] SyncVar<int> playerLevel = new(1);
     [SerializeField] SyncVar<int> goldTotal = new(0);
     [SerializeField] SyncVar<int> xpTotal = new(0);
-    [SerializeField] PredictedPlayerMovement predictedMovement = null;
     [SerializeField] MinimapTracker minimapTracker = null;
-    SO_PlayerInfo playerInfo = null;
+    SO_PlayerInfo playerInfoSO = null;
     List<Tower> friendlyTowers;
 
-    private SyncVar<bool> hasAttemptedSpawn = new(false);
+    public PredictedPlayerMovement predictedMovement = null;
+    public PlayerID playerID;
+    public SyncVar<string> character = new("");
 
-    protected override void Start() 
-    {
-        if (predictedMovement == null) predictedMovement = GetComponent<PredictedPlayerMovement>();
-
-        // Attempt to spawn the NetworkIdentity first
-        if (!hasAttemptedSpawn.value)
-        {
-            hasAttemptedSpawn.value = true;
-            TrySpawnNetworkIdentity();
-        }
-
-        Debug.Log("Start Called for: " + GetNetworkID(isServer) + " | Player ID: " + GetPlayerID() + " | IsLocalPlayer: " + isLocalPlayer());
-    }
+    private GameObject parentObject;
 
     protected override void OnSpawned(bool asServer)
     {
+        StartCoroutine(DelayedSpawn(asServer));
+    }
+
+    private IEnumerator DelayedSpawn(bool asServer)
+    {
+        yield return new WaitForSeconds(0.05f);
+
         base.OnSpawned(asServer);
 
-        if (asServer)
+        if (!isServer)
         {
-            // Set team ONLY on server — SyncVar replicates it automatically
-            foreach (GameManager.PlayerInfo info in GameManager.Instance.playersInfo)
+            PredictedPlayerMovement[] ppMovements = FindObjectsByType<PredictedPlayerMovement>(FindObjectsSortMode.None);
+            for (int i = 0; i < ppMovements.Count(); i++)
             {
-                if (info.playerID == GetPlayerID())
+                //Debug.Log($"Checking PP OWNER: {ppMovements[i].owner} [{i}/{ppMovements.Count()}] for player owner: {owner}");
+                if (ppMovements[i].owner == owner)
                 {
-                    team.value = (Entity.Team)info.team; // SyncVar handles replication
-                    Debug.Log($"[Server] Player {info.playerID} assigned to team {info.team}");
-                    break;
+                    //Debug.Log($"PP OWNER: {ppMovements[i].owner} found for player owner: {owner}");
+                    predictedMovement = ppMovements[i];
+                    predictedMovement._player = this;
+                    transform.SetParent(predictedMovement.transform);
+                    transform.position = transform.parent.transform.position;
                 }
             }
-
-            // Tell all clients to do their LOCAL-only setup
-            RPC_InitializePlayerLocals();
         }
 
-        if (!asServer && minimapTracker != null)
+        if (predictedMovement != null) this.transform.SetParent(predictedMovement.transform);
+        else
         {
-            if (predictedMovement.predictionManager.localPlayer == GetPlayerID())
+            parentObject = transform.parent.gameObject;
+            if (predictedMovement == null) predictedMovement = parentObject.GetComponent<PredictedPlayerMovement>();
+        }
+
+        // Find PlayerID
+        playerID = GetPlayerID();
+
+        if (isServer)
+        {
+            Debug.Log("[PLAYER] OnSpawned Called on SERVER for Player ID: " + playerID + " | IsLocalPlayer: " + isLocalPlayer());
+
+            // Cross Reference PlayerInfo with GameManager Instance
+            // GameManager playerInfo list will be a server side authority of player features like Team/Character
+            GameManager.PlayerInfo? playerInfo = GameManager.Instance.GetPlayerConfiguration(playerID);
+            if (playerInfo != null)
             {
-                minimapTracker.AttachMinimapCamera();
+                GameManager.PlayerInfo playerInfoNN = (GameManager.PlayerInfo) playerInfo;
+                team.value = (Entity.Team) playerInfoNN.team;
+                character.value = playerInfoNN.character;
+
+                //Debug.Log("[PLAYER]  Player ID: " + playerID + " | Team: " + team.value);
+                //GameManager.Instance.DebugPrintPlayersInfo();
+
+                // Tell all clients to do their LOCAL-only setup
+                RPC_InitializePlayerLocals();
             }
+            else Debug.Log("[PLAYER - WARNING] NO PLAYER INFO FOUND");
+        }
+
+        if (isLocalPlayer() && minimapTracker != null)
+        {
+            minimapTracker.AttachMinimapCamera();
         }
     }
 
@@ -68,7 +95,7 @@ public class Player : Entity
     private void RPC_InitializePlayerLocals()
     {
         // ScriptableObject is local-only, fine here
-        playerInfo = ScriptableObject.CreateInstance<SO_PlayerInfo>();
+        playerInfoSO = ScriptableObject.CreateInstance<SO_PlayerInfo>();
 
         // team.value is already synced by the SyncVar — safe to read here
         friendlyTowers = new List<Tower>();
@@ -78,7 +105,7 @@ public class Player : Entity
             if (GetTeam() == t.GetTeam()) friendlyTowers.Add(t);
         }
 
-        Debug.Log($"[Client] Player {GetPlayerID()} locals initialized, team: {GetTeam()}");
+        //Debug.Log($"[Client] Player {GetPlayerID()} locals initialized, team: {GetTeam()}");
     }
 
     private void TrySpawnNetworkIdentity()
@@ -89,6 +116,8 @@ public class Player : Entity
             return;
         }
 
+        if (!NetworkManager.main.isServer) return;
+
         if (isSpawned)
         {
             Debug.Log("Player already spawned");
@@ -97,34 +126,12 @@ public class Player : Entity
 
         if (predictedMovement != null && predictedMovement.owner.HasValue)
         {
-            Debug.Log($"Spawning NetworkIdentity for player {predictedMovement.owner.Value}");
+            //Debug.Log($"Spawning NetworkIdentity for player {predictedMovement.owner.Value}");
             NetworkManager.main.Spawn(this.gameObject);
         }
         else
         {
             Debug.LogError("Cannot spawn - predictedMovement or owner is null!");
-        }
-    }
-
-    private void InitializePlayer()
-    {
-        playerInfo = ScriptableObject.CreateInstance<SO_PlayerInfo>();
-
-        foreach(GameManager.PlayerInfo playerInfo in GameManager.Instance.playersInfo)
-        {
-            if (playerInfo.playerID == GetPlayerID())
-            {
-                team.value = (Entity.Team) playerInfo.team;
-                Debug.Log("Player ID: " + playerInfo.playerID + " is on Team: " + playerInfo.team);
-            }
-        }
-
-        //Fill towers with same team towers
-        friendlyTowers = new List<Tower>();
-        Tower[] allTowers = FindObjectsByType<Tower>(FindObjectsSortMode.None);
-        foreach(Tower t in allTowers)
-        {
-            if (GetTeam() == t.GetTeam()) friendlyTowers.Add(t);
         }
     }
 
@@ -170,7 +177,7 @@ public class Player : Entity
         Debug.Log("Player: " + entityName + " has died");
 
         //Update PlayerStats
-        playerInfo.DeathCount = playerInfo.DeathCount + 1;
+        playerInfoSO.DeathCount = playerInfoSO.DeathCount + 1;
         if(damageOrigin is Player p) {
             p.KilledPlayer();
         }
@@ -184,7 +191,7 @@ public class Player : Entity
     }
     //Update Player stats on kill
     public void KilledPlayer() {
-        playerInfo.KillCount = playerInfo.KillCount + 1;
+        playerInfoSO.KillCount = playerInfoSO.KillCount + 1;
     }
     //Called by entity dying, increase gold amount;
     public void IncreaseGoldTotal(int addAmount) {
@@ -201,21 +208,23 @@ public class Player : Entity
         if (xpTotal == 100) playerLevel.value++;
     }
     //Getts
-    public SO_PlayerInfo GetPlayerInfo() {
-        return playerInfo;
+    public SO_PlayerInfo GetPlayerInfoSO() {
+        return playerInfoSO;
     }
 
     // Helper
-    public PlayerID? GetPlayerID()
+    public PlayerID GetPlayerID()
     {
-        foreach (var player in networkManager.players) {
+        foreach (var player in networkManager.players) 
+        {
             if (player == predictedMovement.owner.Value) 
             {
-                return player;
+                playerID = player;
+                return playerID;
             }
         }
-
-        return null; 
+        
+        return playerID;
     }
 
     public bool isLocalPlayer()

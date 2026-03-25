@@ -61,27 +61,34 @@ public class Mosquito : NetworkBehaviour
     [SerializeField] public Player player;
     [SerializeField] public MosquitoInputTester inputTester;
 
-    protected override void OnSpawned()
+    protected override void OnSpawned(bool asServer)
     {
+        StartCoroutine(DelayedSpawn(asServer));
+    }
+
+    private IEnumerator DelayedSpawn(bool asServer)
+    {
+        yield return new WaitForSeconds(0.05f);
+
         base.OnSpawned();
 
-        meshRenderer = GetComponentInChildren<Renderer>();
+        GameObject parentObject = transform.parent.gameObject;
+
+        bloodShotFirePoint = parentObject.GetComponent<PredictedPlayerMovement>().firingPoint.transform;
+        quickPokeOrigin = bloodShotFirePoint;
+        globFirePoint = bloodShotFirePoint;
 
         if (animator == null)
-            animator = GetComponentInChildren<Animator>();
+            animator = parentObject.GetComponentInChildren<Animator>();
 
         if (meshRenderer != null)
             originalColor = meshRenderer.material.color;
 
         if (inputTester != null)
                 inputTester.EnableInput();
-
-        //ServerTestRpc();
-        if (networkManager != null && player.isLocalPlayer())
-        {
-            
-        }
     }
+
+
 
     [ServerRpc(requireOwnership: false)]
     private void ServerTestRpc()
