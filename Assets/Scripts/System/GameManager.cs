@@ -8,6 +8,7 @@ using UnityEngine.UI;
 using PurrNet;
 using System.Collections.Generic;
 using Steamworks;
+using PurrLobby;
 
 public class GameManager : NetworkBehaviour
 {
@@ -129,7 +130,16 @@ public class GameManager : NetworkBehaviour
     public static GameManager Instance { get; private set;}
 
     private void Awake() {
-        Instance = this;
+        if (Instance != null)        {
+            Debug.LogWarning("Multiple instances of GameManager detected! Destroying duplicate.");
+            Destroy(gameObject);
+            return;
+        }
+        else 
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
 
         //Load in the stats from the JSON
         matchData = GetComponent<JSON_MatchData>();
@@ -469,6 +479,10 @@ public class GameManager : NetworkBehaviour
     // Returns basic team and character informaiton for spawning a player
     public (Team, string) GetPlayerSetup(PlayerID player)
     {
+        ulong steamID;
+        bool hasSteamID = PurrNet.Steam.PurrSteamUtils.TryGetSteamID(player, out steamID);
+        Debug.Log($"[GameManager] Player {player} connected via Steam with ID {steamID}. Assigning team and character.");
+
         foreach (PlayerInfo i in playersInfo)
         {
             if (i.playerID == player)
@@ -477,10 +491,20 @@ public class GameManager : NetworkBehaviour
 
         // New Player
         Team playerTeam;
-        String playerCharacter = "Mosquito"; // Temp just mosquitos
+        String playerCharacter;
 
-        if (playerIDs.Count % 2 == 0) playerTeam = Team.TEAM1;
-        else playerTeam = Team.TEAM2;
+        if (hasSteamID && LobbyPlayerRegistry.Instance != null &&
+        LobbyPlayerRegistry.Instance.TryGetPlayer(steamID.ToString(), out LobbyUser lobbyUser))
+        {
+            playerTeam = lobbyUser.Team == 1 ? Team.TEAM1 : Team.TEAM2;
+            playerCharacter = lobbyUser.Character;
+        }
+        else
+        {
+            // Fallback if registry has no data
+            playerTeam = playerIDs.Count % 2 == 0 ? Team.TEAM1 : Team.TEAM2;
+            playerCharacter = "mosquito"; // Default character
+        }
 
         playerIDs.Add(player);
         playersInfo.Add(new PlayerInfo(player, playerTeam, playerCharacter));

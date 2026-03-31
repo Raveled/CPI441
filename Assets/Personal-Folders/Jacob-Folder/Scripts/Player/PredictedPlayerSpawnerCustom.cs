@@ -24,17 +24,17 @@ namespace PurrNet.Prediction
         {
             currentPlayerInfo = GameManager.Instance.GetPlayerSetup(player);
 
-            if (currentPlayerInfo.Item2 == "Mosquito")
+            if (currentPlayerInfo.Item2 == "mosquito")
             {
                 //Debug.Log("Selecting Mosquito for Player");
                 return _playerPrefabs[0];
             }
-            else if (currentPlayerInfo.Item2 == "Beetle")
+            else if (currentPlayerInfo.Item2 == "beetle")
             {
                 //Debug.Log("Selecting Beetle for Player");
                 return _playerPrefabs[1];
             }
-            else if (currentPlayerInfo.Item2 == "Butterfly")
+            else if (currentPlayerInfo.Item2 == "butterfly")
             {
                 //Debug.Log("Selecting Butterfly for Player");
                 return _playerPrefabs[2];

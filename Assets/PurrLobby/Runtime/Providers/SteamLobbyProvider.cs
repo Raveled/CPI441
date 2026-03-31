@@ -15,6 +15,7 @@ using Steamworks;
 #endif
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.TextCore.Text;
 
 namespace PurrLobby.Providers
 {
@@ -344,6 +345,32 @@ namespace PurrLobby.Providers
             return Task.FromResult(Task.CompletedTask);
         }
 
+        public Task SetTeamAsync(string userId, int team)
+        {
+            //You can only set the ready state for your own user
+            if (IsSteamClientAvailable && !string.IsNullOrEmpty(userId) && ulong.TryParse(userId, out var id)
+                && Steamworks.SteamUser.GetSteamID().m_SteamID == id)
+            {
+                Steamworks.SteamMatchmaking.SetLobbyMemberData(_currentLobby, "Team", team.ToString());
+                Steamworks.SteamMatchmaking.SetLobbyData(_currentLobby, "UpdateTrigger", DateTime.UtcNow.Ticks.ToString());
+            }
+
+            return Task.FromResult(Task.CompletedTask);
+        }
+
+        public Task SetCharacterAsync(string userId, string character)
+        {
+            //You can only set the ready state for your own user
+            if (IsSteamClientAvailable && !string.IsNullOrEmpty(userId) && ulong.TryParse(userId, out var id)
+                && Steamworks.SteamUser.GetSteamID().m_SteamID == id)
+            {
+                Steamworks.SteamMatchmaking.SetLobbyMemberData(_currentLobby, "Character", character);
+                Steamworks.SteamMatchmaking.SetLobbyData(_currentLobby, "UpdateTrigger", DateTime.UtcNow.Ticks.ToString());
+            }
+
+            return Task.FromResult(Task.CompletedTask);
+        }
+
         public Task SetLobbyDataAsync(string key, string value)
         {
             if (IsSteamClientAvailable)
@@ -429,6 +456,11 @@ namespace PurrLobby.Providers
             var isReadyString = Steamworks.SteamMatchmaking.GetLobbyMemberData(lobbyId, steamId, "IsReady");
             var isReady = !string.IsNullOrEmpty(isReadyString) && isReadyString == "True";
 
+            var teamString = Steamworks.SteamMatchmaking.GetLobbyMemberData(lobbyId, steamId, "Team");
+            int.TryParse(teamString, out int team);
+
+            var character = Steamworks.SteamMatchmaking.GetLobbyMemberData(lobbyId, steamId, "Character");
+
             var avatarHandle = Steamworks.SteamFriends.GetLargeFriendAvatar(steamId);
             Texture2D avatar = null;
 
@@ -449,6 +481,8 @@ namespace PurrLobby.Providers
                 Id = steamId.m_SteamID.ToString(),
                 DisplayName = displayName,
                 IsReady = isReady,
+                Team = team,
+                Character = character,
                 Avatar = avatar
             };
         }

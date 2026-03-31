@@ -76,6 +76,5 @@ namespace PurrLobby
                 Destroy(child.gameObject);
             }
         }
-
     }
 }

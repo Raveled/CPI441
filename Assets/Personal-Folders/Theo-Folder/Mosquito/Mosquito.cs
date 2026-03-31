@@ -88,14 +88,6 @@ public class Mosquito : NetworkBehaviour
                 inputTester.EnableInput();
     }
 
-
-
-    [ServerRpc(requireOwnership: false)]
-    private void ServerTestRpc()
-    {
-        Debug.Log("Test Server RPC for PlayerID: " + player.GetPlayerID());
-    }
-
     private void Update()
     {
         if (bloodMeterDecayPerSecond > 0f && currentBloodMeter > 0f)
@@ -117,7 +109,6 @@ public class Mosquito : NetworkBehaviour
     // ========== BASIC ATTACK - BLOOD SHOT ==========
     public void CastBloodShot()
     {
-        ServerTestRpc();
         if (!player.isLocalPlayer()) return; // Safety guard -- Check if local player is player shooting
 
         Debug.Log($"[Mosquito] CastBloodShot on {gameObject.name} | Player ID: {player.GetPlayerID()} | Player is Local: {player.isLocalPlayer()}");
