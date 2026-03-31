@@ -40,7 +40,7 @@ public class NonPlayerEntity : Entity
     // LOCAL (non-networked) state
     [SerializeField] bool canSearchForTarget = true;
     [SerializeField] bool canAttackTimer = true;
-    [SerializeField] List<Entity> entitiesInRange; //for debug purposes, used in FindTarget()
+    [SerializeField] protected List<Entity> entitiesInRange; //for debug purposes, used in FindTarget()
 
 
     //Targeting fields SERVER ONLY

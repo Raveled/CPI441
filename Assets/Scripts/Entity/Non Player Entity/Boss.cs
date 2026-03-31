@@ -5,6 +5,8 @@ public class Boss : NonPlayerEntity
     [Header("Boss Setup")]
     [SerializeField] float rotateAngularSpeed = 10f;
 
+    int attackCycle = 0;
+
     Vector3 basePOSThis;
     Vector3 basePOSTarget;
 
@@ -40,17 +42,44 @@ public class Boss : NonPlayerEntity
 
         if (!isServer) return;
 
+        switch (attackCycle) {
+            case 0:
+                SingleTargetAttack(currentTarget);
+                break;
+            case 1:
+                AOEAttack(currentTarget);
+                break;
+        }
+        if (attackCycle > 1) attackCycle = 1;
+    }
+    void SingleTargetAttack(Entity currentTarget) {
         //If there is a target and it is within attack range
         if (currentTarget && CheckTargetInAttackRange(currentTarget) && attackCooldownTimer.value <= 0) {
-
-            if (currentTarget == this) {
-                Debug.Log(gameObject.name + " is targeting self -- Attack()");
-            }
-
             animator.SetTrigger("Attack");
+
             //deal dmg directly to target
             currentTarget.TakeDamage(attackPower, this);
             attackCooldownTimer.value = defaultAttackCooldown.value;
+            attackCycle++;
+        }
+    }
+    void AOEAttack(Entity currentTarget) {
+        if (currentTarget && CheckTargetInAttackRange(currentTarget) && attackCooldownTimer.value <= 0) {
+            animator.SetTrigger("Attack");
+
+            //deal dmg to all players in range
+            entitiesInRange = npeDetectLogic.GetEnemiesInRange();
+            foreach(Entity e in entitiesInRange) {
+                if (!e || e.GetIsDead()) continue;
+
+                if (e == this) continue;
+
+                if(e is Player) {
+                    e.TakeDamage(attackPower, this);
+                }
+            }
+            attackCooldownTimer.value = defaultAttackCooldown.value;
+            attackCycle++;
         }
     }
     bool CheckTargetInAttackRange(Entity currentTarget) {
