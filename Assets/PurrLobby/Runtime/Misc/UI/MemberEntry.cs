@@ -13,8 +13,10 @@ namespace PurrLobby
         private Color _defaultColor;
         private string _memberId;
         private int _teamNum;
+        private string _character;
         public string MemberId => _memberId;
         public int teamNum => _teamNum;
+        public string Character => _character;
 
         public Color NameColor => userName.color;
 
@@ -23,6 +25,7 @@ namespace PurrLobby
             _defaultColor = userName.color;
             _memberId = user.Id;
             _teamNum = user.Team;
+            _character = user.Character;
             avatar.texture = user.Avatar;
             userName.text = user.DisplayName;
             SetReady(user.IsReady);
@@ -36,6 +39,7 @@ namespace PurrLobby
         public void UpdateMember(LobbyUser user)
         {
             _teamNum = user.Team;
+            _character = user.Character;
             SetReady(user.IsReady);
         }
     }

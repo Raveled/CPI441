@@ -10,5 +10,6 @@ namespace PurrLobby
         public bool IsReady;
         public Texture2D Avatar;
         public int Team;
+        public string Character;
     }
 }

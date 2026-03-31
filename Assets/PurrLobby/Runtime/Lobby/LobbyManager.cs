@@ -455,6 +455,7 @@ namespace PurrLobby
             }
 
             SetTeam(localUserId, 1);
+            SetCharacter(localUserId, "");
         }
 
         public void JoinTeam2()
@@ -480,6 +481,33 @@ namespace PurrLobby
             }
 
             SetTeam(localUserId, 2);
+            SetCharacter(localUserId, "");
+        }
+
+        public void JoinTeam0()
+        {
+            if (!_currentLobby.IsValid)
+            {
+                PurrLogger.LogError($"Can't switch team, current lobby is invalid.");
+                return;
+            }
+            
+            var localUserId = _currentProvider.GetLocalUserIdAsync().Result;
+            if (string.IsNullOrEmpty(localUserId))
+            {
+                PurrLogger.LogError($"Can't switch team, local user ID is null or empty.");
+                return;
+            }
+            
+            var localLobbyUser = _currentLobby.Members.Find(x => x.Id == localUserId);
+            if (localLobbyUser.Team == 0)
+            {
+                PurrLogger.LogWarning("Player is already on Team 0.");
+                return;
+            }
+
+            SetTeam(localUserId, 0);
+            SetCharacter(localUserId, "");
         }
 
         public void SetTeam(string userId, int team)
@@ -488,6 +516,135 @@ namespace PurrLobby
             {
                 EnsureProviderSet();
                 await _currentProvider.SetTeamAsync(userId, team);
+            });
+        }
+
+        public void SetCharacterToMosquito()
+        {
+            if (!_currentLobby.IsValid)
+            {
+                PurrLogger.LogError($"Can't switch character to mosquito, current lobby is invalid.");
+                return;
+            }
+            
+            var localUserId = _currentProvider.GetLocalUserIdAsync().Result;
+            if (string.IsNullOrEmpty(localUserId))
+            {
+                PurrLogger.LogError($"Can't switch character to mosquito, local user ID is null or empty.");
+                return;
+            }
+            
+            var localLobbyUser = _currentLobby.Members.Find(x => x.Id == localUserId);
+
+            // Check if character is already mosquito
+            if (localLobbyUser.Character == "mosquito")
+            {
+                PurrLogger.LogWarning("Player is already playing Mosquito.");
+                return;
+            }
+
+            // Check if other member on same team already has mosquito
+            bool teammateHasMosquito = _currentLobby.Members.Exists(x =>
+                x.Id != localUserId &&
+                x.Team == localLobbyUser.Team &&
+                x.Team != 0 &&
+                x.Character == "mosquito");
+
+            if (teammateHasMosquito)
+            {
+                PurrLogger.LogWarning("A teammate is already playing Mosquito.");
+                return;
+            }
+
+            SetCharacter(localUserId, "mosquito");
+        }
+
+        public void SetCharacterToBeetle()
+        {
+            if (!_currentLobby.IsValid)
+            {
+                PurrLogger.LogError($"Can't switch character to beetle, current lobby is invalid.");
+                return;
+            }
+            
+            var localUserId = _currentProvider.GetLocalUserIdAsync().Result;
+            if (string.IsNullOrEmpty(localUserId))
+            {
+                PurrLogger.LogError($"Can't switch character to beetle, local user ID is null or empty.");
+                return;
+            }
+            
+            var localLobbyUser = _currentLobby.Members.Find(x => x.Id == localUserId);
+
+            // Check if character is already beetle
+            if (localLobbyUser.Character == "beetle")
+            {
+                PurrLogger.LogWarning("Player is already playing beetle.");
+                return;
+            }
+
+            // Check if other member on same team already has beetle
+            bool teammateHasMosquito = _currentLobby.Members.Exists(x =>
+                x.Id != localUserId &&
+                x.Team == localLobbyUser.Team &&
+                x.Team != 0 &&
+                x.Character == "beetle");
+
+            if (teammateHasMosquito)
+            {
+                PurrLogger.LogWarning("A teammate is already playing beetle.");
+                return;
+            }
+
+            SetCharacter(localUserId, "beetle");
+        }
+
+        public void SetCharacterToButterfly()
+        {
+            if (!_currentLobby.IsValid)
+            {
+                PurrLogger.LogError($"Can't switch character to butterfly, current lobby is invalid.");
+                return;
+            }
+            
+            var localUserId = _currentProvider.GetLocalUserIdAsync().Result;
+            if (string.IsNullOrEmpty(localUserId))
+            {
+                PurrLogger.LogError($"Can't switch character to butterfly, local user ID is null or empty.");
+                return;
+            }
+            
+            var localLobbyUser = _currentLobby.Members.Find(x => x.Id == localUserId);
+
+            // Check if character is already butterfly
+            if (localLobbyUser.Character == "butterfly")
+            {
+                PurrLogger.LogWarning("Player is already playing butterfly.");
+                return;
+            }
+
+            // Check if other member on same team already has butterfly
+            bool teammateHasMosquito = _currentLobby.Members.Exists(x =>
+                x.Id != localUserId &&
+                x.Team == localLobbyUser.Team &&
+                x.Team != 0 &&
+                x.Character == "butterfly");
+
+            if (teammateHasMosquito)
+            {
+                PurrLogger.LogWarning("A teammate is already playing butterfly.");
+                return;
+            }
+
+            SetCharacter(localUserId, "butterfly");
+        }
+
+        public void SetCharacter(string userId, string character)
+        {
+            RunTask(async () =>
+            {
+                EnsureProviderSet();
+                await _currentProvider.SetCharacterAsync(userId, character);
             });
         }
 

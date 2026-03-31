@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LobbyMemberListVisualClone : MonoBehaviour
 {
@@ -64,6 +66,35 @@ public class LobbyMemberListVisualClone : MonoBehaviour
 
             // Mirror the source entry's ready color onto the clone's name text
             ApplyReadyColor(sourceChild, clone);
+
+            // Mirror the source entry's character selection onto the clone's background color
+            ApplyBackgroundColor(sourceChild, clone);
+        }
+    }
+
+    private void ApplyBackgroundColor(Transform sourceChild, GameObject clone)
+    {
+        if (!sourceChild.TryGetComponent(out PurrLobby.MemberEntry sourceEntry))
+            return;
+
+        var cloneImage = clone.GetComponent<Image>();
+        if (cloneImage == null)
+            return;
+
+        switch (sourceEntry.Character)
+        {
+            case "mosquito":
+                cloneImage.color = new Color(255/255f, 121/255f, 0/255f);
+                break;
+            case "beetle":
+                cloneImage.color = new Color(90/255f, 186/255f, 255/255f);
+                break;
+            case "butterfly":
+                cloneImage.color = new Color(0f/255f, 255/255f, 39/255f);
+                break;
+            default:
+                cloneImage.color = new Color(255/255f, 55/255f, 55/255f);
+                break;
         }
     }
 
