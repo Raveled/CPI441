@@ -491,17 +491,19 @@ public class GameManager : NetworkBehaviour
 
         // New Player
         Team playerTeam;
-        String playerCharacter = "Mosquito"; // Temp just mosquitos
+        String playerCharacter;
 
         if (hasSteamID && LobbyPlayerRegistry.Instance != null &&
         LobbyPlayerRegistry.Instance.TryGetPlayer(steamID.ToString(), out LobbyUser lobbyUser))
         {
             playerTeam = lobbyUser.Team == 1 ? Team.TEAM1 : Team.TEAM2;
+            playerCharacter = lobbyUser.Character;
         }
         else
         {
             // Fallback if registry has no data
             playerTeam = playerIDs.Count % 2 == 0 ? Team.TEAM1 : Team.TEAM2;
+            playerCharacter = "mosquito"; // Default character
         }
 
         playerIDs.Add(player);
