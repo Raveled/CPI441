@@ -106,6 +106,7 @@ public class Core : NonPlayerEntity
             animator.SetTrigger("Attack");
             //deal dmg directly to target
             currentTarget.TakeDamage(attackPower, this);
+            attackCooldownTimer.value = defaultAttackCooldown.value;
         }
     }
     bool CheckTargetInAttackRange(Entity currentTarget) {
