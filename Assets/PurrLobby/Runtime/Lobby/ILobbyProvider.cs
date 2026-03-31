@@ -27,6 +27,7 @@ namespace PurrLobby {
         Task<string> GetLocalUserIdAsync();
         Task SetAllReadyAsync();
         Task SetLobbyStartedAsync();
+        Task SetTeamAsync(string userId, int team);
 
         // Events
         event UnityAction<string> OnLobbyJoinFailed;

@@ -432,6 +432,65 @@ namespace PurrLobby
             _currentProvider.SetLobbyStartedAsync();
         }
 
+        public void JoinTeam1()
+        {
+            if (!_currentLobby.IsValid)
+            {
+                PurrLogger.LogError($"Can't switch team, current lobby is invalid.");
+                return;
+            }
+            
+            var localUserId = _currentProvider.GetLocalUserIdAsync().Result;
+            if (string.IsNullOrEmpty(localUserId))
+            {
+                PurrLogger.LogError($"Can't switch team, local user ID is null or empty.");
+                return;
+            }
+            
+            var localLobbyUser = _currentLobby.Members.Find(x => x.Id == localUserId);
+            if (localLobbyUser.Team == 1)
+            {
+                PurrLogger.LogWarning("Player is already on Team 1.");
+                return;
+            }
+
+            SetTeam(localUserId, 1);
+        }
+
+        public void JoinTeam2()
+        {
+            if (!_currentLobby.IsValid)
+            {
+                PurrLogger.LogError($"Can't switch team, current lobby is invalid.");
+                return;
+            }
+            
+            var localUserId = _currentProvider.GetLocalUserIdAsync().Result;
+            if (string.IsNullOrEmpty(localUserId))
+            {
+                PurrLogger.LogError($"Can't switch team, local user ID is null or empty.");
+                return;
+            }
+            
+            var localLobbyUser = _currentLobby.Members.Find(x => x.Id == localUserId);
+            if (localLobbyUser.Team == 2)
+            {
+                PurrLogger.LogWarning("Player is already on Team 2.");
+                return;
+            }
+
+            SetTeam(localUserId, 2);
+        }
+
+        public void SetTeam(string userId, int team)
+        {
+            RunTask(async () =>
+            {
+                EnsureProviderSet();
+                await _currentProvider.SetTeamAsync(userId, team);
+            });
+        }
+
         [System.Serializable]
         public class CreateRoomArgs
         {
