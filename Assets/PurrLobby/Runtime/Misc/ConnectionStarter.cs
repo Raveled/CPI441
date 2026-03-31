@@ -1,7 +1,9 @@
 using System.Collections;
+using NUnit.Framework;
 using PurrNet;
 using PurrNet.Logging;
 using PurrNet.Transports;
+using Steamworks;
 using UnityEngine;
 
 #if UTP_LOBBYRELAY
