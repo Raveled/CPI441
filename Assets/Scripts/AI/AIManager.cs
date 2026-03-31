@@ -13,7 +13,7 @@ public class AIManager : MonoBehaviour
     [Header("Prompt")]
     [TextArea(15, 20)]
     [SerializeField] string promptPart1 = "";
-    [TextArea(15, 20)]
+    [TextArea(2, 2)]
     [SerializeField] string promptPart2 = "";
 
     //AI Prompt
@@ -38,7 +38,7 @@ public class AIManager : MonoBehaviour
             Debug.Log("button pressed");
             CreatePrompt();
             Debug.Log(prompt);
-            ai.SendNewMessage(testPrompt);
+            ai.SendNewMessage(prompt);
             Debug.Log("msg sent");
         }
     }

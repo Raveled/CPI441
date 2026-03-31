@@ -65,23 +65,6 @@ public class UnityAndGeminiV3: MonoBehaviour
     [TextArea(15, 20)]
     public string prompt = "";
 
-    // Image Generation is now a paid feature. The generation of images can produce charges at your credit card.
-    // [Header("Image Prompt Function")]
-    // public string imagePrompt = "";
-    // public Material skyboxMaterial; 
-
-    [Header("Media Prompt Function")]
-    // Receives files with a maximum of 20 MB
-    public string mediaFilePath = "";
-    public string mediaPrompt = "";
-    public enum MediaType
-    {
-        Video_MP4 = 0,
-        Audio_MP3 = 1,
-        PDF = 2,
-        JPG = 3,
-        PNG = 4
-    }
     AIManager aiManager = null;
 
     private void Awake() {
@@ -94,47 +77,11 @@ public class UnityAndGeminiV3: MonoBehaviour
         apiKey = jsonApiKey.key;   
         chatHistory = new TextContent[] { };
     }
-
+    //Called from AIManager
     public void SendNewMessage(string prompt) {
         this.prompt = prompt;
         if (prompt != "") { StartCoroutine(SendPromptRequestToGemini(prompt)); };
     }
-
-    //private IEnumerator SendPromptRequestToGemini(string promptText)
-    //{
-    //    string url = $"{apiEndpoint}?key={apiKey}";
-     
-    //    string jsonData = "{\"contents\": [{\"parts\": [{\"text\": \"{" + promptText + "}\"}]}]}";
-
-    //    byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(jsonData);
-
-    //    // Create a UnityWebRequest with the JSON data
-    //    using (UnityWebRequest www = new UnityWebRequest(url, "POST")){
-    //        www.uploadHandler = new UploadHandlerRaw(jsonToSend);
-    //        www.downloadHandler = new DownloadHandlerBuffer();
-    //        www.SetRequestHeader("Content-Type", "application/json");
-
-    //        yield return www.SendWebRequest();
-
-    //        if (www.result != UnityWebRequest.Result.Success) {
-    //            Debug.LogError(www.error);
-    //        } else {
-    //            Debug.Log("Request complete!");
-    //            TextResponse response = JsonUtility.FromJson<TextResponse>(www.downloadHandler.text);
-    //            if (response.candidates.Length > 0 && response.candidates[0].content.parts.Length > 0)
-    //                {
-    //                    //This is the response to your request
-    //                    string text = response.candidates[0].content.parts[0].text;
-    //                    Debug.Log(text);
-    //                    aiManager.ResponseReceived(text);
-    //                }
-    //            else
-    //            {
-    //                Debug.Log("No text found.");
-    //            }
-    //        }
-    //    }
-    //}
     private IEnumerator SendPromptRequestToGemini(string promptText)
     {
         string url = $"{apiEndpoint}?key={apiKey}";
