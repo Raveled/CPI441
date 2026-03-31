@@ -3,8 +3,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections.Generic;
 using TMPro;
-using System.IO; 
-using System;
 
 [System.Serializable]
 public class UnityAndGeminiKey
@@ -12,28 +10,11 @@ public class UnityAndGeminiKey
     public string key;
 }
 
-
-
-[System.Serializable]
-public class InlineData
-{
-    public string mimeType;
-    public string data;
-}
-
 // Text-only part
 [System.Serializable]
 public class TextPart
 {
     public string text;
-}
-
-// Image-capable part
-[System.Serializable]
-public class ImagePart
-{
-    public string text;
-    public InlineData inlineData;
 }
 
 [System.Serializable]
@@ -55,26 +36,6 @@ public class TextResponse
     public TextCandidate[] candidates;
 }
 
-[System.Serializable]
-public class ImageContent
-{
-    public string role;
-    public ImagePart[] parts;
-}
-
-[System.Serializable]
-public class ImageCandidate
-{
-    public ImageContent content;
-}
-
-[System.Serializable]
-public class ImageResponse
-{
-    public ImageCandidate[] candidates;
-}
-
-
 // For text requests
 [System.Serializable]
 public class ChatRequest
@@ -92,7 +53,6 @@ public class UnityAndGeminiV3: MonoBehaviour
     
     private string apiKey = ""; 
     private string apiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"; // Edit it and choose your prefer model
-    private string imageEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent"; //End point for image generation
 
     [Header("ChatBot Function")]
     public TMP_InputField inputField;
@@ -122,27 +82,7 @@ public class UnityAndGeminiV3: MonoBehaviour
         JPG = 3,
         PNG = 4
     }
-    public MediaType mimeType = MediaType.Video_MP4;
-
     AIManager aiManager = null;
-    public string GetMimeTypeString()
-    {
-        switch (mimeType)
-        {
-            case MediaType.Video_MP4:
-                return "video/mp4";
-            case MediaType.Audio_MP3:
-                return "audio/mp3";
-            case MediaType.PDF:
-                return "application/pdf";
-            case MediaType.JPG:
-                return "image/jpeg";
-            case MediaType.PNG:
-                return "image/png";
-            default:
-                return "error";
-        }
-    }
 
     private void Awake() {
         aiManager = GetComponent<AIManager>();
@@ -158,47 +98,89 @@ public class UnityAndGeminiV3: MonoBehaviour
     public void SendNewMessage(string prompt) {
         this.prompt = prompt;
         if (prompt != "") { StartCoroutine(SendPromptRequestToGemini(prompt)); };
-
-        // Image Generation is now a paid feature. The generation of images can produce charges at your credit card.
-        // if (imagePrompt != ""){StartCoroutine( SendPromptRequestToGeminiImageGenerator(imagePrompt));};
-
-        //if (mediaPrompt != "" && mediaFilePath != "") { StartCoroutine(SendPromptMediaRequestToGemini(mediaPrompt, mediaFilePath)); };
     }
 
+    //private IEnumerator SendPromptRequestToGemini(string promptText)
+    //{
+    //    string url = $"{apiEndpoint}?key={apiKey}";
+     
+    //    string jsonData = "{\"contents\": [{\"parts\": [{\"text\": \"{" + promptText + "}\"}]}]}";
 
+    //    byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(jsonData);
 
+    //    // Create a UnityWebRequest with the JSON data
+    //    using (UnityWebRequest www = new UnityWebRequest(url, "POST")){
+    //        www.uploadHandler = new UploadHandlerRaw(jsonToSend);
+    //        www.downloadHandler = new DownloadHandlerBuffer();
+    //        www.SetRequestHeader("Content-Type", "application/json");
+
+    //        yield return www.SendWebRequest();
+
+    //        if (www.result != UnityWebRequest.Result.Success) {
+    //            Debug.LogError(www.error);
+    //        } else {
+    //            Debug.Log("Request complete!");
+    //            TextResponse response = JsonUtility.FromJson<TextResponse>(www.downloadHandler.text);
+    //            if (response.candidates.Length > 0 && response.candidates[0].content.parts.Length > 0)
+    //                {
+    //                    //This is the response to your request
+    //                    string text = response.candidates[0].content.parts[0].text;
+    //                    Debug.Log(text);
+    //                    aiManager.ResponseReceived(text);
+    //                }
+    //            else
+    //            {
+    //                Debug.Log("No text found.");
+    //            }
+    //        }
+    //    }
+    //}
     private IEnumerator SendPromptRequestToGemini(string promptText)
     {
         string url = $"{apiEndpoint}?key={apiKey}";
-     
-        string jsonData = "{\"contents\": [{\"parts\": [{\"text\": \"{" + promptText + "}\"}]}]}";
+
+        // Construct the object structure to ensure valid JSON escaping
+        TextContent content = new TextContent
+        {
+            parts = new TextPart[] { new TextPart { text = promptText } }
+        };
+
+        // We use a wrapper to include the 'generationConfig' for strict JSON mode
+        // Note: You may need to add this class to your serializable list at the top
+        var root = new
+        {
+            contents = new[] { content },
+            generationConfig = new
+            {
+                response_mime_type = "application/json"
+            }
+        };
+
+        string jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(root);
+        // Pro-tip: Use Newtonsoft.Json if possible for complex nested objects, 
+        // otherwise stick to your manual string if you prefer, but remove the extra {}.
 
         byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(jsonData);
 
-        // Create a UnityWebRequest with the JSON data
-        using (UnityWebRequest www = new UnityWebRequest(url, "POST")){
+        using (UnityWebRequest www = new UnityWebRequest(url, "POST"))
+        {
             www.uploadHandler = new UploadHandlerRaw(jsonToSend);
             www.downloadHandler = new DownloadHandlerBuffer();
             www.SetRequestHeader("Content-Type", "application/json");
 
             yield return www.SendWebRequest();
 
-            if (www.result != UnityWebRequest.Result.Success) {
-                Debug.LogError(www.error);
-            } else {
-                Debug.Log("Request complete!");
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError("API Error: " + www.downloadHandler.text);
+            } else
+            {
                 TextResponse response = JsonUtility.FromJson<TextResponse>(www.downloadHandler.text);
-                if (response.candidates.Length > 0 && response.candidates[0].content.parts.Length > 0)
-                    {
-                        //This is the response to your request
-                        string text = response.candidates[0].content.parts[0].text;
-                        Debug.Log(text);
-                        aiManager.ResponseReceived(text);
-                    }
-                else
-                {
-                    Debug.Log("No text found.");
-                }
+                string cleanJson = response.candidates[0].content.parts[0].text;
+
+                // This is your pure JSON data
+                Debug.Log("Balanced Stats Received: " + cleanJson);
+                aiManager.ResponseReceived(cleanJson);
             }
         }
     }
@@ -281,212 +263,6 @@ public class UnityAndGeminiV3: MonoBehaviour
              }
         }  
     }
-
-    // Image Generation is now a paid feature. The generation of images can produce charges at your credit card.
-    
-    // private IEnumerator SendPromptRequestToGeminiImageGenerator(string promptText)
-    // {
-    //     string url = $"{imageEndpoint}?key={apiKey}";
-        
-    //     // Create the proper JSON structure with model specification
-    //     string jsonData = $@"{{
-    //         ""contents"": [{{
-    //             ""parts"": [{{
-    //                 ""text"": ""{promptText}""
-    //             }}]
-    //         }}],
-    //         ""generationConfig"": {{
-    //             ""responseModalities"": [""Text"", ""Image""]
-    //         }}
-    //     }}";
-
-    //     byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(jsonData);
-
-    //     // Create a UnityWebRequest with the JSON data
-    //     using (UnityWebRequest www = new UnityWebRequest(url, "POST"))
-    //     {
-    //         www.uploadHandler = new UploadHandlerRaw(jsonToSend);
-    //         www.downloadHandler = new DownloadHandlerBuffer();
-    //         www.SetRequestHeader("Content-Type", "application/json");
-
-    //         yield return www.SendWebRequest();
-
-    //         if (www.result != UnityWebRequest.Result.Success) 
-    //         {
-    //             Debug.LogError(www.error);
-    //         } 
-    //         else 
-    //         {
-    //             Debug.Log("Request complete!");
-    //             Debug.Log("Full response: " + www.downloadHandler.text); // Log full response for debugging
-                
-    //             // Parse the JSON response
-    //             try 
-    //             {
-    //                 ImageResponse response = JsonUtility.FromJson<ImageResponse>(www.downloadHandler.text);
-                    
-    //                 if (response.candidates != null && response.candidates.Length > 0 && 
-    //                     response.candidates[0].content != null && 
-    //                     response.candidates[0].content.parts != null)
-    //                 {
-    //                     foreach (var part in response.candidates[0].content.parts)
-    //                     {
-    //                         if (!string.IsNullOrEmpty(part.text))
-    //                         {
-    //                             Debug.Log("Text response: " + part.text);
-    //                         }
-    //                         else if (part.inlineData != null && !string.IsNullOrEmpty(part.inlineData.data))
-    //                         {
-    //                             // This is the base64 encoded image data
-    //                             byte[] imageBytes = System.Convert.FromBase64String(part.inlineData.data);
-                                
-    //                             // Create a texture from the bytes
-    //                             Texture2D tex = new Texture2D(2, 2);
-    //                             tex.LoadImage(imageBytes);
-    //                             byte[] pngBytes = tex.EncodeToPNG();
-    //                             string path = Application.persistentDataPath + "/gemini-image.png";
-    //                             File.WriteAllBytes(path, pngBytes);
-    //                             Debug.Log("Saved to: " + path);
-    //                             Debug.Log("Image received successfully!");
-
-    //                             // Load the saved image back as Texture2D
-    //                             string imagePath = Path.Combine(Application.persistentDataPath, "gemini-image.png");
-                                
-    //                             Texture2D panoramaTex = new Texture2D(2, 2);
-    //                             panoramaTex.LoadImage(File.ReadAllBytes(imagePath));
-
-    //                             Texture2D properlySizedTex = ResizeTexture(panoramaTex, 1024, 512);
-                                
-    //                             // Apply to a panoramic skybox material
-    //                             if (skyboxMaterial != null)
-    //                             {
-    //                                 // Switch to panoramic shader
-    //                                 skyboxMaterial.shader = Shader.Find("Skybox/Panoramic");
-    //                                 skyboxMaterial.SetTexture("_MainTex", properlySizedTex);
-    //                                 DynamicGI.UpdateEnvironment();
-    //                                 Debug.Log("Skybox updated with panoramic image!");
-    //                             }
-    //                             else
-    //                             {
-    //                                 Debug.LogError("Skybox material not assigned!");
-    //                             }
-
-    //                             // Another approach but might cause distorsion
-
-                                
-    //                             // Texture2D savedTex = new Texture2D(2, 2);
-    //                             // savedTex.LoadImage(File.ReadAllBytes(path));
-
-    //                             // // Convert to Cubemap (simplified approach - may distort)
-    //                             // Cubemap newCubemap = new Cubemap(savedTex.width, TextureFormat.RGBA32, false);
-    //                             // for (int i = 0; i < 6; i++)
-    //                             // {
-    //                             //     newCubemap.SetPixels(savedTex.GetPixels(), (CubemapFace)i);
-    //                             // }
-    //                             // newCubemap.Apply();
-
-    //                             // // Apply to skybox
-    //                             // if (skyboxMaterial != null)
-    //                             // {
-    //                             //     skyboxMaterial.SetTexture("_Tex", newCubemap);
-    //                             //     DynamicGI.UpdateEnvironment();
-    //                             //     Debug.Log("Skybox updated with new image!");
-    //                             // }                            
-
-    //                         }
-    //                     }
-    //                 }
-    //                 else
-    //                 {
-    //                     Debug.Log("No valid response parts found.");
-    //                 }
-    //             }
-    //             catch (Exception e)
-    //             {
-    //                 Debug.LogError("JSON Parse Error: " + e.Message);
-    //             }
-    //         }
-    //     }
-    // }
-
-    // Texture2D ResizeTexture(Texture2D source, int newWidth, int newHeight)
-    // {
-    //     RenderTexture rt = RenderTexture.GetTemporary(newWidth, newHeight);
-    //     Graphics.Blit(source, rt);
-    //     Texture2D result = new Texture2D(newWidth, newHeight);
-    //     RenderTexture.active = rt;
-    //     result.ReadPixels(new Rect(0, 0, newWidth, newHeight), 0, 0);
-    //     result.Apply();
-    //     RenderTexture.ReleaseTemporary(rt);
-    //     return result;
-    // }
-
-    private IEnumerator SendPromptMediaRequestToGemini(string promptText, string mediaPath)
-    {
-        // Read video file and convert to base64
-        byte[] mediaBytes = File.ReadAllBytes(mediaPath);
-        string base64Media = System.Convert.ToBase64String(mediaBytes);
-
-        string url = $"{apiEndpoint}?key={apiKey}";
-
-        string mimeTypeMedia = GetMimeTypeString();
-
-
-
-        string jsonBody = $@"
-        {{
-        ""contents"": [
-            {{
-            ""parts"": [
-                {{
-                ""text"": ""{promptText}""
-                }},
-                {{
-                ""inline_data"": {{
-                    ""mime_type"": ""{mimeTypeMedia}"",
-                    ""data"": ""{base64Media}""
-                }}
-                }}
-            ]
-            }}
-        ]
-        }}";
-
-
-        byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(jsonBody);
-
-
-        // Create and send the request
-        using (UnityWebRequest www = new UnityWebRequest(url, "POST"))
-        {
-            www.uploadHandler = new UploadHandlerRaw(jsonToSend);
-            www.downloadHandler = new DownloadHandlerBuffer();
-            www.SetRequestHeader("Content-Type", "application/json");
-
-            yield return www.SendWebRequest();
-
-            if (www.result != UnityWebRequest.Result.Success) 
-            {
-                Debug.LogError(www.error);
-                Debug.LogError("Response: " + www.downloadHandler.text);
-            } 
-            else 
-            {
-                Debug.Log("Request complete!");
-                TextResponse response = JsonUtility.FromJson<TextResponse>(www.downloadHandler.text);
-                if (response.candidates.Length > 0 && response.candidates[0].content.parts.Length > 0)
-                {
-                    string text = response.candidates[0].content.parts[0].text;
-                    Debug.Log(text);
-                }
-                else
-                {
-                    Debug.Log("No text found.");
-                }
-            }
-        }
-    }
-
 }
 
 

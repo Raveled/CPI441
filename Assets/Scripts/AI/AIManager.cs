@@ -36,8 +36,10 @@ public class AIManager : MonoBehaviour
         //Testing Message Send
         if (Keyboard.current.oKey.wasPressedThisFrame) {
             Debug.Log("button pressed");
-            //CreatePrompt();
+            CreatePrompt();
+            Debug.Log(prompt);
             ai.SendNewMessage(testPrompt);
+            Debug.Log("msg sent");
         }
     }
     //Concatenate the mesage to send to ai
@@ -56,16 +58,18 @@ public class AIManager : MonoBehaviour
     public void ResponseReceived(string response) {
         this.response = response;
         Debug.Log("AIManager.cs - Response Recieved");
+        Debug.Log(response);
 
         //TODO-------------------------------------------------------------------------------------
         //send to gamemanager to change the entity stats
-        //
-        var parts = response.Split("],");
 
-        int hp = int.Parse(parts[0].Split(',')[1].Trim(' ', ']'));
-        int attack = int.Parse(parts[1].Split(',')[1].Trim(' ', ']'));
+        //for [] test format
+        //var parts = response.Split("],");
 
-        FindFirstObjectByType<JSON_EntityData>().EditMinion(hp, attack);
+        //int hp = int.Parse(parts[0].Split(',')[1].Trim(' ', ']'));
+        //int attack = int.Parse(parts[1].Split(',')[1].Trim(' ', ']'));
+
+        //FindFirstObjectByType<JSON_EntityData>().EditMinion(hp, attack);
     }
 
 
