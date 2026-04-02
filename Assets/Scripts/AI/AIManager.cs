@@ -20,10 +20,7 @@ public class AIManager : MonoBehaviour
     string prompt = "";
     [Header("Reponse Debug")]
     [TextArea(15, 20)]
-    [SerializeField]string response = "";
-    [Space]
-    [TextArea(15, 20)]
-    [SerializeField] string testPrompt = "";
+    [SerializeField] string response = "";
     private void Awake() {
         ai = GetComponent<UnityAndGeminiV3>();
     }
@@ -51,25 +48,16 @@ public class AIManager : MonoBehaviour
 
     //Called from gamemanager after a match
     public void AskAIForBalance() {
-        //CreatePrompt();
-        ai.SendNewMessage(testPrompt);
+        CreatePrompt();
+        ai.SendNewMessage(prompt);
     }
     //Called from UnityAndGeminiV3 for the ai's reponse
     public void ResponseReceived(string response) {
         this.response = response;
         Debug.Log("AIManager.cs - Response Recieved");
         Debug.Log(response);
-
-        //TODO-------------------------------------------------------------------------------------
-        //send to gamemanager to change the entity stats
-
-        //for [] test format
-        //var parts = response.Split("],");
-
-        //int hp = int.Parse(parts[0].Split(',')[1].Trim(' ', ']'));
-        //int attack = int.Parse(parts[1].Split(',')[1].Trim(' ', ']'));
-
-        //FindFirstObjectByType<JSON_EntityData>().EditMinion(hp, attack);
+        entityData.LoadFromJSONString(response);
+        entityData.SaveToJSON();
     }
 
 
