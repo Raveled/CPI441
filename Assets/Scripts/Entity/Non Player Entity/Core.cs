@@ -31,9 +31,6 @@ public class Core : NonPlayerEntity
         if (!isServer) return; // Only execute end game logic on the server
 
         gameManager.GameEnd(team);
-
-        //REMOVE WHEN ANIMATION IS IN
-        Destroy(gameObject);
     }
     //Start the spawning of a minion wave
     public void SpawnWave() {
@@ -140,7 +137,4 @@ public class Core : NonPlayerEntity
     public void SetNumMinionsInWave(int num) {
         numMinionsInWave = num;
     }
-
-
-
 }

@@ -97,6 +97,25 @@ public class JSON_EntityData : MonoBehaviour
         }
         return jsonData;
     }
+    public void LoadFromJSONString(string jsonString) {
+        if (string.IsNullOrEmpty(jsonString)) {
+            Debug.LogWarning("JSON string is null or empty!");
+            return;
+        }
+
+        try {
+            statblocks = JsonConvert.DeserializeObject<Statblocks>(jsonString);
+
+            if (statblocks == null || statblocks.entityStats == null) {
+                Debug.LogError("Failed to parse JSON into Statblocks.");
+                return;
+            }
+
+            Debug.Log("Successfully parsed JSON string!");
+        } catch (System.Exception e) {
+            Debug.LogError("JSON Parse Error: " + e.Message);
+        }
+    }
 }
 
 //Class to hold statblocks

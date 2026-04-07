@@ -13,17 +13,14 @@ public class AIManager : MonoBehaviour
     [Header("Prompt")]
     [TextArea(15, 20)]
     [SerializeField] string promptPart1 = "";
-    [TextArea(15, 20)]
+    [TextArea(2, 2)]
     [SerializeField] string promptPart2 = "";
 
     //AI Prompt
     string prompt = "";
     [Header("Reponse Debug")]
     [TextArea(15, 20)]
-    [SerializeField]string response = "";
-    [Space]
-    [TextArea(15, 20)]
-    [SerializeField] string testPrompt = "";
+    [SerializeField] string response = "";
     private void Awake() {
         ai = GetComponent<UnityAndGeminiV3>();
     }
@@ -36,8 +33,10 @@ public class AIManager : MonoBehaviour
         //Testing Message Send
         if (Keyboard.current.oKey.wasPressedThisFrame) {
             Debug.Log("button pressed");
-            //CreatePrompt();
-            ai.SendNewMessage(testPrompt);
+            CreatePrompt();
+            Debug.Log(prompt);
+            ai.SendNewMessage(prompt);
+            Debug.Log("msg sent");
         }
     }
     //Concatenate the mesage to send to ai
@@ -49,23 +48,16 @@ public class AIManager : MonoBehaviour
 
     //Called from gamemanager after a match
     public void AskAIForBalance() {
-        //CreatePrompt();
-        ai.SendNewMessage(testPrompt);
+        CreatePrompt();
+        ai.SendNewMessage(prompt);
     }
     //Called from UnityAndGeminiV3 for the ai's reponse
     public void ResponseReceived(string response) {
         this.response = response;
         Debug.Log("AIManager.cs - Response Recieved");
-
-        //TODO-------------------------------------------------------------------------------------
-        //send to gamemanager to change the entity stats
-        //
-        var parts = response.Split("],");
-
-        int hp = int.Parse(parts[0].Split(',')[1].Trim(' ', ']'));
-        int attack = int.Parse(parts[1].Split(',')[1].Trim(' ', ']'));
-
-        FindFirstObjectByType<JSON_EntityData>().EditMinion(hp, attack);
+        Debug.Log(response);
+        entityData.LoadFromJSONString(response);
+        entityData.SaveToJSON();
     }
 
 

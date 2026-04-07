@@ -15,6 +15,8 @@ public class NonPlayerEntity : Entity
     [SerializeField] protected UnityEngine.UI.Slider healthBar = null;
     [SerializeField] protected Animator animator = null;
     [Space]
+    [SerializeField] bool canTargetAllies = false;
+    [Space]
     [SerializeField] bool canTargetTower = false;
     [SerializeField] bool canTargetCore = false;
     [SerializeField] bool canTargetMinion = false;
@@ -38,7 +40,7 @@ public class NonPlayerEntity : Entity
     // LOCAL (non-networked) state
     [SerializeField] bool canSearchForTarget = true;
     [SerializeField] bool canAttackTimer = true;
-    [SerializeField] List<Entity> entitiesInRange; //for debug purposes, used in FindTarget()
+    [SerializeField] protected List<Entity> entitiesInRange; //for debug purposes, used in FindTarget()
 
 
     //Targeting fields SERVER ONLY
@@ -151,7 +153,9 @@ public class NonPlayerEntity : Entity
 
                 if (e == this) continue;
 
-                if (e.GetTeam() == Team.NULL || e.GetTeam() == GetTeam()) continue; // Don't target entities on the same team
+                if (!canTargetAllies) {
+                    if (e.GetTeam() == Team.NULL || e.GetTeam() == GetTeam()) continue; // Don't target entities on the same team
+                }
 
                 float dist = Vector3.Distance(transform.position, e.gameObject.transform.position);
 
