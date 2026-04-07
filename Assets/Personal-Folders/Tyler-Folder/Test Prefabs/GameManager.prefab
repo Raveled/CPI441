@@ -1048,6 +1048,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d13bb63be8dadbe4b92d1432bfce9bd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
   spawnpoints_Team1:
   - {fileID: 1256348374070741935}
   - {fileID: 2771562178992919709}
@@ -1072,6 +1081,7 @@ MonoBehaviour:
   team2Name: Blue Team
   team1Color: {r: 0.9547169, g: 0.06304721, b: 0.7279584, a: 0}
   team2Color: {r: 0.043396115, g: 0.9119327, b: 1, a: 0}
+  winningTeamColor: {r: 0, g: 0, b: 0, a: 0}
   chosenCharacters_Team1: 01000000
   chosenCharacters_Team2: 
   beetle_Prefab: {fileID: 0}
@@ -1095,6 +1105,12 @@ MonoBehaviour:
   winnerStr: 
   towersDestroyed_Team1: 0
   towersDestroyed_Team2: 0
+  playerIDs:
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+  playersInfo:
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
 --- !u!114 &4236823861627369861
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1277,6 +1293,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: AI Manager
       objectReference: {fileID: 0}
+    - target: {fileID: 4268357716925106502, guid: 939afb7b9e95a0e4392506ee53d12df2, type: 3}
+      propertyPath: matchData
+      value: 
+      objectReference: {fileID: 4236823861627369861}
+    - target: {fileID: 4268357716925106502, guid: 939afb7b9e95a0e4392506ee53d12df2, type: 3}
+      propertyPath: entityData
+      value: 
+      objectReference: {fileID: 4234075273946786129}
     - target: {fileID: 5543195314949916608, guid: 939afb7b9e95a0e4392506ee53d12df2, type: 3}
       propertyPath: m_LocalPosition.x
       value: -25.03805

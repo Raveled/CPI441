@@ -86,14 +86,11 @@ public class UnityAndGeminiV3: MonoBehaviour
     {
         string url = $"{apiEndpoint}?key={apiKey}";
 
-        // Construct the object structure to ensure valid JSON escaping
         TextContent content = new TextContent
         {
             parts = new TextPart[] { new TextPart { text = promptText } }
         };
 
-        // We use a wrapper to include the 'generationConfig' for strict JSON mode
-        // Note: You may need to add this class to your serializable list at the top
         var root = new
         {
             contents = new[] { content },
@@ -104,8 +101,6 @@ public class UnityAndGeminiV3: MonoBehaviour
         };
 
         string jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(root);
-        // Pro-tip: Use Newtonsoft.Json if possible for complex nested objects, 
-        // otherwise stick to your manual string if you prefer, but remove the extra {}.
 
         byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(jsonData);
 
@@ -125,7 +120,6 @@ public class UnityAndGeminiV3: MonoBehaviour
                 TextResponse response = JsonUtility.FromJson<TextResponse>(www.downloadHandler.text);
                 string cleanJson = response.candidates[0].content.parts[0].text;
 
-                // This is your pure JSON data
                 Debug.Log("Balanced Stats Received: " + cleanJson);
                 aiManager.ResponseReceived(cleanJson);
             }

@@ -225,11 +225,16 @@ public class GameManager : NetworkBehaviour
             LoadEntityJSON();
         }
         if (Keyboard.current.yKey.wasPressedThisFrame) {
-            if (!aiprompted) {
-                Debug.Log("DEBUG: AI PROMPT");
-                FindFirstObjectByType<AIManager>().AskAIForBalance();
-                aiprompted = true;
-            }
+            bool check = true;
+            Core[] cores = FindObjectsByType<Core>(FindObjectsSortMode.None);
+            if (cores[0])
+            {
+                if (check)
+                {
+                    check = false;
+                    cores[0].DebugDie();
+                }
+            } 
         }
     }
     bool aiprompted = false;
