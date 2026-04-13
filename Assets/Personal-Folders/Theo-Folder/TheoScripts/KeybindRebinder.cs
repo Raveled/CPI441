@@ -12,7 +12,7 @@ public class KeybindRebinder : MonoBehaviour
     [Header("Input")]
     public InputActionAsset actions;
 
-    public string quickPokeAction = "QuickPoke";
+    public string quickPokeAction = "QuickPoke-Ability2";
     public string globShotAction = "GlobShot";
     public string ampUpAction = "AmpUp";
     public string basicAttackAction = "BasicAttack";
