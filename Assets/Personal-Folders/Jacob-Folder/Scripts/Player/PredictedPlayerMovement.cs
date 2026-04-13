@@ -32,21 +32,19 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     protected override void LateAwake()
     {
         if (_player == null)
-        {
             _player = GetComponentInChildren<Player>();
-        }
 
-        if (_player == null)
+        if (_player == null && isServer)
         {
-            if (isServer)
+            Debug.Log($"Player {owner.Value} spawning playerRoot prefab");
+            GameObject playerObject = Instantiate(playerObj, this.transform);
+            playerObject.transform.SetParent(this.transform);
+
+            _player = playerObject.GetComponent<Player>();
+
+            if (_player != null)
             {
-                //Debug.Log("Player "+ owner.Value + " spawning playerRoot prefab");
-                GameObject playerObject = Instantiate(playerObj, this.transform);
-                playerObject.transform.SetParent(this.transform);
-
-                _player = playerObject.GetComponent<Player>();
                 _player.predictedMovement = this;
-
                 _player.GiveOwnership(owner.Value);
             }
         }
@@ -57,32 +55,34 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
         }
         else
         {
-            Debug.LogWarning("PredictedPlayerMovement: No Player component found on the GameObject.");
+            Debug.LogWarning($"PredictedPlayerMovement on {name} could not find a Player component. If this appears when a player is spawning, it is expected, since there is a slight delay.\n" +
+                $"If you are concerned about a character not having access to the 'player' component, uncomment the debug check in 'update' in this file! - Theo", this);
         }
 
         if (isOwner)
         {
             moveAction = InputSystem.actions.FindAction("Move");
             jumpAction = InputSystem.actions.FindAction("Jump");
-
             moveAction?.Enable();
             jumpAction?.Enable();
-
             _playerCamera.Init();
         }
     }
 
     private void LoadStatsFromPlayer()
     {
-        if (_player.GetEntityStatblock() != null)
-        {
-            SO_EntityStatBlock playerStatBlock = _player.GetEntityStatblock();
-            moveSpeed = playerStatBlock.BaseMoveSpeed;
-            jumpForce = playerStatBlock.BaseJumpForce;
-            jumpCooldownTime = playerStatBlock.BaseJumpCooldown;
-            acceleration = playerStatBlock.BaseAcceleration;
-            planarDamping = playerStatBlock.BasePlanarDamping;
-        }
+        if (_player == null)
+            return;
+
+        if (_player.GetEntityStatblock() == null)
+            return;
+
+        SO_EntityStatBlock playerStatBlock = _player.GetEntityStatblock();
+        moveSpeed = playerStatBlock.BaseMoveSpeed;
+        jumpForce = playerStatBlock.BaseJumpForce;
+        jumpCooldownTime = playerStatBlock.BaseJumpCooldown;
+        acceleration = playerStatBlock.BaseAcceleration;
+        planarDamping = playerStatBlock.BasePlanarDamping;
     }
 
 
@@ -164,6 +164,21 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     protected override void Update()
     {
         base.Update();
+
+        if (_player == null)
+        {
+            _player = GetComponentInChildren<Player>();
+            if (_player == null)
+                Debug.LogWarning($"PredictedPlayerMovement on {name} could not find a Player component in Update. If this appears when a player is spawning, it is expected, since there is a slight delay.\n" +
+                    $"If you are concerned about a character not having access to the 'player' component, uncomment the debug check in 'update' in this file! - Theo", this);
+            return;
+        }
+
+        // *** DEBUG *** FIXED BY THEO - RESTORE TO CHECK ANY ISSUES WITH PLAYER COMPONENT ASSIGNMENT! *** //
+        /*if (_player != null)
+        {
+            Debug.Log("PredictedPlayerMovement successfully found Player component in Update.");
+        }*/
 
         // Sync stats from Player component in case they were updated (e.g., from leveling up or buffs)
         LoadStatsFromPlayer();
