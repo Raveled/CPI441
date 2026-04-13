@@ -225,11 +225,16 @@ public class GameManager : NetworkBehaviour
             LoadEntityJSON();
         }
         if (Keyboard.current.yKey.wasPressedThisFrame) {
-            if (!aiprompted) {
-                Debug.Log("DEBUG: AI PROMPT");
-                FindFirstObjectByType<AIManager>().AskAIForBalance();
-                aiprompted = true;
-            }
+            bool check = true;
+            Core[] cores = FindObjectsByType<Core>(FindObjectsSortMode.None);
+            if (cores[0])
+            {
+                if (check)
+                {
+                    check = false;
+                    cores[0].DebugDie();
+                }
+            } 
         }
     }
     bool aiprompted = false;
@@ -538,6 +543,26 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    #endregion
+    #region Stat Getters
+    public SO_EntityStatBlock GetCoreStats() {
+        return stats_Core;
+    }
+    public SO_EntityStatBlock GetMinionStats() {
+        return stats_Minion;
+    }
+    public SO_EntityStatBlock getTowerStats() {
+        return stats_Tower;
+    }
+    public SO_EntityStatBlock GetBeetleStats() {
+        return stats_Char_Beetle;
+    }
+    public SO_EntityStatBlock GetMosquitoStats() {
+        return stats_Char_Mosquito;
+    }
+    public SO_EntityStatBlock GetButterflyStats() {
+        return stats_Char_Butterfly;
+    }
     #endregion
     #region WORK IN PROGRESS
     void FreezeAllPCs(bool freeze) {

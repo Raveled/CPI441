@@ -25,6 +25,10 @@ public class Core : NonPlayerEntity
         gameManager = FindFirstObjectByType<GameManager>();
         base.Start();
     }
+    public void DebugDie()
+    {
+        Die(null);
+    }
     protected override void Die(Entity damageOrigin) {
         base.Die(damageOrigin);
 
