@@ -20299,6 +20299,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameManager
       objectReference: {fileID: 0}
+    - target: {fileID: 9083819392621653564, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+      propertyPath: m_NavMeshData
+      value: 
+      objectReference: {fileID: 23800000, guid: 85e9d5ab33a236b43a41c46c30e94320, type: 2}
     - target: {fileID: 9218709570853150868, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
