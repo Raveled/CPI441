@@ -484,9 +484,10 @@ public class GameManager : NetworkBehaviour
     // Returns basic team and character informaiton for spawning a player
     public (Team, string) GetPlayerSetup(PlayerID player)
     {
+        Debug.Log($"[GameManager] Player {player} Assigning team and character.");
         ulong steamID;
         bool hasSteamID = PurrNet.Steam.PurrSteamUtils.TryGetSteamID(player, out steamID);
-        Debug.Log($"[GameManager] Player {player} connected via Steam with ID {steamID}. Assigning team and character.");
+        Debug.Log($"[GameManager] Player {player} connected via Steam with ID {steamID}.");
 
         foreach (PlayerInfo i in playersInfo)
         {
@@ -520,9 +521,11 @@ public class GameManager : NetworkBehaviour
     // Returns all player configuration information for use in the player script
     public PlayerInfo? GetPlayerConfiguration(PlayerID player)
     {
+        Debug.Log($"[GameManager] Retrieving configuration for Player {player}. PlayerInfo count: {playersInfo.Count}");
         foreach (PlayerInfo i in playersInfo)
         {
             if (i.playerID == player)
+                Debug.Log($"[GameManager] Found configuration for Player {player}: Team {i.team}, Character {i.character}");
                 return i;
         }
 
