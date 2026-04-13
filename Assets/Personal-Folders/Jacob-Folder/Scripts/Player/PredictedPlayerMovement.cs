@@ -32,21 +32,19 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     protected override void LateAwake()
     {
         if (_player == null)
-        {
             _player = GetComponentInChildren<Player>();
-        }
 
-        if (_player == null)
+        if (_player == null && isServer)
         {
-            if (isServer)
+            Debug.Log($"Player {owner.Value} spawning playerRoot prefab");
+            GameObject playerObject = Instantiate(playerObj, this.transform);
+            playerObject.transform.SetParent(this.transform);
+
+            _player = playerObject.GetComponent<Player>();
+
+            if (_player != null)
             {
-                //Debug.Log("Player "+ owner.Value + " spawning playerRoot prefab");
-                GameObject playerObject = Instantiate(playerObj, this.transform);
-                playerObject.transform.SetParent(this.transform);
-
-                _player = playerObject.GetComponent<Player>();
                 _player.predictedMovement = this;
-
                 _player.GiveOwnership(owner.Value);
             }
         }
@@ -57,32 +55,33 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
         }
         else
         {
-            Debug.LogWarning("PredictedPlayerMovement: No Player component found on the GameObject.");
+            Debug.LogWarning($"PredictedPlayerMovement on {name} could not find a Player component.", this);
         }
 
         if (isOwner)
         {
             moveAction = InputSystem.actions.FindAction("Move");
             jumpAction = InputSystem.actions.FindAction("Jump");
-
             moveAction?.Enable();
             jumpAction?.Enable();
-
             _playerCamera.Init();
         }
     }
 
     private void LoadStatsFromPlayer()
     {
-        if (_player.GetEntityStatblock() != null)
-        {
-            SO_EntityStatBlock playerStatBlock = _player.GetEntityStatblock();
-            moveSpeed = playerStatBlock.BaseMoveSpeed;
-            jumpForce = playerStatBlock.BaseJumpForce;
-            jumpCooldownTime = playerStatBlock.BaseJumpCooldown;
-            acceleration = playerStatBlock.BaseAcceleration;
-            planarDamping = playerStatBlock.BasePlanarDamping;
-        }
+        if (_player == null)
+            return;
+
+        if (_player.GetEntityStatblock() == null)
+            return;
+
+        SO_EntityStatBlock playerStatBlock = _player.GetEntityStatblock();
+        moveSpeed = playerStatBlock.BaseMoveSpeed;
+        jumpForce = playerStatBlock.BaseJumpForce;
+        jumpCooldownTime = playerStatBlock.BaseJumpCooldown;
+        acceleration = playerStatBlock.BaseAcceleration;
+        planarDamping = playerStatBlock.BasePlanarDamping;
     }
 
 
@@ -164,6 +163,13 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     protected override void Update()
     {
         base.Update();
+
+        if (_player == null)
+        {
+            _player = GetComponentInChildren<Player>();
+            if (_player == null)
+                return;
+        }
 
         // Sync stats from Player component in case they were updated (e.g., from leveling up or buffs)
         LoadStatsFromPlayer();
