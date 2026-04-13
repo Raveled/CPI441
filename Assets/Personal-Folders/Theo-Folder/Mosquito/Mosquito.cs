@@ -114,25 +114,15 @@ public class Mosquito : NetworkBehaviour
         Debug.Log($"[Mosquito] CastBloodShot on {gameObject.name} | Player ID: {player.GetPlayerID()} | Player is Local: {player.isLocalPlayer()}");
 
         int damage = GetBasicAttackDamageWithBlood(bloodShotBaseDamage);
+        PlayBloodShotAnim();
 
-        if (isServer)
-        {
-            Debug.Log("[Mosquito] IS server - spawning directly.");
-            PlayBloodShotAnim();
-            ServerSpawnBloodShot(bloodShotFirePoint.position, bloodShotFirePoint.rotation, damage);
-        }
-        else
-        {
-            Debug.Log("[Mosquito] NOT server - sending ServerRpc.");
-            ServerSpawnBloodShotRpc(bloodShotFirePoint.position, bloodShotFirePoint.rotation, damage);
-        }
+        ServerSpawnBloodShotRpc(bloodShotFirePoint.position, bloodShotFirePoint.rotation, damage);
     }
 
     [ServerRpc(requireOwnership: false)]
     private void ServerSpawnBloodShotRpc(Vector3 position, Quaternion rotation, int damage)
     {
         Debug.Log($"[Mosquito] ServerSpawnBloodShotRpc received on server. damage={damage} player id = {player.GetPlayerID()}");
-        PlayBloodShotAnim();
         ServerSpawnBloodShot(position, rotation, damage);
     }
 

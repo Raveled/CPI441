@@ -484,10 +484,9 @@ public class GameManager : NetworkBehaviour
     // Returns basic team and character informaiton for spawning a player
     public (Team, string) GetPlayerSetup(PlayerID player)
     {
-        Debug.Log($"[GameManager] Player {player} Assigning team and character.");
+        Debug.Log($"[GameManager] Player {player}. Assigning team and character.");
         ulong steamID;
         bool hasSteamID = PurrNet.Steam.PurrSteamUtils.TryGetSteamID(player, out steamID);
-        Debug.Log($"[GameManager] Player {player} connected via Steam with ID {steamID}.");
 
         foreach (PlayerInfo i in playersInfo)
         {
@@ -502,11 +501,13 @@ public class GameManager : NetworkBehaviour
         if (hasSteamID && LobbyPlayerRegistry.Instance != null &&
         LobbyPlayerRegistry.Instance.TryGetPlayer(steamID.ToString(), out LobbyUser lobbyUser))
         {
+            Debug.Log($"[GameManager] Player {player} connected via Steam with ID {steamID}. Utilizing lobby registry.");
             playerTeam = lobbyUser.Team == 1 ? Team.TEAM1 : Team.TEAM2;
             playerCharacter = lobbyUser.Character;
         }
         else
         {
+            Debug.Log($"[GameManager] Player {player} connected without Steam. Utilizing fallback registry.");
             // Fallback if registry has no data
             playerTeam = playerIDs.Count % 2 == 0 ? Team.TEAM1 : Team.TEAM2;
             playerCharacter = "mosquito"; // Default character
