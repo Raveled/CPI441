@@ -544,6 +544,26 @@ public class GameManager : NetworkBehaviour
     }
 
     #endregion
+    #region Stat Getters
+    public SO_EntityStatBlock GetCoreStats() {
+        return stats_Core;
+    }
+    public SO_EntityStatBlock GetMinionStats() {
+        return stats_Minion;
+    }
+    public SO_EntityStatBlock getTowerStats() {
+        return stats_Tower;
+    }
+    public SO_EntityStatBlock GetBeetleStats() {
+        return stats_Char_Beetle;
+    }
+    public SO_EntityStatBlock GetMosquitoStats() {
+        return stats_Char_Mosquito;
+    }
+    public SO_EntityStatBlock GetButterflyStats() {
+        return stats_Char_Butterfly;
+    }
+    #endregion
     #region WORK IN PROGRESS
     void FreezeAllPCs(bool freeze) {
         //WIP---------------------------------------------------------------------
