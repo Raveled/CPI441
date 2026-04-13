@@ -438,6 +438,7 @@ public class Entity : NetworkBehaviour
         }
 
         sr.color = GetTeamColor(team.value);
+        sr.color = new Color(sr.color.r, sr.color.g, sr.color.b, 1f);
     }
 
     protected virtual Color GetTeamColor(Team t)
