@@ -19010,10 +19010,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KeybindRebinder
   actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  quickPokeAction: QuickPoke
-  globShotAction: GlobShot
-  ampUpAction: AmpUp
-  basicAttackAction: BasicAttack
+  quickPokeAction: QuickPoke-Ability2
+  globShotAction: GlobShot-Ability3
+  ampUpAction: AmpUp-Ultimate
+  basicAttackAction: BloodShot-BasicAttack
   quickPokeLabel: {fileID: 1648683563}
   globShotLabel: {fileID: 1797209090}
   ampUpLabel: {fileID: 2014724597}
