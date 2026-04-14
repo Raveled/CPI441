@@ -33,6 +33,8 @@ public class Player : Entity
     [SerializeField] private float respawnTime = 10f;
     [SerializeField] private Vector3 outOfBoundsPosition = new Vector3(0f, -1000f, 0f);
 
+    [SerializeField] RespawnUIController respawnUI;
+
     protected override void OnSpawned(bool asServer)
     {
         StartCoroutine(DelayedSpawn(asServer));
@@ -102,20 +104,20 @@ public class Player : Entity
         {
             if (minimapTracker != null) minimapTracker.AttachMinimapCamera();
             InitHealthBars();
-            RespawnUIController.Instance.Hide();
+            InitRespawnUI();
         }
+    }
+
+    private void InitRespawnUI()
+    {
+        respawnUI = GameObject.Find("RespawnUI").GetComponent<RespawnUIController>();
+        respawnUI.Hide();
     }
 
     private void InitHealthBars()
     {
-        if (healthBar != null)
-        {
-            healthBar.transform.parent.gameObject.SetActive(false);
-        }
-
-        GameObject healthBarSliderUI_GO = GameObject.Find("HealthSlider");
-        healthBarSliderUI = healthBarSliderUI_GO.GetComponent<UnityEngine.UI.Slider>();
-
+        if (healthBar != null) healthBar.transform.parent.gameObject.SetActive(false);
+        healthBarSliderUI = GameObject.Find("HealthSlider").GetComponent<UnityEngine.UI.Slider>();
         UpdateHealthBars();
     }
 
@@ -137,6 +139,8 @@ public class Player : Entity
     }
 
     public override bool TakeDamage(int damage, Entity damageOrigin) {
+        if (isDead.value) return false;
+
         //Check Friendly Tower Aggro
         Tower closestTower = null;
         float minDist = Mathf.Infinity;
@@ -194,9 +198,9 @@ public class Player : Entity
         base.Die(damageOrigin);
         currentHitPoints.value = 0;
         UpdateHealthBars();
-        Debug.Log("Player: " + entityName + " has died");
+        Debug.Log("Player: " + GetPlayerID() + " has died");
 
-        if (isLocalPlayer()) RespawnUIController.Instance.Show();
+        if (isLocalPlayer() && respawnUI != null) respawnUI.Show();
 
         // Update PlayerStats
         playerInfoSO.DeathCount = playerInfoSO.DeathCount + 1;
@@ -263,10 +267,6 @@ public class Player : Entity
             predictedMovement.transform.position = outOfBoundsPosition;
             predictedMovement._rigidbody.linearVelocity = Vector3.zero;
         }
-
-        // Hide the in-world health bar while dead
-        if (healthBar != null)
-            healthBar.transform.parent.gameObject.SetActive(false);
     }
 
     [ObserversRpc]
@@ -278,14 +278,8 @@ public class Player : Entity
             predictedMovement._rigidbody.linearVelocity = Vector3.zero;
         }
 
-        InitHealthBars();
-
-        // Re-show the in-world health bar
-        if (healthBar != null)
-            healthBar.transform.parent.gameObject.SetActive(true);
-
         Debug.Log($"[Player] {entityName} respawned at {spawnPosition}");
-        if (isLocalPlayer()) RespawnUIController.Instance.Hide();
+        if (isLocalPlayer() && respawnUI != null) respawnUI.Hide();
     }
 
     //Update Player stats on kill

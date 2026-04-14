@@ -1,22 +1,25 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class RespawnUIController : MonoBehaviour
 {
-    public static RespawnUIController Instance { get; private set; }
-
-    private void Awake()
+    public Image respawnBackground;
+    public TMPro.TMP_Text respawnText;
+   
+    void Awake()
     {
-        Instance = this;
         Hide();
     }
 
     public void Hide()
     {
-        gameObject.SetActive(false);
+        respawnText.alpha = 0f;
+        respawnBackground.color = new Color(respawnBackground.color.r, respawnBackground.color.g, respawnBackground.color.b, 0f);
     }
 
     public void Show()
     {
-        gameObject.SetActive(true);
+        respawnText.alpha = 1f;
+        respawnBackground.color = new Color(respawnBackground.color.r, respawnBackground.color.g, respawnBackground.color.b, 1f);
     }
 }
