@@ -48,6 +48,14 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     private Vector3 beetleHornStartPosition;
     private Beetle beetleAbility;
 
+    [Header("Beetle Roll Runtime")]
+    [SerializeField] private bool beetleRollActive = false;
+    [SerializeField] private Vector3 beetleRollDirection = Vector3.forward;
+    [SerializeField] private float beetleRollSpeed = 15f;
+    [SerializeField] private float beetleRollDuration = 1f;
+
+    private float beetleRollTimer = 0f;
+
     // Input variables
 
     public Vector2 moveVector;
@@ -376,6 +384,34 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
             _rigidbody.linearVelocity = Vector3.zero;
 
         Debug.Log("[PredictedPlayerMovement] Beetle Horn Impale stopped.");
+    }
+
+    public void StartBeetleRoll(Vector3 direction, float speed, float duration)
+    {
+        if (direction.sqrMagnitude <= 0.001f)
+            direction = transform.forward;
+
+        beetleRollActive = true;
+        beetleRollDirection = direction.normalized;
+        beetleRollSpeed = speed;
+        beetleRollDuration = Mathf.Max(0.01f, duration);
+        beetleRollTimer = beetleRollDuration;
+
+        if (_rigidbody != null)
+            _rigidbody.linearVelocity = Vector3.zero;
+
+        Debug.Log($"[PredictedPlayerMovement] Beetle Roll started. dir={beetleRollDirection}, speed={beetleRollSpeed}, duration={beetleRollDuration}");
+    }
+
+    public void StopBeetleRoll()
+    {
+        beetleRollActive = false;
+        beetleRollTimer = 0f;
+
+        if (_rigidbody != null)
+            _rigidbody.linearVelocity = Vector3.zero;
+
+        Debug.Log("[PredictedPlayerMovement] Beetle Roll stopped.");
     }
 
     //move handling

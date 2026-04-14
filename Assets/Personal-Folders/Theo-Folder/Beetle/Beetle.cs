@@ -58,6 +58,9 @@ public class Beetle : NetworkBehaviour
     private bool isHornImpaling = false;
     private Vector3 currentHornDirection = Vector3.forward;
 
+    private Vector3 currentRollDirection = Vector3.forward;
+    [SerializeField] private float rollDuration = 1.0f;
+
     private void Awake()
     {
         meshRenderer = GetComponentInChildren<MeshRenderer>();
@@ -94,9 +97,6 @@ public class Beetle : NetworkBehaviour
             swaggerTimer -= Time.deltaTime;
             if (swaggerTimer <= 0f) EndSwagger();
         }
-
-        // Roll Update
-        if (isRolling) HandleRoll();
     }
 
     // BASIC ATTACK - MANDIBLE ATTACK
@@ -310,13 +310,14 @@ public class Beetle : NetworkBehaviour
             return false;
         }
 
+        Vector3 finalDirection = transform.forward;
+        if (finalDirection.sqrMagnitude <= 0.001f)
+            finalDirection = Vector3.forward;
+
         PlayRollAnimServerRpc();
-        rollCooldownTimer = rollCooldown;
-        isRolling = true;
+        ServerStartRollRpc(finalDirection);
 
-        if (isServer) StartCoroutine(GrantCCImmunity(3f));
-
-        Debug.Log("Roll STARTED! - Beetle.cs");
+        Debug.Log("Roll requested! - Beetle.cs");
         return true;
     }
 
@@ -329,24 +330,67 @@ public class Beetle : NetworkBehaviour
         if (animator != null) animator.SetTrigger("Roll");
     }
 
-    private void HandleRoll()
+    [ServerRpc(requireOwnership: false)]
+    private void ServerStartRollRpc(Vector3 direction)
     {
-        if (beetleRB != null)
-        {
-            beetleRB.linearVelocity = transform.forward * rollSpeed;
-        }
+        if (!isServer) return;
+        if (player == null) return;
+        if (rollCooldownTimer > 0f || isRolling) return;
 
-        if (Physics.Raycast(transform.position, transform.forward, 0.5f))
-        {
-            EndRoll();
-        }
+        Vector3 finalDirection = direction.normalized;
+        if (finalDirection.sqrMagnitude <= 0.001f)
+            finalDirection = transform.forward;
+
+        rollCooldownTimer = rollCooldown;
+        isRolling = true;
+        currentRollDirection = finalDirection;
+
+        BeginRollObserversRpc(finalDirection);
+
+        if (predictedMovement != null)
+            predictedMovement.StartBeetleRoll(finalDirection, rollSpeed, rollDuration);
+
+        StartCoroutine(GrantCCImmunity(rollDuration));
+
+        Debug.Log($"[Beetle] Roll started. dir={finalDirection}, speed={rollSpeed}, duration={rollDuration}");
     }
 
-    private void EndRoll()
+    [ObserversRpc]
+    private void BeginRollObserversRpc(Vector3 direction)
+    {
+        isRolling = true;
+        currentRollDirection = direction.normalized;
+
+        if (currentRollDirection.sqrMagnitude <= 0.001f)
+            currentRollDirection = transform.forward;
+
+        if (!isServer && predictedMovement != null)
+            predictedMovement.StartBeetleRoll(currentRollDirection, rollSpeed, rollDuration);
+    }
+
+    public void NotifyRollEndedFromMovement()
+    {
+        if (!isServer) return;
+        if (!isRolling) return;
+
+        EndRollServer();
+    }
+
+    private void EndRollServer()
     {
         isRolling = false;
-        if (beetleRB != null) beetleRB.linearVelocity = Vector3.zero;
-        Debug.Log("Roll ENDED! - Beetle.cs");
+        EndRollObserversRpc();
+    }
+
+    [ObserversRpc]
+    private void EndRollObserversRpc()
+    {
+        isRolling = false;
+
+        if (predictedMovement != null)
+            predictedMovement.StopBeetleRoll();
+
+        Debug.Log("[Beetle] Roll ended.");
     }
 
     private IEnumerator GrantCCImmunity(float duration)
