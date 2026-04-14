@@ -1,53 +1,89 @@
 using UnityEngine;
 using PurrNet;
 
-public class GlobProjectile : NetworkBehaviour
+public class GlobProjectile : Projectile
 {
-    public SyncVar<int> syncDamage = new(0);
-    public SyncVar<float> syncSpeed = new(0f);
-    public SyncVar<NetworkID?> syncOwnerID = new(null);
+    private Entity struckTarget = null;
 
-    private bool despawned = false;
-    private Entity cachedOwner = null;
-
-    protected override void OnSpawned()
+    protected override void OnTriggerEnter(Collider other)
     {
-        if (syncOwnerID.value.HasValue)
+        if (!isServer || !isActive) return;
+
+        Entity ownerEntity = null;
+        if (ownerId.HasValue)
         {
-            Entity[] all = FindObjectsByType<Entity>(FindObjectsSortMode.None);
-            foreach (var e in all)
+            ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
+        }
+
+        if (ownerEntity != null)
+        {
+            if (other.transform.IsChildOf(ownerEntity.transform) || other.gameObject == ownerEntity.gameObject)
             {
-                if (e.GetNetworkID(isServer) == syncOwnerID.value)
-                {
-                    cachedOwner = e;
-                    break;
-                }
+                return;
             }
         }
-    }
 
-    private void Update()
-    {
-        if (despawned) return;
-        transform.Translate(Vector3.forward * syncSpeed.value * Time.deltaTime);
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (despawned || !isServer) return;
-
-        if (cachedOwner != null)
+        Entity target = Entity.GetEntityFromCollider(other);
+        if (target == null)
         {
-            if (other.transform.IsChildOf(cachedOwner.transform) || other.gameObject == cachedOwner.gameObject)
-                return;
+            return;
         }
 
-        Entity target = other.GetComponent<Entity>();
-        if (target == null) return;
-        if (cachedOwner != null && (target == cachedOwner || target.GetTeam() == cachedOwner.GetTeam())) return;
+        if (target.GetIsDead())
+        {
+            return;
+        }
 
-        target.TakeDamage(syncDamage.value, cachedOwner);
-        despawned = true;
-        Despawn();
+        if (ownerEntity != null)
+        {
+            if (target == ownerEntity) return;
+            if (target.GetTeam() == ownerEntity.GetTeam()) return;
+        }
+
+        struckTarget = target;
+
+        Debug.Log($"[Glob] Valid hit on {target.name} - detonating");
+        Detonate();
+    }
+
+    protected override void ApplyDamage()
+    {
+        if (!isServer || !isActive) return;
+
+        Entity ownerEntity = null;
+        if (ownerId.HasValue)
+        {
+            ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
+        }
+
+        if (ownerEntity == null)
+        {
+            Debug.LogError($"[Glob] ApplyDamage - owner not found for ID={ownerId}");
+            return;
+        }
+
+        if (struckTarget == null)
+        {
+            Debug.LogWarning("[Glob] ApplyDamage called, but no struckTarget was recorded.");
+            return;
+        }
+
+        if (struckTarget.GetIsDead())
+        {
+            return;
+        }
+
+        if (struckTarget == ownerEntity)
+        {
+            return;
+        }
+
+        if (struckTarget.GetTeam() == ownerEntity.GetTeam())
+        {
+            return;
+        }
+
+        Debug.Log($"[Glob] Hit {struckTarget.name} for {damage} damage!");
+        struckTarget.TakeDamage(damage, ownerEntity);
     }
 }

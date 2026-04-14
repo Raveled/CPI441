@@ -160,7 +160,11 @@ public class Mosquito : NetworkBehaviour
     {
         bool hitPlayer = target.GetType().Name == "Player";
         float gain = hitPlayer ? bloodMeterGainOnPlayerHit : bloodMeterGainOnBasicHit;
+
+        Debug.Log($"[Mosquito] OnBasicAttackHit before gain: {currentBloodMeter:F1}");
+
         ModifyBloodMeter(gain);
+
         Debug.Log($"[Mosquito] Blood gained: +{gain:F1} - current blood: {currentBloodMeter:F1}/{maxBloodMeter}");
     }
 
@@ -229,45 +233,67 @@ public class Mosquito : NetworkBehaviour
     // ========== GLOB SHOT - ABILITY 3 ==========
     public void CastGlobShot()
     {
-        if (!isController) return;
-        if (currentBloodMeter < globShotMinBloodThreshold)
+        if (!player.isLocalPlayer()) return;
+
+        Debug.Log($"[Mosquito] CastGlobShot on {gameObject.name} | Player ID: {player.GetPlayerID()} | Player is Local: {player.isLocalPlayer()}");
+
+        int damage = Mathf.RoundToInt(globBaseDamage);
+        float sizeScale = 1f;
+
+        PlayGlobShotAnim();
+
+        Debug.Log("[Mosquito] Sending GlobShot ServerRpc.");
+        ServerSpawnGlobShotRpc(globFirePoint.position, globFirePoint.rotation, damage, sizeScale);
+    }
+
+    [ServerRpc(requireOwnership:false)]
+    private void ServerSpawnGlobShotRpc(Vector3 position, Quaternion rotation, int damage, float sizeScale)
+    {
+        if (!isServer) return;
+
+        Debug.Log($"[Mosquito] ServerSpawnGlobShotRpc received on server. damage={damage} player id={player.GetPlayerID()}");
+        ServerSpawnGlobShot(position, rotation, damage, sizeScale);
+    }
+
+    private void ServerSpawnGlobShot(Vector3 position, Quaternion rotation, int damage, float sizeScale)
+    {
+        Debug.Log($"[Mosquito] ServerSpawnGlobShot - prefab={globProjectilePrefab}, firePoint={globFirePoint}, networkManager={networkManager}");
+
+        if (globProjectilePrefab == null)
         {
-            Debug.Log($"[Mosquito] Glob Shot blocked - blood {currentBloodMeter:F1} below threshold {globShotMinBloodThreshold}");
+            Debug.LogError("[Mosquito] globProjectilePrefab is NULL!");
             return;
         }
 
-        // FIX: Play animation through server so all clients see it
-        PlayGlobShotAnimServerRpc();
-
-        float maxUsage = maxBloodMeter * globMaxMeterUsageFraction;
-        float bloodToUse = Mathf.Min(currentBloodMeter, maxUsage);
-        if (bloodToUse <= 0f) return;
-
-        ModifyBloodMeter(-bloodToUse);
-        Debug.Log($"[Mosquito] Glob Shot fired - used {bloodToUse:F1} blood, remaining: {currentBloodMeter:F1}");
-        float damage = globBaseDamage + bloodToUse * globDamagePerBloodUnit;
-        float sizeScale = 1f + bloodToUse * globSizePerBloodUnit;
-
-        // FIX: Use NetworkManager.main.Spawn instead of ServerRpc
-        SpawnGlob(globFirePoint.position, globFirePoint.rotation, damage, sizeScale);
-    }
-
-    private void SpawnGlob(Vector3 position, Quaternion rotation, float damage, float sizeScale)
-    {
-        if (globProjectilePrefab == null || globFirePoint == null) return;
-
-        GameObject projGO = Instantiate(globProjectilePrefab, position, rotation);
-        NetworkManager.main.Spawn(projGO);
-
-        projGO.transform.localScale *= sizeScale;
-
-        GlobProjectile proj = projGO.GetComponent<GlobProjectile>();
-        if (proj != null)
+        if (globFirePoint == null)
         {
-            proj.syncDamage.value = Mathf.RoundToInt(damage);
-            proj.syncSpeed.value = globBaseSpeed;
-            proj.syncOwnerID.value = player.GetNetworkID(isServer);
+            Debug.LogError("[Mosquito] globFirePoint is NULL!");
+            return;
         }
+
+        if (networkManager == null)
+        {
+            Debug.LogError("[Mosquito] networkManager is NULL!");
+            return;
+        }
+
+        GameObject proj = Instantiate(globProjectilePrefab, position, rotation);
+
+        proj.transform.localScale *= sizeScale;
+
+        GlobProjectile globProjectile = proj.GetComponent<GlobProjectile>();
+        if (globProjectile == null)
+        {
+            Debug.LogError("[Mosquito] Spawned Glob projectile is missing GlobProjectile component!");
+            Destroy(proj);
+            return;
+        }
+
+        globProjectile.SpawnSetup(player, damage, player.transform.forward, globBaseSpeed, null);
+
+        NetworkManager.main.Spawn(proj);
+
+        Debug.Log($"[Mosquito] Instantiated glob projectile: {proj.name}. PurrNet will auto-sync via NetworkBehaviour.");
     }
 
     // ========== AMP UP - ULTIMATE ==========
