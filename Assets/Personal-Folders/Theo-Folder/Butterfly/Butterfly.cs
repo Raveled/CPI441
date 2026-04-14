@@ -150,6 +150,13 @@ public class Butterfly : NetworkBehaviour
 
         projectile.SpawnSetup(player, damage, player.transform.forward, windBurstSpeed, null);
 
+        Debug.Log(
+            $"[Butterfly][WindBurst][Server] SpawnSetup complete | " +
+            $"owner={player.name} | ownerId={player.GetNetworkID(true)} | " +
+            $"damage={damage} | dir={player.transform.forward} | speed={windBurstSpeed} | " +
+            $"spawnPos={position}"
+        );
+
         NetworkManager.main.Spawn(proj);
 
         Debug.Log($"[Butterfly] Instantiated projectile: {proj.name}. PurrNet will auto-sync via NetworkBehaviour.");
@@ -203,6 +210,13 @@ public class Butterfly : NetworkBehaviour
 
         projectile.SpawnSetup(player, damage, player.transform.forward, windBurstSpeed, null);
 
+        Debug.Log(
+            $"[Butterfly][DustWave][Server] SpawnSetup complete | " +
+            $"owner={player.name} | ownerId={player.GetNetworkID(true)} | " +
+            $"damage={damage} | dir={player.transform.forward} | speed={windBurstSpeed} | " +
+            $"spawnPos={position}"
+        );
+
         NetworkManager.main.Spawn(proj);
 
         Debug.Log($"[Butterfly] Instantiated dust wave projectile: {proj.name}. PurrNet will auto-sync via NetworkBehaviour.");
@@ -255,6 +269,13 @@ public class Butterfly : NetworkBehaviour
         }
 
         projectile.SpawnSetup(player, damage, player.transform.forward, windBurstSpeed, null);
+
+        Debug.Log(
+            $"[Butterfly][DazzlingWave][Server] SpawnSetup complete | " +
+            $"owner={player.name} | ownerId={player.GetNetworkID(true)} | " +
+            $"damage={damage} | dir={player.transform.forward} | speed={windBurstSpeed} | " +
+            $"spawnPos={position}"
+        );
 
         NetworkManager.main.Spawn(proj);
 
