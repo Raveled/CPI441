@@ -34,7 +34,7 @@ public class Core : NonPlayerEntity
 
         if (!isServer) return; // Only execute end game logic on the server
 
-        gameManager.GameEnd(team);
+        gameManager.GameEnd(enemyCore.GetTeam());
     }
     //Start the spawning of a minion wave
     public void SpawnWave() {

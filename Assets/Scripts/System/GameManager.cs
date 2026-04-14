@@ -233,6 +233,7 @@ public class GameManager : NetworkBehaviour
                 if (check)
                 {
                     check = false;
+                    Debug.Log("KILLING: " + cores[0].name);
                     cores[0].DebugDie();
                 }
             } 
@@ -317,11 +318,11 @@ public class GameManager : NetworkBehaviour
     }
     #endregion
     //When a core is destroyed, this will be called, ending the game
-    public void GameEnd(Entity.Team team) {
-        if(team == Entity.Team.TEAM1) {
+    public void GameEnd(Entity.Team winningTeam) {
+        if(winningTeam == Entity.Team.TEAM1) {
             winnerStr = team1Name;
             winningTeamColor = team1Color;
-        }else if(team == Entity.Team.TEAM2) {
+        }else if(winningTeam == Entity.Team.TEAM2) {
             winnerStr = team2Name;
             winningTeamColor = team2Color;
         }
@@ -329,6 +330,8 @@ public class GameManager : NetworkBehaviour
         winScreenBGImage.color = winningTeamColor;
         winScreenText.text = winnerStr + " Wins!";
         winScreenCanvas.SetActive(true);
+
+        ShowGameResult(winningTeam);
 
         ChangeGameState(GameState.END);
         GenerateMatchJSON();
@@ -345,6 +348,18 @@ public class GameManager : NetworkBehaviour
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
         Destroy(gameObject);
+    }
+    public void ShowGameResult(Entity.Team result)
+    {
+        Player[] players = FindObjectsByType<Player>(FindObjectsSortMode.None);
+
+        foreach (var p in players)
+        {
+            if (p.isServer) // ensure server calls it
+            {
+                p.RPC_ShowGameResult(result);
+            }
+        }
     }
 
     //When a Tower is destroyed, this is called for JSON
