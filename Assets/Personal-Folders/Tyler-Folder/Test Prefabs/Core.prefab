@@ -374,7 +374,7 @@ MonoBehaviour:
   minionPrefab: {fileID: 3861177414995866693, guid: c0ad892041217224ea91130f0f8a5204, type: 3}
   minionStatblock: {fileID: 0}
   rotateAngularSpeed: 10
-  timeBetweenMinionsInWave: 1
+  timeBetweenMinionsInWave: 2
   waveSpawnOrigins:
   - {fileID: 4493143644682055093}
   - {fileID: 4289042356162334017}
