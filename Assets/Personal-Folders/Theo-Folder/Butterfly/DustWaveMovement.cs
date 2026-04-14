@@ -1,40 +1,69 @@
 using UnityEngine;
-using System.Collections;
+using PurrNet;
 
-public class DustWaveMovement : MonoBehaviour
+public class DustWaveMovement : Projectile
 {
-    [SerializeField] private float speed = 5f;
-
-    [HideInInspector] public Entity ownerEntity;
-    [HideInInspector] public float radius = 4f;
-    [HideInInspector] public int damage = 3;
-    [HideInInspector] public float tickInterval = 0.5f;
-
-    private void Start()
+    protected override void OnTriggerEnter(Collider other)
     {
-        StartCoroutine(DamageRoutine());
-    }
+        if (!isServer || !isActive) return;
 
-    private void Update()
-    {
-        transform.Translate(Vector3.forward * speed * Time.deltaTime);
-    }
-
-    private IEnumerator DamageRoutine()
-    {
-        while (true)
+        // Ignore owner
+        if (ownerId.HasValue)
         {
-            Collider[] hits = Physics.OverlapSphere(transform.position, radius);
-            foreach (var hit in hits)
+            Entity ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
+            if (ownerEntity != null)
             {
-                Entity target = hit.GetComponent<Entity>();
-                if (target == null || ownerEntity == null) continue;
-                if (target.GetTeam() == ownerEntity.GetTeam()) continue;
-
-                target.TakeDamage(damage, ownerEntity);
+                if (other.transform.IsChildOf(ownerEntity.transform) || other.gameObject == ownerEntity.gameObject)
+                {
+                    return;
+                }
             }
+        }
 
-            yield return new WaitForSeconds(tickInterval);
+        // Ignore non-entities
+        Entity target = other.GetComponent<Entity>();
+        if (target == null)
+        {
+            return;
+        }
+
+        // Ignore friendlies
+        if (ownerId.HasValue)
+        {
+            Entity ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
+            if (ownerEntity != null && target.GetTeam() == ownerEntity.GetTeam())
+            {
+                return;
+            }
+        }
+
+        Debug.Log($"[DustWave] Valid hit on {target.name} - detonating");
+        Detonate();
+    }
+
+    protected override void ApplyDamage()
+    {
+        if (!isServer || !isActive) return;
+
+        Entity ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
+        if (ownerEntity == null)
+        {
+            Debug.LogError($"[DustWave] ApplyDamage - owner not found for ID={ownerId}");
+            return;
+        }
+
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, hitRadius);
+
+        foreach (Collider c in hitColliders)
+        {
+            Entity e = Entity.GetEntityFromCollider(c);
+            if (e == null) continue;
+            if (e.GetIsDead()) continue;
+            if (e == ownerEntity) continue;
+            if (e.GetTeam() == ownerEntity.GetTeam()) continue;
+
+            Debug.Log($"[DustWave] Hit {e.name} for {damage} damage!");
+            e.TakeDamage(damage, ownerEntity);
         }
     }
 }

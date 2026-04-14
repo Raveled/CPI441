@@ -126,7 +126,7 @@ public class TempInputTester : MonoBehaviour
     // *** Helper Functions *** //
     Entity FindNearestEnemy()
     {
-        Entity owner = mosquito?.player ?? butterfly?.entity;
+        Entity owner = mosquito?.player ?? butterfly?.player;
         if (owner == null) return null;
 
         Collider[] hits = Physics.OverlapSphere(transform.position, 5f);

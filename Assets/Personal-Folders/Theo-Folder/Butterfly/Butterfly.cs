@@ -1,10 +1,12 @@
 using System.Collections;
 using UnityEngine;
+using PurrNet;
+using PurrNet.Prediction;
 
-public class Butterfly : MonoBehaviour
+public class Butterfly : NetworkBehaviour
 {
-    [Header("Entity Reference")]
-    public Entity entity;
+    [SerializeField] public Player player;
+    [SerializeField] public ButterflyInputTester inputTester;
 
     [Header("Basic Attack - Wind Burst")]
     [SerializeField] private GameObject windBurstProjectilePrefab;
@@ -19,6 +21,7 @@ public class Butterfly : MonoBehaviour
     [SerializeField] private int dustWaveBaseDamage = 3;
     [SerializeField] private float dustWaveRadius = 4f;
     [SerializeField] private float dustWaveCooldown = 5f;
+    private float dustWaveCooldownTimer = 0f;
 
     [Header("Dazzling Wave - Ability 2")]
     [SerializeField] private GameObject dazzlingWavePrefab;
@@ -29,6 +32,7 @@ public class Butterfly : MonoBehaviour
     [SerializeField] private float dazzlingWaveCooldown = 6f;
     [SerializeField] private bool dazzlingWaveUpgradeReducedDamage = false;
     [SerializeField] private float dazzlingWaveDamageReductionMultiplier = 0.7f;
+    private float dazzlingWaveCooldownTimer = 0f;
 
     [Header("Fly - Ability 3")]
     [SerializeField] private float flyDashDistance = 8f;
@@ -46,25 +50,51 @@ public class Butterfly : MonoBehaviour
     [SerializeField] private float tornadoTickInterval = 0.5f;
     [SerializeField] private float tornadoGroupForce = 10f;
 
-    // Runtime state
-    private float dustWaveCooldownTimer = 0f;
-    private float dazzlingWaveCooldownTimer = 0f;
-    private float flyCooldownTimer = 0f;
+    [Header("Animator")]
+    [SerializeField] private Animator animator;
+
     private int flyCurrentCharges = 0;
     private bool isFlying = false;
     private float flyTimer = 0f;
+    private float flyCooldownTimer = 0f;
     private Vector3 flyDirection;
     private Vector3 flyDashHeight = new Vector3(0, 5, 0);
     private Vector3 flyStartPos;
     private Rigidbody flyRB;
 
-    private void Awake()
+    protected override void OnSpawned(bool asServer)
     {
-        if (entity == null)
-            entity = GetComponent<Entity>();
+        StartCoroutine(DelayedSpawn(asServer));
+    }
+
+    private IEnumerator DelayedSpawn(bool asServer)
+    {
+        yield return new WaitForSeconds(0.05f);
+
+        base.OnSpawned();
+
+        if (player == null)
+            player = GetComponent<Player>();
 
         flyRB = GetComponent<Rigidbody>();
         flyCurrentCharges = GetFlyMaxCharges();
+
+        GameObject parentObject = transform.parent != null ? transform.parent.gameObject : gameObject;
+
+        if (windBurstFirePoint == null)
+            windBurstFirePoint = parentObject.transform;
+
+        if (dustWaveOrigin == null)
+            dustWaveOrigin = windBurstFirePoint;
+
+        if (dazzlingWaveOrigin == null)
+            dazzlingWaveOrigin = windBurstFirePoint;
+
+        if (animator == null)
+            animator = parentObject.GetComponentInChildren<Animator>();
+
+        if (inputTester != null)
+            inputTester.enabled = true;
     }
 
     private void Update()
@@ -88,22 +118,49 @@ public class Butterfly : MonoBehaviour
 
     public void CastWindBurst()
     {
-        Debug.Log("Casting Wind Burst");
+        if (player == null) return;
+        if (!player.isLocalPlayer()) return;
 
-        if (windBurstProjectilePrefab == null || windBurstFirePoint == null)
-            return;
+        Debug.Log($"[Butterfly] CastWindBurst on {gameObject.name} | Player ID: {player.GetPlayerID()} | Player is Local: {player.isLocalPlayer()}");
 
-        Entity shooter = entity ?? GetComponent<Entity>();
+        int damage = windBurstBaseDamage;
 
-        GameObject projGO = Instantiate(windBurstProjectilePrefab, windBurstFirePoint.position, windBurstFirePoint.rotation);
-        WindBurstProjectile proj = projGO.GetComponent<WindBurstProjectile>();
-        if (proj != null)
+        Debug.Log("[Butterfly] Sending WindBurst ServerRpc.");
+        ServerSpawnWindBurstRpc(windBurstFirePoint.position, windBurstFirePoint.rotation, damage);
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void ServerSpawnWindBurstRpc(Vector3 position, Quaternion rotation, int damage)
+    {
+        if (!isServer) return;
+
+        Debug.Log($"[Butterfly] ServerSpawnWindBurstRpc received on server. damage={damage} player id={player.GetPlayerID()}");
+        ServerSpawnWindBurst(position, rotation, damage);
+    }
+
+    private void ServerSpawnWindBurst(Vector3 position, Quaternion rotation, int damage)
+    {
+        Debug.Log($"[Butterfly] ServerSpawnWindBurst - prefab={windBurstProjectilePrefab}, firePoint={windBurstFirePoint}, networkManager={networkManager}");
+
+        if (windBurstProjectilePrefab == null) { Debug.LogError("[Butterfly] windBurstProjectilePrefab is NULL!"); return; }
+        if (windBurstFirePoint == null) { Debug.LogError("[Butterfly] windBurstFirePoint is NULL!"); return; }
+        if (networkManager == null) { Debug.LogError("[Butterfly] networkManager is NULL!"); return; }
+
+        GameObject proj = Instantiate(windBurstProjectilePrefab, position, rotation);
+
+        WindBurstProjectile projectile = proj.GetComponent<WindBurstProjectile>();
+        if (projectile == null)
         {
-            proj.ownerEntity = shooter;
-            proj.damage = windBurstBaseDamage;
-            proj.maxRange = windBurstRange;
+            Debug.LogError("[Butterfly] Spawned projectile is missing WindBurstProjectile component!");
+            Destroy(proj);
+            return;
         }
-        StartCoroutine(DestroyAfterDelay(projGO, 1.5f));
+
+        projectile.SpawnSetup(player, damage, player.transform.forward, windBurstSpeed, null);
+
+        NetworkManager.main.Spawn(proj);
+
+        Debug.Log($"[Butterfly] Instantiated projectile: {proj.name}. PurrNet will auto-sync via NetworkBehaviour.");
     }
 
     #endregion
@@ -112,27 +169,51 @@ public class Butterfly : MonoBehaviour
 
     public void CastDustWave()
     {
+        if (player == null) return;
+        if (!player.isLocalPlayer()) return;
         if (dustWaveCooldownTimer > 0f) return;
 
-        Entity shooter = entity ?? GetComponent<Entity>();
+        int damage = dustWaveBaseDamage;
 
-        if (dustWavePrefab != null && dustWaveOrigin != null)
+        Debug.Log($"[Butterfly] CastDustWave on {gameObject.name} | Player ID: {player.GetPlayerID()} | Player is Local: {player.isLocalPlayer()}");
+        Debug.Log("[Butterfly] Sending DustWave ServerRpc.");
+
+        ServerSpawnDustWaveRpc(dustWaveOrigin.position, dustWaveOrigin.rotation, damage);
+        dustWaveCooldownTimer = dustWaveCooldown;
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void ServerSpawnDustWaveRpc(Vector3 position, Quaternion rotation, int damage)
+    {
+        if (!isServer) return;
+
+        Debug.Log($"[Butterfly] ServerSpawnDustWaveRpc received on server. damage={damage} player id={player.GetPlayerID()}");
+        ServerSpawnDustWave(position, rotation, damage);
+    }
+
+    private void ServerSpawnDustWave(Vector3 position, Quaternion rotation, int damage)
+    {
+        Debug.Log($"[Butterfly] ServerSpawnDustWave - prefab={dustWavePrefab}, origin={dustWaveOrigin}, networkManager={networkManager}");
+
+        if (dustWavePrefab == null) { Debug.LogError("[Butterfly] dustWavePrefab is NULL!"); return; }
+        if (dustWaveOrigin == null) { Debug.LogError("[Butterfly] dustWaveOrigin is NULL!"); return; }
+        if (networkManager == null) { Debug.LogError("[Butterfly] networkManager is NULL!"); return; }
+
+        GameObject proj = Instantiate(dustWavePrefab, position, rotation);
+
+        DustWaveMovement projectile = proj.GetComponent<DustWaveMovement>();
+        if (projectile == null)
         {
-            GameObject wave = Instantiate(dustWavePrefab, dustWaveOrigin.position, dustWaveOrigin.rotation);
-
-            // Pass all fields to the projectile - it handles damage on its own tick
-            DustWaveMovement proj = wave.GetComponent<DustWaveMovement>();
-            if (proj != null)
-            {
-                proj.ownerEntity = shooter;
-                proj.radius = dustWaveRadius;
-                proj.damage = dustWaveBaseDamage;
-            }
-
-            StartCoroutine(DestroyAfterDelay(wave, 5f));
+            Debug.LogError("[Butterfly] Spawned projectile is missing DustWaveMovement component!");
+            Destroy(proj);
+            return;
         }
 
-        dustWaveCooldownTimer = dustWaveCooldown;
+        projectile.SpawnSetup(player, damage, player.transform.forward, windBurstSpeed, null);
+
+        NetworkManager.main.Spawn(proj);
+
+        Debug.Log($"[Butterfly] Instantiated dust wave projectile: {proj.name}. PurrNet will auto-sync via NetworkBehaviour.");
     }
 
     #endregion
@@ -141,30 +222,51 @@ public class Butterfly : MonoBehaviour
 
     public void CastDazzlingWave()
     {
+        if (player == null) return;
+        if (!player.isLocalPlayer()) return;
         if (dazzlingWaveCooldownTimer > 0f) return;
 
-        Entity shooter = entity ?? GetComponent<Entity>();
+        int damage = dazzlingWaveBaseDamage;
 
-        if (dazzlingWavePrefab != null && dazzlingWaveOrigin != null)
+        Debug.Log($"[Butterfly] CastDazzlingWave on {gameObject.name} | Player ID: {player.GetPlayerID()} | Player is Local: {player.isLocalPlayer()}");
+        Debug.Log("[Butterfly] Sending DazzlingWave ServerRpc.");
+
+        ServerSpawnDazzlingWaveRpc(dazzlingWaveOrigin.position, dazzlingWaveOrigin.rotation, damage);
+        dazzlingWaveCooldownTimer = dazzlingWaveCooldown;
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void ServerSpawnDazzlingWaveRpc(Vector3 position, Quaternion rotation, int damage)
+    {
+        if (!isServer) return;
+
+        Debug.Log($"[Butterfly] ServerSpawnDazzlingWaveRpc received on server. damage={damage} player id={player.GetPlayerID()}");
+        ServerSpawnDazzlingWave(position, rotation, damage);
+    }
+
+    private void ServerSpawnDazzlingWave(Vector3 position, Quaternion rotation, int damage)
+    {
+        Debug.Log($"[Butterfly] ServerSpawnDazzlingWave - prefab={dazzlingWavePrefab}, origin={dazzlingWaveOrigin}, networkManager={networkManager}");
+
+        if (dazzlingWavePrefab == null) { Debug.LogError("[Butterfly] dazzlingWavePrefab is NULL!"); return; }
+        if (dazzlingWaveOrigin == null) { Debug.LogError("[Butterfly] dazzlingWaveOrigin is NULL!"); return; }
+        if (networkManager == null) { Debug.LogError("[Butterfly] networkManager is NULL!"); return; }
+
+        GameObject proj = Instantiate(dazzlingWavePrefab, position, rotation);
+
+        DazzlingWaveProjectile projectile = proj.GetComponent<DazzlingWaveProjectile>();
+        if (projectile == null)
         {
-            GameObject wave = Instantiate(dazzlingWavePrefab, dazzlingWaveOrigin.position, dazzlingWaveOrigin.rotation);
-
-            // Pass all fields to the projectile - it handles damage/heal on its own tick
-            DazzlingWaveProjectile proj = wave.GetComponent<DazzlingWaveProjectile>();
-            if (proj != null)
-            {
-                proj.ownerEntity = shooter;
-                proj.radius = dazzlingWaveRadius;
-                proj.damage = dazzlingWaveBaseDamage;
-                proj.healAmount = dazzlingWaveHealAmount;
-                proj.upgradeReducedDamage = dazzlingWaveUpgradeReducedDamage;
-                proj.damageReductionMultiplier = dazzlingWaveDamageReductionMultiplier;
-            }
-
-            StartCoroutine(DestroyAfterDelay(wave, 5f));
+            Debug.LogError("[Butterfly] Spawned projectile is missing DazzlingWaveProjectile component!");
+            Destroy(proj);
+            return;
         }
 
-        dazzlingWaveCooldownTimer = dazzlingWaveCooldown;
+        projectile.SpawnSetup(player, damage, player.transform.forward, windBurstSpeed, null);
+
+        NetworkManager.main.Spawn(proj);
+
+        Debug.Log($"[Butterfly] Instantiated dazzling wave projectile: {proj.name}. PurrNet will auto-sync via NetworkBehaviour.");
     }
 
     #endregion
@@ -195,7 +297,11 @@ public class Butterfly : MonoBehaviour
     private void HandleFlyMovement()
     {
         flyTimer -= Time.deltaTime;
-        transform.position = Vector3.Lerp(flyStartPos, flyStartPos + flyDirection * flyDashDistance + flyDashHeight, 1f - (flyTimer / flyDashDuration));
+        transform.position = Vector3.Lerp(
+            flyStartPos,
+            flyStartPos + flyDirection * flyDashDistance + flyDashHeight,
+            1f - (flyTimer / flyDashDuration)
+        );
 
         if (flyTimer <= 0f)
             EndFly();
@@ -205,8 +311,10 @@ public class Butterfly : MonoBehaviour
     {
         isFlying = false;
         flyTimer = 0f;
+
         if (flyRB != null)
             flyRB.useGravity = true;
+
         flyCooldownTimer = flyCooldown;
     }
 
@@ -239,7 +347,7 @@ public class Butterfly : MonoBehaviour
             return;
         }
 
-        Entity shooter = entity ?? GetComponent<Entity>();
+        Player shooter = player != null ? player : GetComponent<Player>();
         GameObject tornadoGO = Instantiate(tornadoPrefab, position, Quaternion.identity);
         TornadoArea tornado = tornadoGO.GetComponent<TornadoArea>();
 
@@ -258,16 +366,6 @@ public class Butterfly : MonoBehaviour
         {
             Debug.LogError("[Tornado] TornadoArea component missing from prefab root!");
         }
-    }
-
-    #endregion
-
-    #region Helpers
-
-    private IEnumerator DestroyAfterDelay(GameObject go, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        if (go != null) Destroy(go);
     }
 
     #endregion
