@@ -27,20 +27,24 @@ namespace PurrNet.Prediction
             if (currentPlayerInfo.Item2 == "mosquito")
             {
                 //Debug.Log("Selecting Mosquito for Player");
+                stats = FindFirstObjectByType<GameManager>().GetMosquitoStats();
                 return _playerPrefabs[0];
             }
             else if (currentPlayerInfo.Item2 == "beetle")
             {
                 //Debug.Log("Selecting Beetle for Player");
+                stats = FindFirstObjectByType<GameManager>().GetBeetleStats();
                 return _playerPrefabs[1];
             }
             else if (currentPlayerInfo.Item2 == "butterfly")
             {
                 //Debug.Log("Selecting Butterfly for Player");
+                stats = FindFirstObjectByType<GameManager>().GetButterflyStats();
                 return _playerPrefabs[2];
             }
 
             //Debug.Log("Defaulting to Mosquito for Player");
+            stats = FindFirstObjectByType<GameManager>().GetMosquitoStats();
             return _playerPrefabs[0];
         }
 
@@ -124,6 +128,7 @@ namespace PurrNet.Prediction
                 currentState.Remove(player);
             }
         }
+        [SerializeField] SO_EntityStatBlock stats;
 
         private void OnPlayerLoadedScene(PlayerID player)
         {
@@ -141,6 +146,7 @@ namespace PurrNet.Prediction
             CleanupSpawnPoints();
 
             GameObject playerSelectedPrefab = GetPlayerPrefab(player);
+            playerSelectedPrefab.GetComponent<PredictedPlayerMovement>().stats = this.stats;
 
             if (T1_spawnPoints.Count > 0 && currentPlayerInfo.Item1 == GameManager.Team.TEAM1)
             {
