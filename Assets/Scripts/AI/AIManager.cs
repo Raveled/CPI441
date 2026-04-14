@@ -58,6 +58,7 @@ public class AIManager : MonoBehaviour
         Debug.Log(response);
         entityData.LoadFromJSONString(response);
         entityData.SaveToJSON();
+        FindFirstObjectByType<GameManager>().SendToLobby();
     }
 
 
