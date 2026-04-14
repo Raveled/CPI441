@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 335659533012562979}
   - component: {fileID: 3597110248291438795}
   - component: {fileID: 5919232728142371868}
+  - component: {fileID: 72881315412710933}
   m_Layer: 0
   m_Name: GlobTest
   m_TagString: Untagged
@@ -141,17 +142,6 @@ MonoBehaviour:
   hitRadius: 1
   damage: 0
   enemyTeams: 
-  syncDamage:
-    _value: 0
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  syncSpeed:
-    _value: 0
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  syncOwnerID:
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
 --- !u!54 &5919232728142371868
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -175,7 +165,38 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 1
+  m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &72881315412710933
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5426923190247754776}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 817fe5016bd0a2a49a95b6eb338bb132, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.NetworkTransform
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _syncPosition: 1
+  _syncRotation: 1
+  _syncScale: 1
+  _syncParent: 1
+  _interpolateSettings: 7
+  _minBufferSize: 1
+  _maxBufferSize: 2
+  _characterControllerPatch: 0
+  _ownerAuth: 1
+  _interpolationTiming: 0

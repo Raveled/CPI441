@@ -3,44 +3,39 @@ using PurrNet;
 
 public class GlobProjectile : Projectile
 {
-    private Entity struckTarget = null;
-
     protected override void OnTriggerEnter(Collider other)
     {
         if (!isServer || !isActive) return;
 
-        Entity ownerEntity = null;
+        // Ignore owner
         if (ownerId.HasValue)
         {
-            ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
-        }
-
-        if (ownerEntity != null)
-        {
-            if (other.transform.IsChildOf(ownerEntity.transform) || other.gameObject == ownerEntity.gameObject)
+            Entity ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
+            if (ownerEntity != null)
             {
-                return;
+                if (other.transform.IsChildOf(ownerEntity.transform) || other.gameObject == ownerEntity.gameObject)
+                {
+                    return;
+                }
             }
         }
 
-        Entity target = Entity.GetEntityFromCollider(other);
+        // Ignore non-entities
+        Entity target = other.GetComponent<Entity>();
         if (target == null)
         {
             return;
         }
 
-        if (target.GetIsDead())
+        // Ignore friendlies
+        if (ownerId.HasValue)
         {
-            return;
+            Entity ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
+            if (ownerEntity != null && target.GetTeam() == ownerEntity.GetTeam())
+            {
+                return;
+            }
         }
-
-        if (ownerEntity != null)
-        {
-            if (target == ownerEntity) return;
-            if (target.GetTeam() == ownerEntity.GetTeam()) return;
-        }
-
-        struckTarget = target;
 
         Debug.Log($"[Glob] Valid hit on {target.name} - detonating");
         Detonate();
@@ -50,40 +45,31 @@ public class GlobProjectile : Projectile
     {
         if (!isServer || !isActive) return;
 
-        Entity ownerEntity = null;
-        if (ownerId.HasValue)
-        {
-            ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
-        }
-
+        Entity ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
         if (ownerEntity == null)
         {
             Debug.LogError($"[Glob] ApplyDamage - owner not found for ID={ownerId}");
             return;
         }
 
-        if (struckTarget == null)
-        {
-            Debug.LogWarning("[Glob] ApplyDamage called, but no struckTarget was recorded.");
-            return;
-        }
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, hitRadius);
 
-        if (struckTarget.GetIsDead())
+        foreach (Collider c in hitColliders)
         {
-            return;
-        }
+            Entity e = Entity.GetEntityFromCollider(c);
+            if (e == null) { continue; }
+            if (e.GetIsDead()) { continue; }
+            if (e == ownerEntity) { continue; }
+            if (e.GetTeam() == ownerEntity.GetTeam()) { continue; }
 
-        if (struckTarget == ownerEntity)
-        {
-            return;
-        }
+            Debug.Log($"[Glob] Hit {e.name} for {damage} damage!");
+            e.TakeDamage(damage, ownerEntity);
 
-        if (struckTarget.GetTeam() == ownerEntity.GetTeam())
-        {
-            return;
+            Mosquito mosquito = ownerEntity.GetComponent<Mosquito>();
+            if (mosquito != null)
+                mosquito.OnBasicAttackHit(e);
+            else
+                Debug.LogWarning($"[Glob] No Mosquito component found on owner {ownerEntity.name}");
         }
-
-        Debug.Log($"[Glob] Hit {struckTarget.name} for {damage} damage!");
-        struckTarget.TakeDamage(damage, ownerEntity);
     }
 }
