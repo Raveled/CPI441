@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class TowerProjectile : Projectile
+public class TowerProjectile : PredictedProjectile
 {
     //Debug
     [Header("Tower Projectile Debug")]

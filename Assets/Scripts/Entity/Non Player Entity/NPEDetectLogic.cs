@@ -25,29 +25,29 @@ public class NPEDetectLogic : NetworkBehaviour
         enemiesInRange.RemoveAll(e => e == null);
         if (npe.GetEnemyTeams().Count <= 0) return;
 
-        if(other.gameObject.TryGetComponent<Entity>(out Entity e)) 
-        {
-            if (e == npe) return;
-            if (e.GetTeam() == Entity.Team.NULL) return;
-            if (e.GetTeam() == npe.GetTeam()) return;
-            if(npe.GetEnemyTeams().Contains(e.GetTeam())) {
-                enemiesInRange.Add(e);
-            }  
-        }
+        Entity e = Entity.GetEntityFromCollider(other);
+        if (e == null) return;
+        if (e == npe) return;
+        if (e.GetTeam() == Entity.Team.NULL) return;
+        if (e.GetTeam() == npe.GetTeam()) return;
+        if(npe.GetEnemyTeams().Contains(e.GetTeam())) {
+            enemiesInRange.Add(e);
+        }  
     }
     private void OnTriggerExit(Collider other) {
         if (!isServer) return; // Only execute detection logic on the server
         
         //If collision is an enemy entity in range, remove it from the list enemiesInRange
-        if (other.gameObject.TryGetComponent<Entity>(out Entity e)) {
-            if (enemiesInRange.Contains(e)) {
-                enemiesInRange.Remove(e);
-                if(npe.GetTarget() == e) {
-                    npe.ResetTarget();
-                }
+        Entity e = Entity.GetEntityFromCollider(other);
+        if (e == null) return;
+        if (enemiesInRange.Contains(e)) {
+            enemiesInRange.Remove(e);
+            if(npe.GetTarget() == e) {
+                npe.ResetTarget();
             }
         }
     }
+
     private void OnDrawGizmos() {
         if (showDetectRange) {
             Gizmos.color = Color.green;

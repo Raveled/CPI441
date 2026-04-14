@@ -1,242 +1,129 @@
-using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using System.Collections.Generic;
-
 using PurrNet;
-using PurrNet.Prediction;
-using PurrNet.Modules;
 
-
-//Superclass for all projectiles
-
-public struct ProjectileState : IPredictedData<ProjectileState>
-{
-    public Vector3 position;
-    public Vector3 velocity;
-    public NetworkID? ownerId; // The ID of spawner
-    public NetworkID? targetId; // Optional target (null if AOE)
-    public int damage;
-    public bool isActive;
-    public List<Entity.Team> enemyTeams;
-    public float lifetime;
-
-    public void Dispose() { }
-}
-
-public class Projectile : PredictedIdentity<ProjectileState>
+public class Projectile : NetworkBehaviour
 {
     [Header("Projectile Setup")]
-    [Tooltip("Must be set in inspector")]
-    [SerializeField] protected PredictedRigidbody rb;
+    [SerializeField] protected Rigidbody rb;
     [SerializeField] protected SphereCollider hitCollider;
 
     [Header("Projectile Settings")]
     [SerializeField] protected float maxLifetime = 3f;
+    [SerializeField] protected float hitRadius = 1f;
 
-    //Info when spawned
     [Header("Projectile Debug")]
     [SerializeField] protected NetworkID? ownerId;
     [SerializeField] protected int damage;
     [SerializeField] protected List<Entity.Team> enemyTeams;
-    [SerializeField] protected NetworkID? target;
+    [SerializeField] protected NetworkID? targetId;
 
-    private PredictedEvent _onDetonate;
+    private float lifetime;
+    protected bool isActive;
 
-    protected override void LateAwake()
+    protected void Awake()
     {
-        base.LateAwake();
-        _onDetonate = new PredictedEvent(predictionManager, this);
-        
-        // Cache components
-        if (!rb) 
-        {
-            Debug.Log("Tower -- Missing Predicted Rigidbody reference, attempting to cache.");
-            rb = GetComponent<PredictedRigidbody>();
-        }
-        if (!hitCollider) 
-        {
-            Debug.Log("Tower -- Missing Hit Collider reference, attempting to cache.");
-            hitCollider = GetComponent<SphereCollider>();
-        }
+        if (!rb) rb = GetComponent<Rigidbody>();
+        if (!hitCollider) hitCollider = GetComponent<SphereCollider>();
+    }
 
-        if (isServer)
+    // This replaces the old LateAwake physics setup that was lost in the refactor
+    protected override void OnSpawned(bool asServer)
+    {
+        base.OnSpawned(asServer);
+
+        if (asServer)
         {
-            // Server: enable physics and collision
             rb.isKinematic = false;
-            GetComponent<Collider>().enabled = true;
-            GetComponent<Collider>().isTrigger = true;
+            hitCollider.enabled = true;
+            hitCollider.isTrigger = true;
         }
         else
         {
-            // Clients: disable physics, only interpolate
-            rb.isKinematic = true;
-            GetComponent<Collider>().enabled = false;
-        }
-    }
-
-    //Called by the script that spawns this object
-    public virtual void SpawnSetup(Entity ownerEntity, int damage, Vector3 direction, float speed, Entity targetEntity = null)
-    {
-        //Get NetworkID from Target
-        NetworkID? targetNetId = null;
-        if (targetEntity != null)
-        {
-            targetNetId = targetEntity.GetNetworkID(isServer);
-        }
-
-        //Setup
-        var newState = currentState;
-        newState.position = transform.position;
-        newState.velocity = direction.normalized * speed;
-        newState.ownerId = ownerEntity.GetNetworkID(isServer);
-        newState.targetId = targetNetId;
-        newState.damage = damage;
-        newState.isActive = true;
-        newState.enemyTeams = ownerEntity.GetEnemyTeams();
-        newState.lifetime = maxLifetime;
-
-        currentState = newState;
-
-        if (rb)
-        {
-            rb.linearVelocity = newState.velocity;
-        }
-
-        // Debug Caching
-        this.ownerId = currentState.ownerId;
-        this.damage = damage;
-        this.enemyTeams = newState.enemyTeams;
-        this.target = targetNetId;
-    }
-
-    protected override void Simulate(ref ProjectileState state, float delta)
-    {
-        if (!state.isActive)
-            return;
-
-        if (isServer)
-        {
-            state.lifetime -= delta;
-            if (state.lifetime <= 0f)
+            if (!isServer)
             {
-                Detonate();
-                return;
+                rb.isKinematic = true;
+                hitCollider.enabled = false;
             }
         }
-
-        // Apply velocity to rigidbody instead of manual position update
-        if (rb)
-        {
-            state.velocity = rb.linearVelocity;
-        }
-        // Update state position from actual position
-        state.position = transform.position;
     }
 
-    protected override void GetUnityState(ref ProjectileState state)
-    {
-        state.position = transform.position;
-        if (rb)
-        {
-            state.velocity = rb.linearVelocity;
-        }
-    }
-
-    protected override void SetUnityState(ProjectileState state)
-    {
-        transform.position = state.position;
-        if (rb)
-        {
-            rb.linearVelocity = state.velocity; 
-        }
-    }
-
-    protected virtual void OnTriggerEnter(Collider other)
+    public void SpawnSetup(Entity ownerEntity, int damage, Vector3 direction, float speed, Entity targetEntity = null)
     {
         if (!isServer)
+        {
+            Debug.LogWarning("[Projectile] SpawnSetup called but isServer=false — skipping.");
             return;
+        }
 
-        //If collision is not a tower or NPEDetectLogic, detonate
-        if(!other.gameObject.GetComponent<Tower>() && !other.gameObject.GetComponent<NPEDetectLogic>())
+        ownerId = ownerEntity.GetNetworkID(true);
+        targetId = targetEntity ? targetEntity.GetNetworkID(true) : null;
+        this.damage = damage;
+        this.enemyTeams = ownerEntity.GetEnemyTeams();
+        lifetime = maxLifetime;
+        isActive = true;
+
+        rb.linearVelocity = direction.normalized * speed;
+    }
+
+    protected void Update()
+    {
+        if (!isServer || !isActive) return;
+
+        lifetime -= Time.deltaTime;
+        if (lifetime <= 0f)
         {
             Detonate();
         }
     }
 
-    protected virtual void Detonate()
+    protected virtual void OnTriggerEnter(Collider other)
     {
-        if (!isServer)
-            return;
+        if (!isServer || !isActive) return;
 
-        var state = currentState;
-        state.isActive = false;
-        currentState = state;
+        Debug.Log($"[Projectile] OnTriggerEnter with {other.gameObject.name}");
 
-        // Broadcast detonation event to all clients
-        _onDetonate.Invoke();
+        if (!Entity.GetEntityFromCollider(other))
+            Detonate();
+    }
 
-        // Apply damage server-side
+    protected void Detonate()
+    {
+        if (!isServer || !isActive) return;
+
         ApplyDamage();
-
+        isActive = false;
         Destroy(gameObject);
     }
 
     protected virtual void ApplyDamage()
     {
-        if (!isServer)
-            return;
+        if (!isServer || !isActive) return;
 
-        var state = currentState;
-        Entity ownerEntity = GetEntityByNetworkID(state.ownerId.Value);
-        Entity targetEntity = null;
-        
-        if (state.targetId.HasValue)
-        {
-            targetEntity = GetEntityByNetworkID(state.targetId.Value);
-        }
-
+        Entity ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
         if (!ownerEntity)
-            return;
-
-        var enemyTeams = ownerEntity.GetEnemyTeams();
-
-        // AOE or single-target damage
-        Collider[] hitColliders = Physics.OverlapSphere(state.position, GetHitRadius());
-
-        bool onlyHitTarget = state.targetId.HasValue; // If there's a target, only hit that target
-
-        foreach (Collider c in hitColliders)
         {
-            if (c.TryGetComponent<Entity>(out Entity e))
+            Debug.LogError($"[Projectile] ApplyDamage - could not find owner entity for ID={ownerId}");
+            return;
+        }
+
+        Entity targetEntity = targetId.HasValue ? Entity.GetEntityByNetworkID(targetId.Value, isServer) : null;
+        bool onlyHitTarget = targetId.HasValue;
+
+        Collider[] hits = Physics.OverlapSphere(transform.position, hitRadius);
+
+        foreach (Collider c in hits)
+        {
+            Entity e = Entity.GetEntityFromCollider(c);
+            if (!e) continue;
+            if (e.GetIsDead()) { continue; }
+            if (onlyHitTarget && e != targetEntity) { continue; }
+
+            if (enemyTeams.Contains(e.GetTeam()))
             {
-                if (e.GetIsDead()) continue;
-
-                //If not AOE attack, only hit target
-                if (onlyHitTarget && e != targetEntity) continue;
-
-                //If collider is entity on enemy team, deal damage to it
-                if (enemyTeams.Contains(e.GetTeam()))
-                {
-                    e.TakeDamage(state.damage, ownerEntity);
-                }
+                Debug.Log($"[Projectile] Dealing {damage} damage to {e.name}");
+                e.TakeDamage(damage, ownerEntity);
             }
         }
     }
-
-    // Helper method to find Entity by NetworkID (same pattern as Entity class)
-    protected Entity GetEntityByNetworkID(NetworkID networkId)
-    {
-        Entity[] allEntities = FindObjectsByType<Entity>(FindObjectsSortMode.None);
-        foreach (var entity in allEntities) {
-            if (entity.GetNetworkID(isServer) == networkId) {
-
-                return entity;
-            }
-        }
-
-        return null;
-    }
-
-    protected virtual float GetHitRadius() => 1f;
 }

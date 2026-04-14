@@ -3,76 +3,73 @@ using PurrNet;
 
 public class BloodShotProjectile : Projectile
 {
-    protected override void LateAwake()
-    {
-        base.LateAwake();
-
-        // Apply velocity after base LateAwake initializes the prediction system
-        if (rb != null && currentState.isActive)
-        {
-            rb.linearVelocity = currentState.velocity;
-            Debug.Log($"[BloodShot] LateAwake - velocity={currentState.velocity}, isServer={isServer}");
-        }
-        else
-        {
-            //Debug.LogWarning($"[BloodShot] LateAwake - rb={rb}, isActive={currentState.isActive}");
-        }
-    }
-
     protected override void OnTriggerEnter(Collider other)
     {
-        if (!isServer) return;
+        if (!isServer || !isActive) return;
 
-        // Ignore towers and NPE detection logic (inherited behaviour from Projectile)
-        if (other.gameObject.GetComponent<Tower>() || other.gameObject.GetComponent<NPEDetectLogic>())
-            return;
-
-        // Ignore the owner
-        Entity ownerEntity = GetEntityByNetworkID(currentState.ownerId.Value);
-        if (ownerEntity != null)
+        // Ignore owner
+        if (ownerId.HasValue)
         {
-            if (other.transform.IsChildOf(ownerEntity.transform) || other.gameObject == ownerEntity.gameObject)
-                return;
+            Entity ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
+            if (ownerEntity != null)
+            {
+                if (other.transform.IsChildOf(ownerEntity.transform) || other.gameObject == ownerEntity.gameObject)
+                {
+                    return;
+                }
+            }
         }
 
         // Ignore non-entities
         Entity target = other.GetComponent<Entity>();
-        if (target == null) return;
+        if (target == null)
+        {
+            return;
+        }
 
-        // Ignore friendly targets
-        if (ownerEntity != null && target.GetTeam() == ownerEntity.GetTeam()) return;
+        // Ignore friendlies
+        if (ownerId.HasValue)
+        {
+            Entity ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
+            if (ownerEntity != null && target.GetTeam() == ownerEntity.GetTeam())
+            {
+                return;
+            }
+        }
 
+        Debug.Log($"[BloodShot] Valid hit on {target.name} - detonating");
         Detonate();
     }
 
     protected override void ApplyDamage()
     {
-        if (!isServer) return;
+        if (!isServer || !isActive) return;
 
-        var state = currentState;
-        Entity ownerEntity = GetEntityByNetworkID(state.ownerId.Value);
-        if (ownerEntity == null) return;
+        Entity ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
+        if (ownerEntity == null)
+        {
+            Debug.LogError($"[BloodShot] ApplyDamage - owner not found for ID={ownerId}");
+            return;
+        }
 
-        Entity target = GetEntityByNetworkID(state.targetId.HasValue ? state.targetId.Value : default);
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, hitRadius);
 
-        // BloodShot hits whatever it collided with directly via overlap at position
-        Collider[] hitColliders = Physics.OverlapSphere(state.position, GetHitRadius());
         foreach (Collider c in hitColliders)
         {
-            Entity e = c.GetComponent<Entity>();
-            if (e == null || e.GetIsDead()) continue;
-            if (e == ownerEntity || e.GetTeam() == ownerEntity.GetTeam()) continue;
-            if (!state.enemyTeams.Contains(e.GetTeam())) continue;
+            Entity e = Entity.GetEntityFromCollider(c);
+            if (e == null) { continue; }
+            if (e.GetIsDead()) { continue; }
+            if (e == ownerEntity) { continue; }
+            if (e.GetTeam() == ownerEntity.GetTeam()) { continue; }
 
-            Debug.Log($"[BloodShot] Hit {e.name} for {state.damage} damage!");
-            e.TakeDamage(state.damage, ownerEntity);
+            Debug.Log($"[BloodShot] Hit {e.name} for {damage} damage!");
+            e.TakeDamage(damage, ownerEntity);
 
-            // Notify Mosquito so it can gain blood meter
             Mosquito mosquito = ownerEntity.GetComponent<Mosquito>();
             if (mosquito != null)
                 mosquito.OnBasicAttackHit(e);
+            else
+                Debug.LogWarning($"[BloodShot] No Mosquito component found on owner {ownerEntity.name}");
         }
     }
-
-    protected override float GetHitRadius() => 0.5f;
 }

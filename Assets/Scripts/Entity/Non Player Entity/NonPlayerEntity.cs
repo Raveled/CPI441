@@ -32,7 +32,6 @@ public class NonPlayerEntity : Entity
 
     // NETWORKED
     [SerializeField] protected SyncVar<NetworkID?> targetId = new(null);
-    [SerializeField] protected SyncVar<PlayerID?> targetPlayerId = new(null);
     [SerializeField] protected SyncVar<bool> hasTarget = new(false);
     [SerializeField] protected SyncVar<float> attackCooldownTimer = new(0f);
     [SerializeField] protected SyncVar<float> attackRange = new(10f);
@@ -185,7 +184,6 @@ public class NonPlayerEntity : Entity
 
             //DONT use GetNetworkID(entity).Value use entity.GetNetworkID(isServer)
 
-
             if (newTarget != null && newTarget.GetTeam() == GetTeam()) {
                 Debug.LogError("Attempting to target entity on same team. This should never happen. Check targeting logic.");
                 newTarget = null;
@@ -204,31 +202,11 @@ public class NonPlayerEntity : Entity
         if (newTarget == null)
         {
             targetId.value = null;
-            targetPlayerId.value = null;
             hasTarget.value = false;
         }
         else
         {
-            /* DEPRECIATED: PLAYER NOW HAS NETWORKID ON PLAYER SCRIPT
-            if (newTarget is Player)
-            {
-                PredictedPlayerMovement ppMovement = newTarget.GetComponent<PredictedPlayerMovement>();
-                foreach (var player in networkManager.players) {
-                    if (player == ppMovement.owner.Value) 
-                    {
-                        //Debug.Log(this.gameObject.name + " is targetting Player ID: " + player);
-                        targetPlayerId.value = player;
-                    }
-                }
-
-                targetId.value = null;
-                hasTarget.value = true;
-                return;
-            }
-            */
-
             targetId.value = newTarget.GetNetworkID(isServer);
-            targetPlayerId.value = null;
             hasTarget.value = true;
         }
     }
@@ -274,14 +252,9 @@ public class NonPlayerEntity : Entity
     #region Getters
     public Entity GetTarget()
     {
-        if (!targetId.value.HasValue && !targetPlayerId.value.HasValue) return null;
+        if (!targetId.value.HasValue) return null;
         
-        if (targetPlayerId.value.HasValue) {
-            //Debug.Log(gameObject.name + " is trying to get target by PlayerID: " + targetPlayerId.value);
-            return GetEntityByPlayerID(targetPlayerId.value);
-        }
-
-        return GetEntityByNetworkID(targetId.value);
+        return GetEntityByNetworkID(targetId.value, isServer);
     }
 
     public NetworkID? GetTargetId()
@@ -294,18 +267,4 @@ public class NonPlayerEntity : Entity
         return hasTarget.value;
     }
     #endregion
-
-    // Helper for retrieving player entity
-    public Entity GetEntityByPlayerID(PlayerID? playerId)
-    {
-        Player[] allPlayers = FindObjectsByType<Player>(FindObjectsSortMode.None);
-        foreach (var player in allPlayers) {
-            if (player.GetComponent<PredictedPlayerMovement>().owner.Value == playerId) {  
-                //Debug.Log("Found " + player.gameObject.name + " that has ID: " + playerId);              
-                return player;
-            }
-        }
-
-        return null;
-    }
 }

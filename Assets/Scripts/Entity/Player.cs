@@ -11,23 +11,31 @@ using Unity.VisualScripting;
 
 public class Player : Entity
 {
-    [Header("Player Debug")]
+    [Header("Player Settings/Debug")]
     [SerializeField] SyncVar<int> playerLevel = new(1);
     [SerializeField] SyncVar<int> goldTotal = new(0);
     [SerializeField] SyncVar<int> xpTotal = new(0);
     [SerializeField] MinimapTracker minimapTracker = null;
+    [SerializeField] protected UnityEngine.UI.Slider healthBar = null;
     SO_PlayerInfo playerInfoSO = null;
     List<Tower> friendlyTowers;
 
     public PredictedPlayerMovement predictedMovement = null;
+
     public PlayerID playerID;
     public SyncVar<string> character = new("");
 
     private GameObject parentObject;
+    private UnityEngine.UI.Slider healthBarSliderUI;
 
     protected override void OnSpawned(bool asServer)
     {
         StartCoroutine(DelayedSpawn(asServer));
+    }
+
+    protected void Update()
+    {
+        if (!isServer) UpdateHealthBars();
     }
 
     private IEnumerator DelayedSpawn(bool asServer)
@@ -85,10 +93,25 @@ public class Player : Entity
             else Debug.Log("[PLAYER - WARNING] NO PLAYER INFO FOUND");
         }
 
-        if (isLocalPlayer() && minimapTracker != null)
+        if (isLocalPlayer())
         {
-            minimapTracker.AttachMinimapCamera();
+            if (minimapTracker != null) minimapTracker.AttachMinimapCamera();
+
+            InitHealthBars();
         }
+    }
+
+    private void InitHealthBars()
+    {
+        if (healthBar != null)
+        {
+            healthBar.transform.parent.gameObject.SetActive(false);
+        }
+
+        GameObject healthBarSliderUI_GO = GameObject.Find("HealthSlider");
+        healthBarSliderUI = healthBarSliderUI_GO.GetComponent<UnityEngine.UI.Slider>();
+
+        Debug.Log($"[Player] HealthBar UI found: {healthBarSliderUI != null}");
     }
 
     [ObserversRpc(bufferLast: true)]
@@ -106,33 +129,6 @@ public class Player : Entity
         }
 
         //Debug.Log($"[Client] Player {GetPlayerID()} locals initialized, team: {GetTeam()}");
-    }
-
-    private void TrySpawnNetworkIdentity()
-    {
-        if (NetworkManager.main == null)
-        {
-            Debug.LogError("NetworkManager.main is null!");
-            return;
-        }
-
-        if (!NetworkManager.main.isServer) return;
-
-        if (isSpawned)
-        {
-            Debug.Log("Player already spawned");
-            return;
-        }
-
-        if (predictedMovement != null && predictedMovement.owner.HasValue)
-        {
-            //Debug.Log($"Spawning NetworkIdentity for player {predictedMovement.owner.Value}");
-            NetworkManager.main.Spawn(this.gameObject);
-        }
-        else
-        {
-            Debug.LogError("Cannot spawn - predictedMovement or owner is null!");
-        }
     }
 
     public override bool TakeDamage(int damage, Entity damageOrigin) {
@@ -170,6 +166,23 @@ public class Player : Entity
     protected override void OnHealthChanged(int newHealth)
     {
         base.OnHealthChanged(newHealth);
+        UpdateHealthBars();
+    }
+
+    //Update healthBar UI Element
+    void UpdateHealthBars()
+    {
+        if (healthBar != null)
+        {
+            healthBar.maxValue = maximumHitPoints.value;
+            healthBar.value = currentHitPoints.value;
+        }
+
+        if (healthBarSliderUI != null)
+        {
+            healthBarSliderUI.maxValue = maximumHitPoints.value;
+            healthBarSliderUI.value = currentHitPoints.value;
+        }
     }
 
     protected override void Die(Entity damageOrigin) {
