@@ -24666,6 +24666,7 @@ MonoBehaviour:
   - {fileID: 616711886}
   - {fileID: 616711885}
   - {fileID: 616711884}
+  stats: {fileID: 0}
 --- !u!1001 &730041273
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -27385,7 +27386,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &803435778
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -70077,7 +70078,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &2021159712
 MonoBehaviour:
   m_ObjectHideFlags: 0
