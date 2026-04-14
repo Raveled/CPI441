@@ -116,7 +116,6 @@ GameObject:
   - component: {fileID: 514572795312819960}
   - component: {fileID: 3345391672689060854}
   - component: {fileID: 5934907757888997875}
-  - component: {fileID: 5042814139240384730}
   m_Layer: 0
   m_Name: BeetlePref
   m_TagString: Untagged
@@ -238,7 +237,7 @@ MonoBehaviour:
   _extrapolateInput: 1
   _playerCamera: {fileID: 8790536772058787017}
   _rigidbody: {fileID: 3345391672689060854}
-  _player: {fileID: 5042814139240384730}
+  _player: {fileID: 0}
   firingPoint: {fileID: 0}
   playerObj: {fileID: 3921032179608766505, guid: b21d6c6e8552df44fa071b8d689cd56d, type: 3}
   moveSpeed: 10
@@ -269,103 +268,6 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
---- !u!114 &5042814139240384730
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8286419546937254081}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 02284832f568b5945a0ba2229770e053, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Player
-  _isSetup: 0
-  _prefabId: -2147483648
-  _componentIndex: -2147483648
-  _shouldBePooled: 0
-  _parent: {fileID: 0}
-  _invertedPathToNearestParent: 
-  _directChildren: []
-  _networkRules: {fileID: 0}
-  _visitiblityRules: {fileID: 0}
-  entityName: Beetle
-  statBlock: {fileID: 11400000, guid: f1ac5180a9d4c9148bc45bcfb02ef474, type: 2}
-  team:
-    _value: 0
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  canMove: 1
-  canDefaultAttack: 1
-  rewardRange: 50
-  currentHitPoints:
-    _value: 0
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  maximumHitPoints:
-    _value: 0
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  moveSpeed:
-    _value: 0
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  acceleration:
-    _value: 0
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  planarDamping:
-    _value: 0
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  jumpForce:
-    _value: 0
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  jumpCooldown:
-    _value: 0
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  attackPower:
-    _value: 0
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  defaultAttackCooldown:
-    _value: 0
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  reward_Gold:
-    _value: 0
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  reward_XP:
-    _value: 0
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  isDead:
-    _value: 0
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  enemyTeams: 
-  playerLevel:
-    _value: 1
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  goldTotal:
-    _value: 0
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  xpTotal:
-    _value: 0
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  minimapTracker: {fileID: 0}
-  predictedMovement: {fileID: 5934907757888997875}
-  character:
-    _value: 
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
 --- !u!1 &8917012355507029038
 GameObject:
   m_ObjectHideFlags: 0
