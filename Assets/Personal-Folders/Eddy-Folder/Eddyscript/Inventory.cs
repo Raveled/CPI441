@@ -1,72 +1,156 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Inventory : MonoBehaviour
+public sealed class Inventory : MonoBehaviour
 {
-    [SerializeField] private List<Item> items = new List<Item>();
-    [SerializeField] private int maxSlots = 6;
-    
-    public System.Action OnInventoryChanged;
-    
-    public bool AddItem(SO_ItemData itemData, int count = 1)
+    [SerializeField] private List<Item> items = new();
+
+    public event Action OnInventoryChanged;
+
+    public List<Item> GetItems()
     {
-        // Try to stack with existing item
-        foreach (Item item in items)
-        {
-            if (item.itemData == itemData && item.itemData.stackable && item.stackCount < item.itemData.maxStacks)
-            {
-                int canAdd = Mathf.Min(count, item.itemData.maxStacks - item.stackCount);
-                item.AddStack(canAdd);
-                count -= canAdd;
-                if (count <= 0)
-                {
-                    OnInventoryChanged?.Invoke();
-                    return true;
-                }
-            }
-        }
-        
-        // Create new item stacks
-        while (count > 0 && items.Count < maxSlots)
-        {
-            int stackSize = Mathf.Min(count, itemData.maxStacks);
-            items.Add(new Item(itemData, stackSize));
-            count -= stackSize;
-        }
-        
-        OnInventoryChanged?.Invoke();
-        return count <= 0;
+        return items;
     }
-    
-    public bool RemoveItem(SO_ItemData itemData, int count = 1)
+
+    public Item GetItemAt(int index)
     {
-        for (int i = items.Count - 1; i >= 0; i--)
+        if (index < 0 || index >= items.Count)
         {
-            if (items[i].itemData == itemData)
+            return null;
+        }
+
+        return items[index];
+    }
+
+    public bool HasItem(SO_ItemData itemData)
+    {
+        if (itemData == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < items.Count; i++)
+        {
+            Item item = items[i];
+            if (item != null && item.itemData == itemData)
             {
-                int removeCount = Mathf.Min(count, items[i].stackCount);
-                items[i].stackCount -= removeCount;
-                count -= removeCount;
-                
-                if (items[i].stackCount <= 0)
-                    items.RemoveAt(i);
-                
-                if (count <= 0)
-                {
-                    OnInventoryChanged?.Invoke();
-                    return true;
-                }
+                return true;
             }
         }
-        
-        OnInventoryChanged?.Invoke();
+
         return false;
     }
-    
+
+    public bool CanAddItem(SO_ItemData itemData, int amount)
+    {
+        if (itemData == null || amount <= 0)
+        {
+            return false;
+        }
+
+        if (!itemData.stackable)
+        {
+            return !HasItem(itemData);
+        }
+
+        for (int i = 0; i < items.Count; i++)
+        {
+            Item item = items[i];
+            if (item == null || item.itemData != itemData)
+            {
+                continue;
+            }
+
+            if (item.stackCount < itemData.maxStacks)
+            {
+                return true;
+            }
+        }
+
+        return true;
+    }
+
+    public bool AddItem(SO_ItemData itemData, int amount)
+    {
+        if (itemData == null || amount <= 0)
+        {
+            return false;
+        }
+
+        if (!itemData.stackable)
+        {
+            if (HasItem(itemData))
+            {
+                return false;
+            }
+
+            items.Add(new Item(itemData, 1));
+            OnInventoryChanged?.Invoke();
+            return true;
+        }
+
+        int remaining = amount;
+
+        for (int i = 0; i < items.Count && remaining > 0; i++)
+        {
+            Item item = items[i];
+            if (item == null || item.itemData != itemData)
+            {
+                continue;
+            }
+
+            int space = itemData.maxStacks - item.stackCount;
+            if (space <= 0)
+            {
+                continue;
+            }
+
+            int toAdd = Mathf.Min(space, remaining);
+            item.stackCount += toAdd;
+            remaining -= toAdd;
+        }
+
+        while (remaining > 0)
+        {
+            int toAdd = Mathf.Min(itemData.maxStacks, remaining);
+            items.Add(new Item(itemData, toAdd));
+            remaining -= toAdd;
+        }
+
+        OnInventoryChanged?.Invoke();
+        return true;
+    }
+
+    public bool TryRemoveAt(int index, int amount = 1)
+    {
+        if (index < 0 || index >= items.Count || amount <= 0)
+        {
+            return false;
+        }
+
+        Item item = items[index];
+        if (item == null)
+        {
+            return false;
+        }
+
+        if (item.stackCount > amount)
+        {
+            item.stackCount -= amount;
+        }
+        else
+        {
+            items.RemoveAt(index);
+        }
+
+        OnInventoryChanged?.Invoke();
+        return true;
+    }
     public StatModifiers GetTotalStatModifiers()
     {
         StatModifiers total = new StatModifiers();
-        
+
         foreach (Item item in items)
         {
             total.healthBonus += item.itemData.healthBonus * item.stackCount;
@@ -75,38 +159,63 @@ public class Inventory : MonoBehaviour
             total.movementSpeedMultiplier *= Mathf.Pow(item.itemData.movementSpeedMultiplier, item.stackCount);
             total.defenseBonus += item.itemData.defenseBonus * item.stackCount;
         }
-        
+
         return total;
     }
-    
-    public List<Item> GetItems() => items;
-    public int GetItemCount(SO_ItemData itemData)
+    public bool RemoveItem(SO_ItemData itemData, int amount)
     {
-        int count = 0;
-        foreach (Item item in items)
+        if (itemData == null || amount <= 0)
         {
-            if (item.itemData == itemData)
-                count += item.stackCount;
+            return false;
         }
-        return count;
-    }
-}
 
-[System.Serializable]
-public struct StatModifiers
-{
-    public int healthBonus;
-    public int attackDamageBonus;
-    public float attackSpeedMultiplier;
-    public float movementSpeedMultiplier;
-    public int defenseBonus;
-    
-    public StatModifiers(int health = 0, int attack = 0, float attackSpeed = 1f, float moveSpeed = 1f, int defense = 0)
+        for (int i = 0; i < items.Count; i++)
+        {
+            Item item = items[i];
+            if (item == null || item.itemData != itemData)
+            {
+                continue;
+            }
+
+            if (item.stackCount > amount)
+            {
+                item.stackCount -= amount;
+            }
+            else
+            {
+                items.RemoveAt(i);
+            }
+
+            OnInventoryChanged?.Invoke();
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool RemoveItemAt(int index, int amount = 1)
     {
-        healthBonus = health;
-        attackDamageBonus = attack;
-        attackSpeedMultiplier = attackSpeed;
-        movementSpeedMultiplier = moveSpeed;
-        defenseBonus = defense;
+        if (index < 0 || index >= items.Count || amount <= 0)
+        {
+            return false;
+        }
+
+        Item item = items[index];
+        if (item == null)
+        {
+            return false;
+        }
+
+        if (item.stackCount > amount)
+        {
+            item.stackCount -= amount;
+        }
+        else
+        {
+            items.RemoveAt(index);
+        }
+
+        OnInventoryChanged?.Invoke();
+        return true;
     }
 }
