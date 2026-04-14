@@ -113,6 +113,10 @@ public class Butterfly : NetworkBehaviour
         if (player == null) return;
         if (!player.isLocalPlayer()) return;
 
+        // Trigger animation locally
+        if (animator != null)
+            animator.SetTrigger("WindBurst");
+
         Debug.Log($"[Butterfly] CastWindBurst on {gameObject.name} | Player ID: {player.GetPlayerID()} | Player is Local: {player.isLocalPlayer()}");
 
         int damage = windBurstBaseDamage;
@@ -125,6 +129,9 @@ public class Butterfly : NetworkBehaviour
     private void ServerSpawnWindBurstRpc(Vector3 position, Quaternion rotation, int damage)
     {
         if (!isServer) return;
+
+        // Play animation on all observers
+        PlayAnimationObserversRpc("WindBurst");
 
         Debug.Log($"[Butterfly] ServerSpawnWindBurstRpc received on server. damage={damage} player id={player.GetPlayerID()}");
         ServerSpawnWindBurst(position, rotation, damage);
@@ -150,6 +157,13 @@ public class Butterfly : NetworkBehaviour
 
         projectile.SpawnSetup(player, damage, player.transform.forward, windBurstSpeed, null);
 
+        Debug.Log(
+            $"[Butterfly][WindBurst][Server] SpawnSetup complete | " +
+            $"owner={player.name} | ownerId={player.GetNetworkID(true)} | " +
+            $"damage={damage} | dir={player.transform.forward} | speed={windBurstSpeed} | " +
+            $"spawnPos={position}"
+        );
+
         NetworkManager.main.Spawn(proj);
 
         Debug.Log($"[Butterfly] Instantiated projectile: {proj.name}. PurrNet will auto-sync via NetworkBehaviour.");
@@ -165,6 +179,10 @@ public class Butterfly : NetworkBehaviour
         if (!player.isLocalPlayer()) return;
         if (dustWaveCooldownTimer > 0f) return;
 
+        // Trigger animation locally
+        if (animator != null)
+            animator.SetTrigger("DustStorm");
+
         int damage = dustWaveBaseDamage;
 
         Debug.Log($"[Butterfly] CastDustWave on {gameObject.name} | Player ID: {player.GetPlayerID()} | Player is Local: {player.isLocalPlayer()}");
@@ -178,6 +196,9 @@ public class Butterfly : NetworkBehaviour
     private void ServerSpawnDustWaveRpc(Vector3 position, Quaternion rotation, int damage)
     {
         if (!isServer) return;
+
+        // Play animation on all observers
+        PlayAnimationObserversRpc("DustStorm");
 
         Debug.Log($"[Butterfly] ServerSpawnDustWaveRpc received on server. damage={damage} player id={player.GetPlayerID()}");
         ServerSpawnDustWave(position, rotation, damage);
@@ -203,6 +224,13 @@ public class Butterfly : NetworkBehaviour
 
         projectile.SpawnSetup(player, damage, player.transform.forward, windBurstSpeed, null);
 
+        Debug.Log(
+            $"[Butterfly][DustWave][Server] SpawnSetup complete | " +
+            $"owner={player.name} | ownerId={player.GetNetworkID(true)} | " +
+            $"damage={damage} | dir={player.transform.forward} | speed={windBurstSpeed} | " +
+            $"spawnPos={position}"
+        );
+
         NetworkManager.main.Spawn(proj);
 
         Debug.Log($"[Butterfly] Instantiated dust wave projectile: {proj.name}. PurrNet will auto-sync via NetworkBehaviour.");
@@ -218,6 +246,10 @@ public class Butterfly : NetworkBehaviour
         if (!player.isLocalPlayer()) return;
         if (dazzlingWaveCooldownTimer > 0f) return;
 
+        // Trigger animation locally
+        if (animator != null)
+            animator.SetTrigger("DazzlingWave");
+
         int damage = dazzlingWaveBaseDamage;
 
         Debug.Log($"[Butterfly] CastDazzlingWave on {gameObject.name} | Player ID: {player.GetPlayerID()} | Player is Local: {player.isLocalPlayer()}");
@@ -231,6 +263,9 @@ public class Butterfly : NetworkBehaviour
     private void ServerSpawnDazzlingWaveRpc(Vector3 position, Quaternion rotation, int damage)
     {
         if (!isServer) return;
+
+        // Play animation on all observers
+        PlayAnimationObserversRpc("DazzlingWave");
 
         Debug.Log($"[Butterfly] ServerSpawnDazzlingWaveRpc received on server. damage={damage} player id={player.GetPlayerID()}");
         ServerSpawnDazzlingWave(position, rotation, damage);
@@ -255,6 +290,13 @@ public class Butterfly : NetworkBehaviour
         }
 
         projectile.SpawnSetup(player, damage, player.transform.forward, windBurstSpeed, null);
+
+        Debug.Log(
+            $"[Butterfly][DazzlingWave][Server] SpawnSetup complete | " +
+            $"owner={player.name} | ownerId={player.GetNetworkID(true)} | " +
+            $"damage={damage} | dir={player.transform.forward} | speed={windBurstSpeed} | " +
+            $"spawnPos={position}"
+        );
 
         NetworkManager.main.Spawn(proj);
 
@@ -282,6 +324,10 @@ public class Butterfly : NetworkBehaviour
             return;
         }
 
+        // Trigger animation locally
+        if (animator != null)
+            animator.SetTrigger("Fly");
+
         Vector3 finalDirection = direction.normalized;
         if (finalDirection.sqrMagnitude <= 0.001f)
             finalDirection = transform.forward;
@@ -306,6 +352,9 @@ public class Butterfly : NetworkBehaviour
             Debug.Log("[Butterfly] ServerStartFlyRpc blocked - no charges.");
             return;
         }
+
+        // Play animation on all observers
+        PlayAnimationObserversRpc("Fly");
 
         Vector3 finalDirection = direction.normalized;
         if (finalDirection.sqrMagnitude <= 0.001f)
@@ -416,6 +465,10 @@ public class Butterfly : NetworkBehaviour
         if (player == null) return;
         if (!player.isLocalPlayer()) return;
 
+        // Trigger animation locally
+        if (animator != null)
+            animator.SetTrigger("Tornado");
+
         Debug.Log($"[Butterfly] CastTornado on {gameObject.name} | Player ID: {player.GetPlayerID()} | Player is Local: {player.isLocalPlayer()}");
         Debug.Log("[Butterfly] Sending Tornado ServerRpc.");
 
@@ -426,6 +479,9 @@ public class Butterfly : NetworkBehaviour
     private void ServerSpawnTornadoRpc(Vector3 position, Vector3 forwardDirection)
     {
         if (!isServer) return;
+
+        // Play animation on all observers
+        PlayAnimationObserversRpc("Tornado");
 
         Debug.Log($"[Butterfly] ServerSpawnTornadoRpc received on server. player id={player.GetPlayerID()}");
         ServerSpawnTornado(position, forwardDirection);
@@ -470,6 +526,18 @@ public class Butterfly : NetworkBehaviour
         );
 
         Debug.Log($"[Butterfly] Instantiated tornado: {tornadoGO.name}. PurrNet will auto-sync via NetworkBehaviour.");
+    }
+
+    #endregion
+
+    #region Animation Helpers
+
+    [ObserversRpc]
+    private void PlayAnimationObserversRpc(string triggerName)
+    {
+        // Don't replay on owner since they already triggered locally
+        if (animator != null && !isOwner)
+            animator.SetTrigger(triggerName);
     }
 
     #endregion
