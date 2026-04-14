@@ -79,7 +79,7 @@ public class Butterfly : NetworkBehaviour
         GameObject parentObject = transform.parent != null ? transform.parent.gameObject : gameObject;
 
         if (windBurstFirePoint == null)
-            windBurstFirePoint = parentObject.transform;
+            windBurstFirePoint = parentObject.GetComponent<PredictedPlayerMovement>().firingPoint.transform;
 
         if (dustWaveOrigin == null)
             dustWaveOrigin = windBurstFirePoint;

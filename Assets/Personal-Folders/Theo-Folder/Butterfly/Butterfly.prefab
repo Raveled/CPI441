@@ -169,17 +169,27 @@ MonoBehaviour:
   _playerCamera: {fileID: 9010252939979917820}
   _rigidbody: {fileID: 8069894609849645937}
   _player: {fileID: 0}
-  firingPoint: {fileID: 0}
+  firingPoint: {fileID: 8111900342316838556}
   playerObj: {fileID: 3921032179608766505, guid: 7aba4ffb82b11534588e3f7df81ba922, type: 3}
   moveSpeed: 10
   jumpForce: 10
   jumpCooldownTime: 1
+  groundCheckYOffset: 0.9
   acceleration: 20
   planarDamping: 10
   groundCheckDistance: 0.2
   groundLayer:
     serializedVersion: 2
     m_Bits: 57
+  butterflyFlyActive: 0
+  butterflyFlyDirection: {x: 0, y: 0, z: 1}
+  butterflyFlyDistance: 8
+  butterflyFlyDuration: 0.35
+  butterflyFlyHeightOffset: {x: 0, y: 5, z: 0}
+  beetleHornImpaleActive: 0
+  beetleHornDirection: {x: 0, y: 0, z: 1}
+  beetleHornDistance: 4
+  beetleHornDuration: 0.4
   moveVector: {x: 0, y: 0}
   moveAction:
     m_Name: Move
@@ -199,6 +209,7 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
+  stats: {fileID: 0}
 --- !u!1 &8111900342316838556
 GameObject:
   m_ObjectHideFlags: 0

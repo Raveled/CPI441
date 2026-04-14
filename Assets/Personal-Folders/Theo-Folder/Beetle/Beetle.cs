@@ -1,10 +1,13 @@
 // Beetle.cs - FULLY ADAPTED TO MOSQUITO STRUCTURE
-using UnityEngine;
-using System.Collections;
 using PurrNet;
+using System.Collections;
+using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class Beetle : NetworkBehaviour
 {
+    [SerializeField] public Player player;
+
     [Header("Basic Attack - Mandible Attack")]
     [SerializeField] private int mandibleBaseDamage = 12;
     [SerializeField] private float mandibleRange = 2.5f;
@@ -44,17 +47,22 @@ public class Beetle : NetworkBehaviour
     [Header("Animator")]
     [SerializeField] private Animator animator;
 
-    [Header("Entity Reference")]
-    public Entity entity;
+    [Header("player Reference")]
 
     private MeshRenderer meshRenderer;
     private Color originalColor;
     private Rigidbody beetleRB;
 
+    private PredictedPlayerMovement predictedMovement;
+
+    private bool isHornImpaling = false;
+    private Vector3 currentHornDirection = Vector3.forward;
+
     private void Awake()
     {
         meshRenderer = GetComponentInChildren<MeshRenderer>();
-        beetleRB = GetComponent<Rigidbody>();
+        beetleRB = GetComponentInParent<Rigidbody>();
+        predictedMovement = GetComponentInParent<PredictedPlayerMovement>();
         if (meshRenderer != null) originalColor = meshRenderer.material.color;
         if (animator == null) animator = GetComponentInChildren<Animator>();
     }
@@ -63,7 +71,12 @@ public class Beetle : NetworkBehaviour
     {
         base.OnSpawned();
         Debug.Log($"Beetle OnSpawned {gameObject.name} isOwner:{isOwner} isController:{isController} isServer:{isServer}");
-        entity = GetComponent<Entity>();
+        player = GetComponent<Player>();
+        if (player == null)
+            player = GetComponentInParent<Player>();
+
+        predictedMovement = GetComponentInParent<PredictedPlayerMovement>();
+
         BeetleInputTester inputTester = GetComponent<BeetleInputTester>();
         if (inputTester != null) inputTester.EnableInput();
     }
@@ -113,15 +126,15 @@ public class Beetle : NetworkBehaviour
 
     private void ApplyMandibleAttack()
     {
-        if (entity == null) return;
+        if (player == null) return;
 
         Collider[] hits = Physics.OverlapSphere(transform.position + transform.forward * mandibleRange, mandibleRange);
         foreach (var hit in hits)
         {
-            Entity target = hit.GetComponent<Entity>();
-            if (target != null && target != entity && !entity.GetEnemyTeams().Contains(target.GetTeam()))
+            Player target = hit.GetComponent<Player>();
+            if (target != null && target != player && !player.GetEnemyTeams().Contains(target.GetTeam()))
             {
-                target.TakeDamage(mandibleBaseDamage, entity);
+                target.TakeDamage(mandibleBaseDamage, player);
             }
         }
         Debug.Log("Mandible Attack! - Beetle.cs");
@@ -131,17 +144,18 @@ public class Beetle : NetworkBehaviour
     public bool TryHornImpale()
     {
         if (!isController) return false;
-        if (hornCooldownTimer > 0f || entity == null)
+        if (hornCooldownTimer > 0f || player == null || isHornImpaling)
         {
-            Debug.Log($"Horn Impale blocked - cooldown {hornCooldownTimer:F2}s remaining");
+            Debug.Log($"Horn Impale blocked - cooldown {hornCooldownTimer:F2}s remaining or already active");
             return false;
         }
 
-        PlayHornImpaleAnimServerRpc();
-        hornCooldownTimer = hornCooldown;
+        Vector3 dashDirection = transform.forward;
+        if (dashDirection.sqrMagnitude <= 0.001f)
+            dashDirection = Vector3.forward;
 
-        if (isServer) StartCoroutine(HornImpaleRoutine());
-        else HornImpaleServerRpc();
+        PlayHornImpaleAnimServerRpc();
+        ServerStartHornImpaleRpc(dashDirection);
 
         return true;
     }
@@ -155,36 +169,87 @@ public class Beetle : NetworkBehaviour
         if (animator != null) animator.SetTrigger("HornImpale");
     }
 
-    [ServerRpc]
-    private void HornImpaleServerRpc() => StartCoroutine(HornImpaleRoutine());
-
-    private IEnumerator HornImpaleRoutine()
+    [ServerRpc(requireOwnership: false)]
+    private void ServerStartHornImpaleRpc(Vector3 direction)
     {
-        Entity shooter = entity ?? GetComponent<Entity>();
-        Vector3 dashEnd = transform.position + transform.forward * hornDashDistance;
-        float elapsed = 0f;
-        Vector3 startPos = transform.position;
+        if (!isServer) return;
+        if (player == null) return;
+        if (hornCooldownTimer > 0f || isHornImpaling) return;
 
-        while (elapsed < hornDashDuration)
-        {
-            transform.position = Vector3.Lerp(startPos, dashEnd, elapsed / hornDashDuration);
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
+        Vector3 finalDirection = direction.normalized;
+        if (finalDirection.sqrMagnitude <= 0.001f)
+            finalDirection = transform.forward;
 
-        // Damage at end position
+        hornCooldownTimer = hornCooldown;
+        isHornImpaling = true;
+        currentHornDirection = finalDirection;
+
+        BeginHornImpaleObserversRpc(finalDirection);
+
+        if (predictedMovement != null)
+            predictedMovement.StartBeetleHornImpale(finalDirection, hornDashDistance, hornDashDuration);
+
+        Debug.Log($"[Beetle] Horn Impale started. dir={finalDirection}");
+    }
+
+    [ObserversRpc]
+    private void BeginHornImpaleObserversRpc(Vector3 direction)
+    {
+        isHornImpaling = true;
+        currentHornDirection = direction.normalized;
+
+        if (currentHornDirection.sqrMagnitude <= 0.001f)
+            currentHornDirection = transform.forward;
+
+        if (!isServer && predictedMovement != null)
+            predictedMovement.StartBeetleHornImpale(currentHornDirection, hornDashDistance, hornDashDuration);
+    }
+
+    public void NotifyHornImpaleEndedFromMovement()
+    {
+        if (!isServer) return;
+        if (!isHornImpaling) return;
+
+        ApplyHornImpaleHit();
+        EndHornImpaleServer();
+    }
+
+    private void EndHornImpaleServer()
+    {
+        isHornImpaling = false;
+        EndHornImpaleObserversRpc();
+    }
+
+    [ObserversRpc]
+    private void EndHornImpaleObserversRpc()
+    {
+        isHornImpaling = false;
+
+        if (predictedMovement != null)
+            predictedMovement.StopBeetleHornImpale();
+
+        Debug.Log("[Beetle] Horn Impale ended.");
+    }
+
+    private void ApplyHornImpaleHit()
+    {
+        Entity shooter = player;
+        if (shooter == null) return;
+
         Collider[] hits = Physics.OverlapSphere(transform.position, 1.5f);
         foreach (var hit in hits)
         {
             Entity target = hit.GetComponent<Entity>();
-            if (target != null && target != shooter && shooter != null && !shooter.GetEnemyTeams().Contains(target.GetTeam()))
+            if (target != null && target != shooter && !shooter.GetEnemyTeams().Contains(target.GetTeam()))
             {
                 target.TakeDamage(hornImpaleDamage, shooter);
                 target.ModifyMoveSpeedMultiplier(1f - hornSlowAmount, hornSlowDuration);
             }
         }
+
         Debug.Log("Horn Impale! - Beetle.cs");
     }
+
 
     // ABILITY 2 - SWAGGER
     public void ActivateSwagger()
@@ -222,9 +287,9 @@ public class Beetle : NetworkBehaviour
 
     private void ApplySwagger()
     {
-        if (entity != null)
+        if (player != null)
         {
-            entity.ModifyMoveSpeedMultiplier(swaggerMoveSpeedMult, swaggerDuration);
+            player.ModifyMoveSpeedMultiplier(swaggerMoveSpeedMult, swaggerDuration);
         }
     }
 
@@ -239,7 +304,7 @@ public class Beetle : NetworkBehaviour
     public bool TryRoll()
     {
         if (!isController) return false;
-        if (rollCooldownTimer > 0f || isRolling || entity == null)
+        if (rollCooldownTimer > 0f || isRolling || player == null)
         {
             Debug.Log("Roll blocked - cooldown or already rolling");
             return false;
@@ -298,7 +363,7 @@ public class Beetle : NetworkBehaviour
     public void CastGroundStomp()
     {
         if (!isController) return;
-        if (stompPrefab == null || entity == null) return;
+        if (stompPrefab == null || player == null) return;
 
         PlayStompAnimServerRpc();
 
@@ -331,10 +396,10 @@ public class Beetle : NetworkBehaviour
         Collider[] hits = Physics.OverlapSphere(transform.position, stompRadius);
         foreach (var hit in hits)
         {
-            Entity target = hit.GetComponent<Entity>();
-            if (target != null && target != entity && !entity.GetEnemyTeams().Contains(target.GetTeam()))
+            Player target = hit.GetComponent<Player>();
+            if (target != null && target != player && !player.GetEnemyTeams().Contains(target.GetTeam()))
             {
-                target.TakeDamage(stompDamage, entity);
+                target.TakeDamage(stompDamage, player);
                 target.ModifyMoveSpeedMultiplier(0f, stompStunDuration);
             }
         }
@@ -343,7 +408,7 @@ public class Beetle : NetworkBehaviour
 
     public float GetMoveSpeedMultiplier()
     {
-        return entity != null ? entity.GetMoveSpeed() : 1f;
+        return player != null ? player.GetMoveSpeed() : 1f;
     }
 
     [ContextMenu("Test Mandible Attack")]

@@ -93,7 +93,7 @@ public class BeetleInputTester : MonoBehaviour
     // Enemy Search (same as Mosquito)
     Entity FindNearestEnemy()
     {
-        if (beetle?.entity == null) return null;
+        if (beetle?.player == null) return null;
 
         Collider[] hits = Physics.OverlapSphere(transform.position, 5f);
         Entity nearest = null;
@@ -102,7 +102,7 @@ public class BeetleInputTester : MonoBehaviour
         foreach (var hit in hits)
         {
             Entity enemy = hit.GetComponent<Entity>();
-            if (enemy != null && enemy.GetTeam() != beetle.entity.GetTeam())
+            if (enemy != null && enemy.GetTeam() != beetle.player.GetTeam())
             {
                 float dist = Vector3.Distance(transform.position, enemy.transform.position);
                 if (dist < closestDist)

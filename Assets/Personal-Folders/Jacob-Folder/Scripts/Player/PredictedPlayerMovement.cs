@@ -38,6 +38,16 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     private Vector3 butterflyFlyStartPosition;
     private Butterfly butterflyAbility;
 
+    [Header("Beetle Horn Runtime")]
+    [SerializeField] private bool beetleHornImpaleActive = false;
+    [SerializeField] private Vector3 beetleHornDirection = Vector3.forward;
+    [SerializeField] private float beetleHornDistance = 4f;
+    [SerializeField] private float beetleHornDuration = 0.4f;
+
+    private float beetleHornTimer = 0f;
+    private Vector3 beetleHornStartPosition;
+    private Beetle beetleAbility;
+
     // Input variables
 
     public Vector2 moveVector;
@@ -88,6 +98,9 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
 
         //butterfly handling for flying / dash
         butterflyAbility = GetComponentInChildren<Butterfly>();
+
+        //beetle handling for most attacks
+        beetleAbility = GetComponentInChildren<Beetle>();
     }
 
     private void LoadStatsFromPlayer()
@@ -173,6 +186,39 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
 
                 if (isServer && butterflyAbility != null)
                     butterflyAbility.NotifyFlyEndedFromMovement();
+            }
+
+            return;
+        }
+
+        // ****************************** beetle horn handling (overrides normal movement) ************************* //
+        if (beetleHornImpaleActive)
+        {
+            beetleHornTimer -= delta;
+
+            float elapsed = beetleHornDuration - Mathf.Max(0f, beetleHornTimer);
+            float t = Mathf.Clamp01(elapsed / beetleHornDuration);
+
+            Vector3 targetPosition = Vector3.Lerp(
+                beetleHornStartPosition,
+                beetleHornStartPosition + beetleHornDirection * beetleHornDistance,
+                t
+            );
+
+            state.position = targetPosition;
+            state.velocity = Vector3.zero;
+            state.rotation = Quaternion.LookRotation(beetleHornDirection.sqrMagnitude > 0.001f ? beetleHornDirection : transform.forward);
+
+            transform.SetPositionAndRotation(state.position, state.rotation);
+            _rigidbody.linearVelocity = Vector3.zero;
+            _rigidbody.MoveRotation(state.rotation);
+
+            if (beetleHornTimer <= 0f)
+            {
+                beetleHornImpaleActive = false;
+
+                if (isServer && beetleAbility != null)
+                    beetleAbility.NotifyHornImpaleEndedFromMovement();
             }
 
             return;
@@ -302,6 +348,34 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
             _rigidbody.linearVelocity = Vector3.zero;
 
         Debug.Log("[PredictedPlayerMovement] Butterfly Fly stopped.");
+    }
+    public void StartBeetleHornImpale(Vector3 direction, float distance, float duration)
+    {
+        if (direction.sqrMagnitude <= 0.001f)
+            direction = transform.forward;
+
+        beetleHornImpaleActive = true;
+        beetleHornDirection = direction.normalized;
+        beetleHornDistance = distance;
+        beetleHornDuration = Mathf.Max(0.01f, duration);
+        beetleHornTimer = beetleHornDuration;
+        beetleHornStartPosition = transform.position;
+
+        if (_rigidbody != null)
+            _rigidbody.linearVelocity = Vector3.zero;
+
+        Debug.Log($"[PredictedPlayerMovement] Beetle Horn Impale started. dir={beetleHornDirection}");
+    }
+
+    public void StopBeetleHornImpale()
+    {
+        beetleHornImpaleActive = false;
+        beetleHornTimer = 0f;
+
+        if (_rigidbody != null)
+            _rigidbody.linearVelocity = Vector3.zero;
+
+        Debug.Log("[PredictedPlayerMovement] Beetle Horn Impale stopped.");
     }
 
     //move handling
