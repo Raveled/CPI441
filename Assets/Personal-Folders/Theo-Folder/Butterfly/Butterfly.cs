@@ -55,12 +55,9 @@ public class Butterfly : NetworkBehaviour
 
     private int flyCurrentCharges = 0;
     private bool isFlying = false;
-    private float flyTimer = 0f;
     private float flyCooldownTimer = 0f;
-    private Vector3 flyDirection;
-    private Vector3 flyDashHeight = new Vector3(0, 5, 0);
-    private Vector3 flyStartPos;
-    private Rigidbody flyRB;
+    private Vector3 currentFlyDirection = Vector3.forward;
+    private PredictedPlayerMovement predictedMovement;
 
     protected override void OnSpawned(bool asServer)
     {
@@ -76,7 +73,7 @@ public class Butterfly : NetworkBehaviour
         if (player == null)
             player = GetComponent<Player>();
 
-        flyRB = GetComponent<Rigidbody>();
+        predictedMovement = GetComponentInParent<PredictedPlayerMovement>();
         flyCurrentCharges = GetFlyMaxCharges();
 
         GameObject parentObject = transform.parent != null ? transform.parent.gameObject : gameObject;
@@ -105,13 +102,8 @@ public class Butterfly : NetworkBehaviour
         if (dazzlingWaveCooldownTimer > 0f)
             dazzlingWaveCooldownTimer -= Time.deltaTime;
 
-        if (flyCooldownTimer > 0f)
-            flyCooldownTimer -= Time.deltaTime;
-
-        if (isFlying)
-            HandleFlyMovement();
-
-        HandleFlyChargeRecharge();
+        if (isServer)
+            HandleFlyChargeRecharge();
     }
 
     #region Basic Attack - Wind Burst
@@ -275,47 +267,121 @@ public class Butterfly : NetworkBehaviour
 
     public void StartFly(Vector3 direction)
     {
-        if (isFlying || flyCurrentCharges <= 0)
+        if (player == null) return;
+        if (!player.isLocalPlayer()) return;
+
+        if (isFlying)
+        {
+            Debug.Log("[Butterfly] Fly blocked - already flying.");
             return;
+        }
 
-        isFlying = true;
-        flyTimer = flyDashDuration;
-        flyDirection = direction.normalized;
-        flyStartPos = transform.position;
+        if (flyCurrentCharges <= 0)
+        {
+            Debug.Log("[Butterfly] Fly blocked - no charges.");
+            return;
+        }
+
+        Vector3 finalDirection = direction.normalized;
+        if (finalDirection.sqrMagnitude <= 0.001f)
+            finalDirection = transform.forward;
+
+        Debug.Log($"[Butterfly] StartFly requested by local player. dir={finalDirection}");
+        ServerStartFlyRpc(finalDirection);
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void ServerStartFlyRpc(Vector3 direction)
+    {
+        if (!isServer) return;
+
+        if (isFlying)
+        {
+            Debug.Log("[Butterfly] ServerStartFlyRpc blocked - already flying.");
+            return;
+        }
+
+        if (flyCurrentCharges <= 0)
+        {
+            Debug.Log("[Butterfly] ServerStartFlyRpc blocked - no charges.");
+            return;
+        }
+
+        Vector3 finalDirection = direction.normalized;
+        if (finalDirection.sqrMagnitude <= 0.001f)
+            finalDirection = transform.forward;
+
         flyCurrentCharges--;
+        flyCooldownTimer = flyCooldown;
+        isFlying = true;
+        currentFlyDirection = finalDirection;
 
-        if (flyRB != null)
-            flyRB.useGravity = false;
+        Debug.Log($"[Butterfly] Server starting Fly. Remaining charges={flyCurrentCharges}");
+
+        BeginFlyObserversRpc(finalDirection);
+
+        if (predictedMovement != null)
+            predictedMovement.StartButterflyFly(finalDirection, flyDashDistance, flyDashDuration);
+    }
+
+    [ObserversRpc]
+    private void BeginFlyObserversRpc(Vector3 direction)
+    {
+        isFlying = true;
+        currentFlyDirection = direction.normalized;
+
+        if (currentFlyDirection.sqrMagnitude <= 0.001f)
+            currentFlyDirection = transform.forward;
+
+        if (!isServer && predictedMovement != null)
+            predictedMovement.StartButterflyFly(currentFlyDirection, flyDashDistance, flyDashDuration);
+
+        Debug.Log($"[Butterfly] Fly started on observer. dir={currentFlyDirection}");
     }
 
     public void CancelFly()
     {
+        if (player == null) return;
+        if (!player.isLocalPlayer()) return;
         if (!isFlying) return;
-        EndFly();
+
+        Debug.Log("[Butterfly] CancelFly requested.");
+        ServerCancelFlyRpc();
     }
 
-    private void HandleFlyMovement()
+    [ServerRpc(requireOwnership: false)]
+    private void ServerCancelFlyRpc()
     {
-        flyTimer -= Time.deltaTime;
-        transform.position = Vector3.Lerp(
-            flyStartPos,
-            flyStartPos + flyDirection * flyDashDistance + flyDashHeight,
-            1f - (flyTimer / flyDashDuration)
-        );
+        if (!isServer) return;
+        if (!isFlying) return;
 
-        if (flyTimer <= 0f)
-            EndFly();
+        Debug.Log("[Butterfly] Server cancelling Fly.");
+        EndFlyServer();
     }
 
-    private void EndFly()
+    public void NotifyFlyEndedFromMovement()
+    {
+        if (!isServer) return;
+        if (!isFlying) return;
+
+        EndFlyServer();
+    }
+
+    private void EndFlyServer()
     {
         isFlying = false;
-        flyTimer = 0f;
+        EndFlyObserversRpc();
+    }
 
-        if (flyRB != null)
-            flyRB.useGravity = true;
+    [ObserversRpc]
+    private void EndFlyObserversRpc()
+    {
+        isFlying = false;
 
-        flyCooldownTimer = flyCooldown;
+        if (predictedMovement != null)
+            predictedMovement.StopButterflyFly();
+
+        Debug.Log("[Butterfly] Fly ended.");
     }
 
     private int GetFlyMaxCharges()
@@ -328,11 +394,17 @@ public class Butterfly : NetworkBehaviour
         if (isFlying || flyCurrentCharges >= GetFlyMaxCharges())
             return;
 
-        if (flyCooldownTimer <= 0f)
+        if (flyCooldownTimer > 0f)
         {
-            flyCurrentCharges++;
-            flyCooldownTimer = flyCooldown;
+            flyCooldownTimer -= Time.deltaTime;
+            return;
         }
+
+        flyCurrentCharges++;
+        if (flyCurrentCharges < GetFlyMaxCharges())
+            flyCooldownTimer = flyCooldown;
+
+        Debug.Log($"[Butterfly] Fly charge restored. Charges={flyCurrentCharges}/{GetFlyMaxCharges()}");
     }
 
     #endregion

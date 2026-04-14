@@ -27,6 +27,19 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     [SerializeField] private float groundCheckDistance = 0.1f;
     [SerializeField] private LayerMask groundLayer;
 
+    [Header("Butterfly Fly Runtime")]
+    [SerializeField] private bool butterflyFlyActive = false;
+    [SerializeField] private Vector3 butterflyFlyDirection = Vector3.forward;
+    [SerializeField] private float butterflyFlyDistance = 8f;
+    [SerializeField] private float butterflyFlyDuration = 0.35f;
+    [SerializeField] private Vector3 butterflyFlyHeightOffset = new Vector3(0f, 5f, 0f);
+
+    private float butterflyFlyTimer = 0f;
+    private Vector3 butterflyFlyStartPosition;
+    private Butterfly butterflyAbility;
+
+    // Input variables
+
     public Vector2 moveVector;
     public InputAction moveAction;
     public InputAction jumpAction;
@@ -72,6 +85,9 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
             jumpAction?.Enable();
             _playerCamera.Init();
         }
+
+        //butterfly handling for flying / dash
+        butterflyAbility = GetComponentInChildren<Butterfly>();
     }
 
     private void LoadStatsFromPlayer()
@@ -128,6 +144,41 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
 
     protected override void Simulate(MoveInput input, ref MoveState state, float delta)
     {
+
+        // ****************************** butterfly fly handling (overrides normal movement) ************************* // 
+        if (butterflyFlyActive)
+        {
+            butterflyFlyTimer -= delta;
+
+            float elapsed = butterflyFlyDuration - Mathf.Max(0f, butterflyFlyTimer);
+            float t = Mathf.Clamp01(elapsed / butterflyFlyDuration);
+
+            Vector3 targetPosition = Vector3.Lerp(
+                butterflyFlyStartPosition,
+                butterflyFlyStartPosition + butterflyFlyDirection * butterflyFlyDistance + butterflyFlyHeightOffset,
+                t
+            );
+
+            state.position = targetPosition;
+            state.velocity = Vector3.zero;
+            state.rotation = Quaternion.LookRotation(butterflyFlyDirection.sqrMagnitude > 0.001f ? butterflyFlyDirection : transform.forward);
+
+            transform.SetPositionAndRotation(state.position, state.rotation);
+            _rigidbody.linearVelocity = Vector3.zero;
+            _rigidbody.MoveRotation(state.rotation);
+
+            if (butterflyFlyTimer <= 0f)
+            {
+                butterflyFlyActive = false;
+
+                if (isServer && butterflyAbility != null)
+                    butterflyAbility.NotifyFlyEndedFromMovement();
+            }
+
+            return;
+        }
+
+        // ****************************** normal movement handling ************************* // 
         state.jumpCooldown -= delta;
 
         state.isGrounded = CheckGrounded(state.position);
@@ -221,6 +272,39 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
             input.moveDirection.Normalize();
         }
     }
+
+    //Butterfly - flying/dashing handling
+
+    public void StartButterflyFly(Vector3 direction, float distance, float duration)
+    {
+        if (direction.sqrMagnitude <= 0.001f)
+            direction = transform.forward;
+
+        butterflyFlyActive = true;
+        butterflyFlyDirection = direction.normalized;
+        butterflyFlyDistance = distance;
+        butterflyFlyDuration = Mathf.Max(0.01f, duration);
+        butterflyFlyTimer = butterflyFlyDuration;
+        butterflyFlyStartPosition = transform.position;
+
+        if (_rigidbody != null)
+            _rigidbody.linearVelocity = Vector3.zero;
+
+        Debug.Log($"[PredictedPlayerMovement] Butterfly Fly started. dir={butterflyFlyDirection}, distance={butterflyFlyDistance}, duration={butterflyFlyDuration}");
+    }
+
+    public void StopButterflyFly()
+    {
+        butterflyFlyActive = false;
+        butterflyFlyTimer = 0f;
+
+        if (_rigidbody != null)
+            _rigidbody.linearVelocity = Vector3.zero;
+
+        Debug.Log("[PredictedPlayerMovement] Butterfly Fly stopped.");
+    }
+
+    //move handling
 
     public struct MoveInput : IPredictedData
     {
