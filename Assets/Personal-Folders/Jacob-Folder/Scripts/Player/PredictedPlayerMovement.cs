@@ -8,7 +8,7 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
 {
     [Header("References")]
     [SerializeField] private PlayerCamera _playerCamera;
-    [SerializeField] private PredictedRigidbody _rigidbody;
+    [SerializeField] public PredictedRigidbody _rigidbody;
     [SerializeField] public Player _player;
     [SerializeField] public GameObject firingPoint;
 
@@ -18,6 +18,8 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     [SerializeField] private float moveSpeed = 0f;
     [SerializeField] private float jumpForce = 0f;
     [SerializeField] private float jumpCooldownTime = 0f;
+    [SerializeField] private float groundCheckYOffset = 0.9f;
+
     [SerializeField] private float acceleration = 0f;
     [SerializeField] private float planarDamping = 0f;
 
@@ -128,6 +130,8 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     {
         state.jumpCooldown -= delta;
 
+        state.isGrounded = CheckGrounded(state.position);
+
         // Movement
         Vector3 targetVelocity = (transform.forward * input.moveDirection.y + transform.right * input.moveDirection.x) * moveSpeed;
         Vector3 velocityDelta = targetVelocity - state.velocity;
@@ -144,7 +148,7 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
         }
 
         // Jumping
-        if(input.jump && IsGrounded() && state.jumpCooldown <= 0f)
+        if(input.jump && state.isGrounded && state.jumpCooldown <= 0f)
         {
             _rigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             state.jumpCooldown = jumpCooldownTime;
@@ -162,6 +166,11 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
         // Update state velocity after physics
         state.velocity = _rigidbody.linearVelocity;
         state.position = transform.position;
+    }
+
+    private bool CheckGrounded(Vector3 statePosition)
+    {
+        return Physics.Raycast(statePosition, Vector3.down, groundCheckDistance, groundLayer);
     }
 
     protected override void Update()
@@ -228,6 +237,7 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
         public Quaternion rotation;
         public Vector3 velocity;
         public float jumpCooldown;
+        public bool isGrounded;
         public void Dispose() {}
     }
 }

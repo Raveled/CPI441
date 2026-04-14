@@ -347,7 +347,7 @@ public class Entity : NetworkBehaviour
 
         if (damageOriginId.HasValue)
         {
-            damageOrigin = GetEntityByNetworkID(damageOriginId.Value);
+            damageOrigin = GetEntityByNetworkID(damageOriginId.Value, isServer);
         }
 
         if (!GetIsDead()) NotifyDeathObserversRpc(damageOriginId);
@@ -499,7 +499,7 @@ public class Entity : NetworkBehaviour
     #endregion
 
     // Helper method to find an Entity by its NetworkID
-    protected Entity GetEntityByNetworkID(NetworkID? networkId)
+    public static Entity GetEntityByNetworkID(NetworkID? networkId, bool isServer)
     {
         Entity[] allEntities = FindObjectsByType<Entity>(FindObjectsSortMode.None);
         foreach (var entity in allEntities)
@@ -510,6 +510,14 @@ public class Entity : NetworkBehaviour
             }
         }
 
+        return null;
+    }
+
+    public static Entity GetEntityFromCollider(Collider other) 
+    {
+        if (other.TryGetComponent<Entity>(out Entity e)) return e;
+        else if (other.transform.parent != null && other.transform.parent.TryGetComponent<Entity>(out e)) return e;
+        else if (other.GetComponentInChildren<Entity>() != null) return other.GetComponentInChildren<Entity>();
         return null;
     }
 }

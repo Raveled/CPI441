@@ -116,12 +116,15 @@ public class Mosquito : NetworkBehaviour
         int damage = GetBasicAttackDamageWithBlood(bloodShotBaseDamage);
         PlayBloodShotAnim();
 
+        Debug.Log("[Mosquito] Sending BloodShot ServerRpc.");
         ServerSpawnBloodShotRpc(bloodShotFirePoint.position, bloodShotFirePoint.rotation, damage);
     }
 
     [ServerRpc(requireOwnership: false)]
     private void ServerSpawnBloodShotRpc(Vector3 position, Quaternion rotation, int damage)
     {
+        if (!isServer) return;
+
         Debug.Log($"[Mosquito] ServerSpawnBloodShotRpc received on server. damage={damage} player id = {player.GetPlayerID()}");
         ServerSpawnBloodShot(position, rotation, damage);
     }
@@ -134,12 +137,14 @@ public class Mosquito : NetworkBehaviour
         if (bloodShotFirePoint == null) { Debug.LogError("[Mosquito] bloodShotFirePoint is NULL!"); return; }
         if (networkManager == null) { Debug.LogError("[Mosquito] networkManager is NULL!"); return; }
 
-        // NETCODED
-        // Instantiate new projectile and set it's properties
-        PredictionManager predictionManager = FindFirstObjectByType<PredictionManager>();
-        PredictedObjectID? projPredictedId = predictionManager.hierarchy.Create(bloodShotProjectilePrefab.gameObject, position, rotation);
-        GameObject proj = predictionManager.hierarchy.GetGameObject(projPredictedId);
+        // Spawn on Server
+        GameObject proj = Instantiate(bloodShotProjectilePrefab, position, rotation);
+
+        // Setup projectile state
         proj.GetComponent<BloodShotProjectile>().SpawnSetup(player, damage, player.transform.forward, bloodShotSpeed, null);
+
+        // Push to network manager for syncing to clients (transform synced by prefab [NetworkTransform], other data synced by Projectile script [NetworkBehaviour])
+        NetworkManager.main.Spawn(proj);
 
         Debug.Log($"[Mosquito] Instantiated projectile: {proj.name}. PurrNet will auto-sync via NetworkBehaviour.");
     }
@@ -201,7 +206,7 @@ public class Mosquito : NetworkBehaviour
             if (hit.transform.IsChildOf(player.transform) || hit.gameObject == player.gameObject)
                 continue;
 
-            Entity target = hit.GetComponent<Entity>();
+            Entity target = Entity.GetEntityFromCollider(hit);
             if (target == null || target.GetIsDead()) continue;
             if (!player.GetEnemyTeams().Contains(target.GetTeam())) continue;
 

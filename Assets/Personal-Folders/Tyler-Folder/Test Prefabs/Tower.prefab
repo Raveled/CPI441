@@ -261,8 +261,8 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 1.91
-  m_Height: 8.63
+  m_Radius: 1.42
+  m_Height: 10.25
   m_Direction: 1
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
 --- !u!114 &5180604451610894363
@@ -356,9 +356,6 @@ MonoBehaviour:
   showAttackRange: 1
   showForwardDirection: 1
   targetId:
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  targetPlayerId:
     _ownerAuth: 0
     _sendIntervalInSeconds: 0
   hasTarget:
