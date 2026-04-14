@@ -275,6 +275,8 @@ MonoBehaviour:
     _value: 
     _ownerAuth: 0
     _sendIntervalInSeconds: 0
+  respawnTime: 10
+  outOfBoundsPosition: {x: 0, y: -1000, z: 0}
 --- !u!114 &6056569021579865597
 MonoBehaviour:
   m_ObjectHideFlags: 0
