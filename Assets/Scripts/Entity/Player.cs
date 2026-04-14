@@ -177,7 +177,26 @@ public class Player : Entity
         base.OnHealthChanged(newHealth);
         UpdateHealthBars();
     }
+    public int GetGoldTotal()
+    {
+        return goldTotal.value;
+    }
 
+    public bool TrySpendGold(int amount)
+    {
+        if (amount < 0)
+        {
+            return false;
+        }
+
+        if (goldTotal.value < amount)
+        {
+            return false;
+        }
+
+        goldTotal.value -= amount;
+        return true;
+    }
     //Update healthBar UI Element
     void UpdateHealthBars()
     {
