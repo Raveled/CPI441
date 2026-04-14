@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class EnhancedPlayer : Entity
@@ -71,7 +70,7 @@ public class EnhancedPlayer : Entity
     public void RemoveItem(SO_ItemData itemData, int count = 1)
     {
         if (inventory != null)
-            inventory.RemoveItemAt(index, 1);
+            inventory.RemoveItem(itemData, count);
     }
     
     // Getters for modified stats
