@@ -171,6 +171,7 @@ MonoBehaviour:
   _player: {fileID: 0}
   firingPoint: {fileID: 8111900342316838556}
   playerObj: {fileID: 3921032179608766505, guid: 7aba4ffb82b11534588e3f7df81ba922, type: 3}
+  visualRoot: {fileID: 3018743115224839933}
   moveSpeed: 10
   jumpForce: 10
   jumpCooldownTime: 1
@@ -190,6 +191,10 @@ MonoBehaviour:
   beetleHornDirection: {x: 0, y: 0, z: 1}
   beetleHornDistance: 4
   beetleHornDuration: 0.4
+  beetleRollActive: 0
+  beetleRollDirection: {x: 0, y: 0, z: 1}
+  beetleRollSpeed: 15
+  beetleRollDuration: 1
   moveVector: {x: 0, y: 0}
   moveAction:
     m_Name: Move

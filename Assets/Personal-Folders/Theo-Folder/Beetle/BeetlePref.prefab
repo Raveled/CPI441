@@ -31,7 +31,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 4559614075675646739}
+  m_Father: {fileID: 9101056435019303872}
   m_LocalEulerAnglesHint: {x: 40.889, y: 0, z: 0}
 --- !u!114 &8038132569199358623
 MonoBehaviour:
@@ -136,7 +136,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6260842736269989087}
   - {fileID: 9101056435019303872}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -240,15 +239,30 @@ MonoBehaviour:
   _player: {fileID: 0}
   firingPoint: {fileID: 0}
   playerObj: {fileID: 3921032179608766505, guid: b21d6c6e8552df44fa071b8d689cd56d, type: 3}
+  visualRoot: {fileID: 8917012355507029038}
   moveSpeed: 10
   jumpForce: 10
   jumpCooldownTime: 1
+  groundCheckYOffset: 0.9
   acceleration: 20
   planarDamping: 10
   groundCheckDistance: 0.1
   groundLayer:
     serializedVersion: 2
     m_Bits: 57
+  butterflyFlyActive: 0
+  butterflyFlyDirection: {x: 0, y: 0, z: 1}
+  butterflyFlyDistance: 8
+  butterflyFlyDuration: 0.35
+  butterflyFlyHeightOffset: {x: 0, y: 5, z: 0}
+  beetleHornImpaleActive: 0
+  beetleHornDirection: {x: 0, y: 0, z: 1}
+  beetleHornDistance: 4
+  beetleHornDuration: 0.4
+  beetleRollActive: 0
+  beetleRollDirection: {x: 0, y: 0, z: 1}
+  beetleRollSpeed: 15
+  beetleRollDuration: 1
   moveVector: {x: 0, y: 0}
   moveAction:
     m_Name: Move
@@ -268,6 +282,7 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
+  stats: {fileID: 0}
 --- !u!1 &8917012355507029038
 GameObject:
   m_ObjectHideFlags: 0
@@ -298,6 +313,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3171425786339334986}
+  - {fileID: 6260842736269989087}
   m_Father: {fileID: 4559614075675646739}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &416149935471985720

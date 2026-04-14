@@ -170,6 +170,7 @@ MonoBehaviour:
   _player: {fileID: 0}
   firingPoint: {fileID: 8111900342316838556}
   playerObj: {fileID: 6682633530466954004, guid: a2be7d979c33b3241ad597c4b91687d3, type: 3}
+  visualRoot: {fileID: 3018743115224839933}
   moveSpeed: 10
   jumpForce: 10
   jumpCooldownTime: 1

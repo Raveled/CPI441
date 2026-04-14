@@ -13,6 +13,7 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     [SerializeField] public GameObject firingPoint;
 
     [SerializeField] private GameObject playerObj;
+    [SerializeField] private GameObject visualRoot;
 
     [Header("Movement Settings - Pull from SO_EntityStatBlock")]
     [SerializeField] private float moveSpeed = 0f;
@@ -82,6 +83,11 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
             {
                 _player.predictedMovement = this;
                 _player.GiveOwnership(owner.Value);
+            }
+
+            if (visualRoot != null)
+            {
+                visualRoot.transform.SetParent(this.transform);
             }
         }
 
