@@ -15,10 +15,11 @@ MonoBehaviour:
   itemName: Cracker
   itemIcon: {fileID: 21300000, guid: 1480ff93d7e852a44be19665fac807a8, type: 3}
   description: 
+  cost: 20
   healthBonus: 0
-  attackDamageBonus: 0
+  attackDamageBonus: 15
   attackSpeedMultiplier: 1
   movementSpeedMultiplier: 1
-  defenseBonus: 0
+  defenseBonus: 5
   stackable: 1
   maxStacks: 1

@@ -15,10 +15,11 @@ MonoBehaviour:
   itemName: Cucumber
   itemIcon: {fileID: 21300000, guid: a9947ebbc5524714593b778e19d05246, type: 3}
   description: 
-  healthBonus: 0
+  cost: 40
+  healthBonus: 50
   attackDamageBonus: 0
   attackSpeedMultiplier: 1
-  movementSpeedMultiplier: 1
+  movementSpeedMultiplier: 1.25
   defenseBonus: 0
   stackable: 1
   maxStacks: 1

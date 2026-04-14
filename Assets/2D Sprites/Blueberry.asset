@@ -15,10 +15,11 @@ MonoBehaviour:
   itemName: Blueberry
   itemIcon: {fileID: 21300000, guid: acd60a8f81732f64c86f06d3b413858b, type: 3}
   description: 
+  cost: 20
   healthBonus: 0
   attackDamageBonus: 0
-  attackSpeedMultiplier: 1
-  movementSpeedMultiplier: 1
+  attackSpeedMultiplier: 1.25
+  movementSpeedMultiplier: 1.25
   defenseBonus: 0
   stackable: 1
-  maxStacks: 1
+  maxStacks: 3
