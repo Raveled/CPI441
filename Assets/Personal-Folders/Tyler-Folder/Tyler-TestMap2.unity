@@ -15035,6 +15035,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Tower_Team1 (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 4450124783581481318, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: team._value
       value: 1
@@ -16462,6 +16466,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Core_Team1
       objectReference: {fileID: 0}
+    - target: {fileID: 1319588409081338035, guid: 736f9aa3aa7e7344ab11c6ca4691c0ea, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3099228963143835330, guid: 736f9aa3aa7e7344ab11c6ca4691c0ea, type: 3}
       propertyPath: m_LocalPosition.x
       value: -7.9
@@ -16601,6 +16609,10 @@ PrefabInstance:
     - target: {fileID: 3755667599024715023, guid: 736f9aa3aa7e7344ab11c6ca4691c0ea, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7164471537469758490, guid: 736f9aa3aa7e7344ab11c6ca4691c0ea, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8750648680008560901, guid: 736f9aa3aa7e7344ab11c6ca4691c0ea, type: 3}
       propertyPath: m_SortingOrder
@@ -18069,15 +18081,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2551549058546101749, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 50.75584
+      value: 53.18
       objectReference: {fileID: 0}
     - target: {fileID: 2551549058546101749, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 10.29
+      value: 6.14
       objectReference: {fileID: 0}
     - target: {fileID: 2551549058546101749, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 158.78513
+      value: 159.97
       objectReference: {fileID: 0}
     - target: {fileID: 2551549058546101749, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: m_LocalRotation.w
@@ -18110,6 +18122,10 @@ PrefabInstance:
     - target: {fileID: 4450124783581481318, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: m_Name
       value: Tower_Team1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4450124783581481318, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: team._value
@@ -20481,6 +20497,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1334909885517814509, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2046770791161010532, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: m_Name
       value: T2_Spawn3
@@ -20496,6 +20516,10 @@ PrefabInstance:
     - target: {fileID: 3604123774642722008, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: spawnCharactersOnStart
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3604123774642722008, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+      propertyPath: minionWaveSpawnInterval
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 3674364982704174147, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: m_Name
@@ -24277,6 +24301,10 @@ PrefabInstance:
     - target: {fileID: 4450124783581481318, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
       propertyPath: m_Name
       value: Tower_Team2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4450124783581481318, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
       propertyPath: team._value
@@ -32355,6 +32383,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Tower_Team2 (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 4450124783581481318, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
       propertyPath: team._value
       value: 2
@@ -34849,6 +34881,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Tower_Team1 (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 4450124783581481318, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: team._value
       value: 1
@@ -37155,6 +37191,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Tower_Team2 (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 4450124783581481318, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
       propertyPath: team._value
       value: 2
@@ -37599,6 +37639,10 @@ PrefabInstance:
     - target: {fileID: 4450124783581481318, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
       propertyPath: m_Name
       value: Tower_Team2 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4450124783581481318, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 465956f03f2b40c4cbb2ff5755807dd3, type: 3}
       propertyPath: team._value
@@ -46285,15 +46329,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8650583005144723300, guid: 2eb3f80b03ab4e74f8a379cb26613717, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 49.38
+      value: 46.58
       objectReference: {fileID: 0}
     - target: {fileID: 8650583005144723300, guid: 2eb3f80b03ab4e74f8a379cb26613717, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 5.94
+      value: 0.91
       objectReference: {fileID: 0}
     - target: {fileID: 8650583005144723300, guid: 2eb3f80b03ab4e74f8a379cb26613717, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -4.65
+      value: -6.35
       objectReference: {fileID: 0}
     - target: {fileID: 8650583005144723300, guid: 2eb3f80b03ab4e74f8a379cb26613717, type: 3}
       propertyPath: m_LocalRotation.w
@@ -48406,6 +48450,10 @@ PrefabInstance:
     - target: {fileID: 4450124783581481318, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: m_Name
       value: Tower_Team1 (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4450124783581481318, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7221454314747841623, guid: 5fc9ad8b39d0bb44887463f6f7e30d87, type: 3}
       propertyPath: team._value
@@ -55091,9 +55139,17 @@ PrefabInstance:
       propertyPath: m_Color.a
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4314692757839011874, guid: 42be0b0de69bcf6448ed01adafb84135, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5394626803236988043, guid: 42be0b0de69bcf6448ed01adafb84135, type: 3}
       propertyPath: m_Name
       value: Core_Team2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5394626803236988043, guid: 42be0b0de69bcf6448ed01adafb84135, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7823668566556018999, guid: 42be0b0de69bcf6448ed01adafb84135, type: 3}
       propertyPath: m_AnchorMax.x
