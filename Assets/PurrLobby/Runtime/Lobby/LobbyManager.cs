@@ -372,6 +372,18 @@ namespace PurrLobby
             }
             
             var localLobbyUser = _currentLobby.Members.Find(x => x.Id == localUserId);
+            if (localLobbyUser.Character != "mosquito" && localLobbyUser.Character != "beetle" && localLobbyUser.Character != "butterfly")
+            {
+                PurrLogger.LogError($"Can't toggle ready state, local user character is invalid.");
+                return;
+            }
+
+            if (localLobbyUser.Team != 1 && localLobbyUser.Team != 2)
+            {
+                PurrLogger.LogError($"Can't toggle ready state, local user team is invalid.");
+                return;
+            }
+
             SetIsReady(localUserId, !localLobbyUser.IsReady);
         }
 

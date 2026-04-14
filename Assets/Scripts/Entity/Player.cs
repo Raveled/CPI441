@@ -8,6 +8,7 @@ using System.Collections;
 using System.Linq;
 using System;
 using Unity.VisualScripting;
+using UnityEngine.SocialPlatforms;
 
 public class Player : Entity
 {
@@ -27,6 +28,10 @@ public class Player : Entity
 
     private GameObject parentObject;
     private UnityEngine.UI.Slider healthBarSliderUI;
+
+    [Header("Respawn Settings")]
+    [SerializeField] private float respawnTime = 10f;
+    [SerializeField] private Vector3 outOfBoundsPosition = new Vector3(0f, -1000f, 0f);
 
     protected override void OnSpawned(bool asServer)
     {
@@ -96,8 +101,8 @@ public class Player : Entity
         if (isLocalPlayer())
         {
             if (minimapTracker != null) minimapTracker.AttachMinimapCamera();
-
             InitHealthBars();
+            RespawnUIController.Instance.Hide();
         }
     }
 
@@ -111,7 +116,7 @@ public class Player : Entity
         GameObject healthBarSliderUI_GO = GameObject.Find("HealthSlider");
         healthBarSliderUI = healthBarSliderUI_GO.GetComponent<UnityEngine.UI.Slider>();
 
-        Debug.Log($"[Player] HealthBar UI found: {healthBarSliderUI != null}");
+        UpdateHealthBars();
     }
 
     [ObserversRpc(bufferLast: true)]
@@ -187,21 +192,102 @@ public class Player : Entity
 
     protected override void Die(Entity damageOrigin) {
         base.Die(damageOrigin);
+        currentHitPoints.value = 0;
+        UpdateHealthBars();
         Debug.Log("Player: " + entityName + " has died");
 
-        //Update PlayerStats
+        if (isLocalPlayer()) RespawnUIController.Instance.Show();
+
+        // Update PlayerStats
         playerInfoSO.DeathCount = playerInfoSO.DeathCount + 1;
         if(damageOrigin is Player p) {
             p.KilledPlayer();
         }
 
-        //Send GameManager message of event
+        // Send GameManager message of event
         GameManager gameManager = FindFirstObjectByType<GameManager>();
         gameManager.PlayerDeath(this, damageOrigin);
 
-        //WIP--------------------------------------------------------
-        //go into death mode - body nonexistant, move on respawn
+        // Respawn Routine
+        if (isServer) StartCoroutine(RespawnSequence());
     }
+
+    private IEnumerator RespawnSequence()
+    {
+        // Move character out of the world immediately, notify all clients
+        RPC_MoveToOutOfBounds();
+
+        yield return new WaitForSeconds(respawnTime);
+
+        // Find the correct spawn point for this player's team
+        Vector3 spawnPosition = GetTeamSpawnPoint();
+
+        // Reset health server-side
+        currentHitPoints.value = maximumHitPoints.value;
+        isDead.value = false;
+
+        // Tell all clients to teleport and refresh UI
+        RPC_Respawn(spawnPosition);
+    }
+
+    private Vector3 GetTeamSpawnPoint()
+    {
+        // Spawn points should be named/tagged starting with "T1" or "T2"
+        string prefix = GetTeam() == Entity.Team.TEAM1 ? "T1" : "T2";
+
+        // Gather all matching spawn points
+        GameObject[] allObjects = FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+        List<GameObject> spawnPoints = new List<GameObject>();
+
+        foreach (GameObject obj in allObjects)
+        {
+            if (obj.name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                spawnPoints.Add(obj);
+        }
+
+        if (spawnPoints.Count == 0)
+        {
+            Debug.LogWarning($"[Player] No spawn points found for prefix '{prefix}'. Respawning at origin.");
+            return Vector3.zero;
+        }
+
+        // Pick a random one so players don't all stack on the same point
+        return spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Count)].transform.position;
+    }
+
+    [ObserversRpc]
+    private void RPC_MoveToOutOfBounds()
+    {
+        if (predictedMovement != null)
+        {
+            predictedMovement.transform.position = outOfBoundsPosition;
+            predictedMovement._rigidbody.linearVelocity = Vector3.zero;
+        }
+
+        // Hide the in-world health bar while dead
+        if (healthBar != null)
+            healthBar.transform.parent.gameObject.SetActive(false);
+    }
+
+    [ObserversRpc]
+    private void RPC_Respawn(Vector3 spawnPosition)
+    {
+        if (predictedMovement != null)
+        {
+            predictedMovement.transform.position = spawnPosition;
+            predictedMovement._rigidbody.linearVelocity = Vector3.zero;
+        }
+
+        InitHealthBars();
+
+        // Re-show the in-world health bar
+        if (healthBar != null)
+            healthBar.transform.parent.gameObject.SetActive(true);
+
+        Debug.Log($"[Player] {entityName} respawned at {spawnPosition}");
+        if (isLocalPlayer()) RespawnUIController.Instance.Hide();
+    }
+
     //Update Player stats on kill
     public void KilledPlayer() {
         playerInfoSO.KillCount = playerInfoSO.KillCount + 1;
