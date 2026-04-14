@@ -1,52 +1,102 @@
-// TornadoArea.cs - full rewrite
 using UnityEngine;
 using System.Collections;
+using PurrNet;
 
-public class TornadoArea : MonoBehaviour
+public class TornadoArea : NetworkBehaviour
 {
-    [HideInInspector] public Entity ownerEntity;
-    [HideInInspector] public float radius = 5f;
-    [HideInInspector] public float duration = 5f;
-    [HideInInspector] public int damagePerTick = 2;
-    [HideInInspector] public float tickInterval = 0.5f;
-    [HideInInspector] public float groupForce = 10f;
-    [HideInInspector] public Vector3 travelDirection = Vector3.forward;
+    [Header("Runtime Setup")]
+    [SerializeField] private Rigidbody rb;
+    [SerializeField] private SphereCollider areaCollider;
+
+    [Header("Owner / Damage")]
+    [SerializeField] private NetworkID? ownerId;
+    [SerializeField] private float radius = 5f;
+    [SerializeField] private float duration = 5f;
+    [SerializeField] private int damagePerTick = 2;
+    [SerializeField] private float tickInterval = 0.5f;
+    [SerializeField] private float groupForce = 10f;
+    [SerializeField] private Vector3 travelDirection = Vector3.forward;
 
     [Header("Movement")]
-    [SerializeField] private float forwardSpeed = 4f;   // units/sec moving forward
-    [SerializeField] private float spiralRadius = 1.5f; // how wide the spiral sweeps
-    [SerializeField] private float spiralSpeed = 3f;    // radians/sec of spiral rotation
+    [SerializeField] private float forwardSpeed = 4f;
+    [SerializeField] private float spiralRadius = 1.5f;
+    [SerializeField] private float spiralSpeed = 3f;
 
     private float timer;
     private float spiralAngle;
     private bool initialized;
+    private Vector3 basePosition;
 
-    // Called explicitly by Butterfly after setting all fields
-    // TornadoArea.cs - Init and Update with verbose debug
-    private Vector3 basePosition; // tracks pure forward movement
-
-    public void Init()
+    private void Awake()
     {
-        if (initialized) return;
-        initialized = true;
+        if (rb == null) rb = GetComponent<Rigidbody>();
+        if (areaCollider == null) areaCollider = GetComponent<SphereCollider>();
+    }
+
+    protected override void OnSpawned(bool asServer)
+    {
+        base.OnSpawned(asServer);
+
+        if (rb != null)
+            rb.isKinematic = true;
+
+        if (areaCollider != null)
+        {
+            areaCollider.isTrigger = true;
+            areaCollider.radius = radius;
+        }
+    }
+
+    public void SpawnSetup(Entity ownerEntity, float radius, float duration, int damagePerTick, float tickInterval, float groupForce, Vector3 travelDirection)
+    {
+        if (!isServer)
+        {
+            Debug.LogWarning("[TornadoArea] SpawnSetup called but isServer=false — skipping.");
+            return;
+        }
+
+        if (ownerEntity == null)
+        {
+            Debug.LogError("[TornadoArea] SpawnSetup failed: ownerEntity is null.");
+            return;
+        }
+
+        ownerId = ownerEntity.GetNetworkID(true);
+        this.radius = radius;
+        this.duration = duration;
+        this.damagePerTick = damagePerTick;
+        this.tickInterval = tickInterval;
+        this.groupForce = groupForce;
+        this.travelDirection = travelDirection.normalized;
+
+        if (areaCollider != null)
+            areaCollider.radius = radius;
+
         timer = duration;
         spiralAngle = 0f;
         basePosition = transform.position;
+        initialized = true;
+
         StartCoroutine(DamageRoutine());
     }
 
     private void Update()
     {
-        if (!initialized) return;
+        if (!isServer || !initialized) return;
 
-        // Advance base position forward
         basePosition += travelDirection * forwardSpeed * Time.deltaTime;
 
-        // Spiral wobble around the base
         spiralAngle += spiralSpeed * Time.deltaTime;
         Vector3 right = Vector3.Cross(travelDirection, Vector3.up).normalized;
+        if (right == Vector3.zero)
+            right = Vector3.right;
+
         Vector3 up = Vector3.Cross(right, travelDirection).normalized;
-        Vector3 spiralOffset = (right * Mathf.Cos(spiralAngle) + up * Mathf.Sin(spiralAngle)) * spiralRadius;
+        if (up == Vector3.zero)
+            up = Vector3.up;
+
+        Vector3 spiralOffset =
+            (right * Mathf.Cos(spiralAngle) + up * Mathf.Sin(spiralAngle)) * spiralRadius;
 
         transform.position = basePosition + spiralOffset;
     }
@@ -54,35 +104,55 @@ public class TornadoArea : MonoBehaviour
     private IEnumerator DamageRoutine()
     {
         Debug.Log("[TornadoArea] DamageRoutine started");
+
         while (timer > 0f)
         {
-            timer -= tickInterval;
-            Debug.Log($"[TornadoArea] Tick — timer={timer}, checking overlaps at {transform.position} radius={radius}");
+            Debug.Log($"[TornadoArea] Tick — timer={timer:F2}, checking overlaps at {transform.position} radius={radius}");
+
+            Entity ownerEntity = null;
+            if (ownerId.HasValue)
+                ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
+
+            if (ownerEntity == null)
+            {
+                Debug.LogError($"[TornadoArea] Owner not found for ID={ownerId}. Destroying tornado.");
+                Destroy(gameObject);
+                yield break;
+            }
 
             Collider[] hits = Physics.OverlapSphere(transform.position, radius);
             Debug.Log($"[TornadoArea] OverlapSphere hit {hits.Length} colliders");
 
             foreach (var hit in hits)
             {
-                Entity target = hit.GetComponent<Entity>();
-                if (target == null || ownerEntity == null) continue;
-                if (target == ownerEntity || target.GetTeam() == ownerEntity.GetTeam()) continue;
+                Entity target = Entity.GetEntityFromCollider(hit);
+                if (target == null) continue;
+                if (target.GetIsDead()) continue;
+                if (target == ownerEntity) continue;
+                if (target.GetTeam() == ownerEntity.GetTeam()) continue;
 
+                Debug.Log($"[TornadoArea] Damaging {target.name} for {damagePerTick}");
                 target.TakeDamage(damagePerTick, ownerEntity);
 
-                Rigidbody rb = target.GetComponent<Rigidbody>();
-                if (rb != null)
+                Rigidbody targetRb = target.GetComponent<Rigidbody>();
+                if (targetRb != null)
                 {
                     Vector3 dirToCenter = (transform.position - target.transform.position).normalized;
-                    rb.AddForce(dirToCenter * groupForce, ForceMode.Acceleration);
+                    targetRb.AddForce(dirToCenter * groupForce, ForceMode.Acceleration);
                 }
             }
 
             yield return new WaitForSeconds(tickInterval);
+            timer -= tickInterval;
         }
 
-        Debug.Log("[TornadoArea] DamageRoutine finished, destroying");
+        Debug.Log("[TornadoArea] Duration finished, destroying");
         Destroy(gameObject);
-        yield break;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, radius);
     }
 }

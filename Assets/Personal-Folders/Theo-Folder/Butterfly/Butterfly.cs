@@ -341,31 +341,63 @@ public class Butterfly : NetworkBehaviour
 
     public void CastTornado(Vector3 position)
     {
+        if (player == null) return;
+        if (!player.isLocalPlayer()) return;
+
+        Debug.Log($"[Butterfly] CastTornado on {gameObject.name} | Player ID: {player.GetPlayerID()} | Player is Local: {player.isLocalPlayer()}");
+        Debug.Log("[Butterfly] Sending Tornado ServerRpc.");
+
+        ServerSpawnTornadoRpc(position, player.transform.forward);
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void ServerSpawnTornadoRpc(Vector3 position, Vector3 forwardDirection)
+    {
+        if (!isServer) return;
+
+        Debug.Log($"[Butterfly] ServerSpawnTornadoRpc received on server. player id={player.GetPlayerID()}");
+        ServerSpawnTornado(position, forwardDirection);
+    }
+
+    private void ServerSpawnTornado(Vector3 position, Vector3 forwardDirection)
+    {
+        Debug.Log($"[Butterfly] ServerSpawnTornado - prefab={tornadoPrefab}, networkManager={networkManager}");
+
         if (tornadoPrefab == null)
         {
-            Debug.LogError("[Tornado] Prefab is not assigned in the Inspector!");
+            Debug.LogError("[Butterfly] tornadoPrefab is NULL!");
             return;
         }
 
-        Player shooter = player != null ? player : GetComponent<Player>();
-        GameObject tornadoGO = Instantiate(tornadoPrefab, position, Quaternion.identity);
-        TornadoArea tornado = tornadoGO.GetComponent<TornadoArea>();
+        if (networkManager == null)
+        {
+            Debug.LogError("[Butterfly] networkManager is NULL!");
+            return;
+        }
 
-        if (tornado != null)
+        GameObject tornadoGO = Instantiate(tornadoPrefab, position, Quaternion.identity);
+
+        TornadoArea tornado = tornadoGO.GetComponent<TornadoArea>();
+        if (tornado == null)
         {
-            tornado.ownerEntity = shooter;
-            tornado.radius = tornadoRadius;
-            tornado.duration = tornadoDuration;
-            tornado.damagePerTick = tornadoBaseDamagePerTick;
-            tornado.tickInterval = tornadoTickInterval;
-            tornado.groupForce = tornadoGroupForce;
-            tornado.travelDirection = transform.forward;
-            tornado.Init();
+            Debug.LogError("[Butterfly] TornadoArea component missing from tornado prefab root!");
+            Destroy(tornadoGO);
+            return;
         }
-        else
-        {
-            Debug.LogError("[Tornado] TornadoArea component missing from prefab root!");
-        }
+
+        NetworkManager.main.Spawn(tornadoGO);
+
+        tornado.SpawnSetup(
+            player,
+            tornadoRadius,
+            tornadoDuration,
+            tornadoBaseDamagePerTick,
+            tornadoTickInterval,
+            tornadoGroupForce,
+            forwardDirection
+        );
+
+        Debug.Log($"[Butterfly] Instantiated tornado: {tornadoGO.name}. PurrNet will auto-sync via NetworkBehaviour.");
     }
 
     #endregion
