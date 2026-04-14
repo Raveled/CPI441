@@ -59,7 +59,7 @@ MonoBehaviour:
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
   entityName: Player
-  statBlock: {fileID: 11400000, guid: dc12e1b749b4e38439cbe1ce13157769, type: 2}
+  statBlock: {fileID: 11400000, guid: f1ac5180a9d4c9148bc45bcfb02ef474, type: 2}
   team:
     _value: 2
     _ownerAuth: 0
@@ -190,7 +190,7 @@ MonoBehaviour:
   stompDamage: 8
   stompStunDuration: 1.5
   animator: {fileID: 712748910838575233, guid: e511ccdc8e7874c4986f5423ad2358bd, type: 3}
-  entity: {fileID: 5042814139240384730, guid: e511ccdc8e7874c4986f5423ad2358bd, type: 3}
+  entity: {fileID: 4751865395330377205}
 --- !u!114 &-5748678838735300178
 MonoBehaviour:
   m_ObjectHideFlags: 0
