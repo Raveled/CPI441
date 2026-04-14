@@ -343,4 +343,14 @@ public class Player : Entity
     {
         return predictedMovement.predictionManager.localPlayer == GetPlayerID();
     }
+    [ObserversRpc]
+    public void RPC_ShowGameResult(Entity.Team result)
+    {
+        if (!isLocalPlayer()) return;
+
+        bool iWon = false;
+        if (GetTeam() == result) iWon = true;
+
+        UIManager.Instance.ShowEndScreen(iWon);
+    }
 }

@@ -5,6 +5,7 @@ public class AIManager : MonoBehaviour
 {
     //Setup
     [Header("Setup")]
+    [SerializeField] bool ai_enabled = true;
     [SerializeField] JSON_MatchData matchData = null;
     [SerializeField] JSON_EntityData entityData = null;
     UnityAndGeminiV3 ai = null;
@@ -49,15 +50,20 @@ public class AIManager : MonoBehaviour
     //Called from gamemanager after a match
     public void AskAIForBalance() {
         CreatePrompt();
-        ai.SendNewMessage(prompt);
+        if (ai_enabled) ai.SendNewMessage(prompt);
+        else ResponseReceived("");
     }
     //Called from UnityAndGeminiV3 for the ai's reponse
     public void ResponseReceived(string response) {
-        this.response = response;
-        Debug.Log("AIManager.cs - Response Recieved");
-        Debug.Log(response);
-        entityData.LoadFromJSONString(response);
-        entityData.SaveToJSON();
+        if (ai_enabled)
+        {
+            this.response = response;
+            Debug.Log("AIManager.cs - Response Recieved");
+            Debug.Log(response);
+            entityData.LoadFromJSONString(response);
+            entityData.SaveToJSON();
+        }
+        
         FindFirstObjectByType<GameManager>().SendToLobby();
     }
 

@@ -45,6 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4c8dfd97de435d409f8e3f6dc7f55d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIManager
+  ai_enabled: 1
   matchData: {fileID: 0}
   entityData: {fileID: 0}
   promptPart1: 'Can you give me balanced stats for a MOBA style video game with a
@@ -64,11 +65,6 @@ MonoBehaviour:
     a real game):'
   promptPart2: 'The Current EntityData from that game: '
   response: 
-  testPrompt: can you give me balanced stats for a minion in a MOBA game? it should
-    be in the form of the following, and include only the stats, no other text. also,
-    please do not use the baseline numbers and only give the two stats listed. [baseHitPoints,
-    100],[baseAttackPower, 40] include the comma between brackets in output. for
-    reference, the baseline for hp is 100 and baseline for attackpower is 40
 --- !u!114 &2281255540730664037
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -86,6 +82,3 @@ MonoBehaviour:
   uiText: {fileID: 0}
   botInstructions: You are a game balance calculator. Output only raw data.
   prompt: 'can you give me a random number in this format: [RanNum: Number]'
-  mediaFilePath: 
-  mediaPrompt: 
-  mimeType: 0
