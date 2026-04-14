@@ -29,6 +29,8 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     public InputAction moveAction;
     public InputAction jumpAction;
 
+    public SO_EntityStatBlock stats;
+
     protected override void LateAwake()
     {
         if (_player == null)
@@ -39,6 +41,7 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
             Debug.Log($"Player {owner.Value} spawning playerRoot prefab");
             GameObject playerObject = Instantiate(playerObj, this.transform);
             playerObject.transform.SetParent(this.transform);
+            playerObject.GetComponent<Player>().SetStatblock(stats);
 
             _player = playerObject.GetComponent<Player>();
 
