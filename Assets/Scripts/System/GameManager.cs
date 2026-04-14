@@ -9,6 +9,7 @@ using PurrNet;
 using System.Collections.Generic;
 using Steamworks;
 using PurrLobby;
+using UnityEngine.SceneManagement;
 
 public class GameManager : NetworkBehaviour
 {
@@ -337,6 +338,13 @@ public class GameManager : NetworkBehaviour
             FindFirstObjectByType<AIManager>().AskAIForBalance();
             aiprompted = true;
         }
+
+    }
+    //Called by AIManager once AI stats are given back
+    public void SendToLobby()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        Destroy(gameObject);
     }
 
     //When a Tower is destroyed, this is called for JSON
