@@ -921,8 +921,19 @@ AnimatorStateMachine:
     m_State: {fileID: -3559226896427721405}
     m_Position: {x: 140, y: -160, z: 0}
   - serializedVersion: 1
+<<<<<<< Updated upstream
     m_State: {fileID: 6792106151162671539}
     m_Position: {x: 400, y: -160, z: 0}
+=======
+    m_State: {fileID: -9052586242043096688}
+    m_Position: {x: 100, y: 150, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: 2165638111282881897}
+    m_Position: {x: 310, y: 150, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: 9207104152240780129}
+    m_Position: {x: 450, y: 90, z: 0}
+>>>>>>> Stashed changes
   m_ChildStateMachines:
   - serializedVersion: 1
     m_StateMachine: {fileID: 7565495198757537293}
