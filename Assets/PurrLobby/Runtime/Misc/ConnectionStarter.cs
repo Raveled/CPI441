@@ -5,6 +5,7 @@ using PurrNet.Logging;
 using PurrNet.Transports;
 using Steamworks;
 using UnityEngine;
+using PurrNet.Steam;
 
 #if UTP_LOBBYRELAY
 using PurrNet.UTP;
@@ -119,7 +120,37 @@ namespace PurrLobby
                 (_networkManager.transport as PurrTransport).roomName = _lobbyDataHolder.CurrentLobby.LobbyId;
             }
 
-            if(_lobbyDataHolder.CurrentLobby.IsOwner)
+            if (_networkManager.transport is SteamTransport steamTransport)
+            {
+                steamTransport.peerToPeer = true;
+                steamTransport.dedicatedServer = false;
+
+                if (_lobbyDataHolder.CurrentLobby.IsOwner)
+                {
+                    steamTransport.address = SteamUser.GetSteamID().ToString();
+                    _networkManager.StartServer();
+                    // Server starts synchronously for Steam - safe to start client immediately
+                    _networkManager.StartClient();
+                } else
+                {
+                    /*
+                    // Client: use host's Steam ID from lobby properties
+                    var host = _lobbyDataHolder.CurrentLobby.Members.Find(m => m.IsOwner);
+                    var hostSteamID = host?.Id;
+                    if (!_lobbyDataHolder.CurrentLobby.Properties.TryGetValue("HostSteamId", out var hostSteamId)
+                        || string.IsNullOrEmpty(hostSteamId))
+                    {
+                        PurrLogger.LogError("HostSteamId missing from lobby properties!", this);
+                        return;
+                    }
+                    steamTransport.address = hostSteamId;
+                    _networkManager.StartClient();
+                    */
+                }
+                return;
+            }
+
+            if (_lobbyDataHolder.CurrentLobby.IsOwner)
                 _networkManager.StartServer();
             StartCoroutine(StartClient());
         }
