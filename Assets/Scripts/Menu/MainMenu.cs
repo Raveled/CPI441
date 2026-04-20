@@ -5,8 +5,8 @@ public class MainMenu : MonoBehaviour
     [SerializeField] GameObject settingsMenu;
     [SerializeField] GameObject creditsMenu;
     private void Start() {
-        settingsMenu.SetActive(false);
-        creditsMenu.SetActive(false);
+        if(settingsMenu)settingsMenu.SetActive(false);
+        if(creditsMenu)creditsMenu.SetActive(false);
     }
     public void QuitGame() {
         Application.Quit();
