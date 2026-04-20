@@ -2,14 +2,27 @@ using UnityEngine;
 
 public class MainMenu : MonoBehaviour
 {
+    [SerializeField] GameObject settingsMenu;
+    [SerializeField] GameObject creditsMenu;
+    private void Start() {
+        if(settingsMenu)settingsMenu.SetActive(false);
+        if(creditsMenu)creditsMenu.SetActive(false);
+    }
     public void QuitGame() {
         Application.Quit();
     }
     public void ToggleSettingsMenu(bool open) {
+        HelperToggleMenu(settingsMenu, open);
+    }
+    public void ToggleCreditsMenu(bool open) {
+        HelperToggleMenu(creditsMenu, open);
+    }
+    void HelperToggleMenu(GameObject menu, bool open) {
         if (open) {
-            //open settings
-        } else {
-            //close settings
+            menu.SetActive(true);
+        }
+        else{
+            menu.SetActive(false);
         }
     }
 }
