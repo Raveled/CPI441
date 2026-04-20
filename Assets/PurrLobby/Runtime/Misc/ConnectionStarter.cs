@@ -133,19 +133,15 @@ namespace PurrLobby
                     _networkManager.StartClient();
                 } else
                 {
-                    /*
-                    // Client: use host's Steam ID from lobby properties
-                    var host = _lobbyDataHolder.CurrentLobby.Members.Find(m => m.IsOwner);
-                    var hostSteamID = host?.Id;
-                    if (!_lobbyDataHolder.CurrentLobby.Properties.TryGetValue("HostSteamId", out var hostSteamId)
-                        || string.IsNullOrEmpty(hostSteamId))
+                    //Client: use host's Steam ID from lobby properties
+                    string hostSteamID = _lobbyDataHolder.CurrentLobby.HostSteamId;
+                    if (!string.IsNullOrEmpty(hostSteamID))
                     {
                         PurrLogger.LogError("HostSteamId missing from lobby properties!", this);
                         return;
                     }
-                    steamTransport.address = hostSteamId;
+                    steamTransport.address = hostSteamID;
                     _networkManager.StartClient();
-                    */
                 }
                 return;
             }
