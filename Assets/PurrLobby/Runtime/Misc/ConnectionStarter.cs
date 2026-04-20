@@ -135,7 +135,7 @@ namespace PurrLobby
                 {
                     //Client: use host's Steam ID from lobby properties
                     string hostSteamID = _lobbyDataHolder.CurrentLobby.HostSteamId;
-                    if (!string.IsNullOrEmpty(hostSteamID))
+                    if (string.IsNullOrEmpty(hostSteamID))
                     {
                         PurrLogger.LogError("HostSteamId missing from lobby properties!", this);
                         return;
