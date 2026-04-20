@@ -106,6 +106,17 @@ public class Mosquito : NetworkBehaviour
 
     public float GetBloodMeter01() => maxBloodMeter <= 0f ? 0f : currentBloodMeter / maxBloodMeter;
 
+    // ========== ANIMATION HELPER ==========
+
+    // Mirrors Butterfly's pattern: called from the server after receiving an RPC,
+    // skips the owner since they already triggered locally.
+    [ObserversRpc]
+    private void PlayAnimationObserversRpc(string triggerName)
+    {
+        if (animator != null && !isOwner)
+            animator.SetTrigger(triggerName);
+    }
+
     // ========== BASIC ATTACK - BLOOD SHOT ==========
     public void CastBloodShot()
     {
@@ -113,8 +124,11 @@ public class Mosquito : NetworkBehaviour
 
         Debug.Log($"[Mosquito] CastBloodShot on {gameObject.name} | Player ID: {player.GetPlayerID()} | Player is Local: {player.isLocalPlayer()}");
 
+        // Trigger animation locally on the owner
+        if (animator != null)
+            animator.SetTrigger("BloodShot");
+
         int damage = GetBasicAttackDamageWithBlood(bloodShotBaseDamage);
-        PlayBloodShotAnim();
 
         Debug.Log("[Mosquito] Sending BloodShot ServerRpc.");
         ServerSpawnBloodShotRpc(bloodShotFirePoint.position, bloodShotFirePoint.rotation, damage);
@@ -124,6 +138,9 @@ public class Mosquito : NetworkBehaviour
     private void ServerSpawnBloodShotRpc(Vector3 position, Quaternion rotation, int damage)
     {
         if (!isServer) return;
+
+        // Replay animation on all non-owner observers
+        PlayAnimationObserversRpc("BloodShot");
 
         Debug.Log($"[Mosquito] ServerSpawnBloodShotRpc received on server. damage={damage} player id = {player.GetPlayerID()}");
         ServerSpawnBloodShot(position, rotation, damage);
@@ -177,12 +194,20 @@ public class Mosquito : NetworkBehaviour
 
         quickPokeCooldownTimer = quickPokeCooldown;
 
-        PlayQuickPokeAnimServerRpc();
+        // Trigger animation locally on the owner
+        if (animator != null)
+            animator.SetTrigger("QuickPoke");
 
         if (isServer)
+        {
+            // Play animation on all non-owner observers
+            PlayAnimationObserversRpc("QuickPoke");
             ApplyQuickPoke();
+        }
         else
+        {
             ApplyQuickPokeServerRpc();
+        }
 
         return true;
     }
@@ -190,6 +215,8 @@ public class Mosquito : NetworkBehaviour
     [ServerRpc(requireOwnership: false)]
     private void ApplyQuickPokeServerRpc()
     {
+        // Play animation on all non-owner observers
+        PlayAnimationObserversRpc("QuickPoke");
         ApplyQuickPoke();
     }
 
@@ -233,8 +260,11 @@ public class Mosquito : NetworkBehaviour
 
         Debug.Log($"[Mosquito] CastGlobShot on {gameObject.name} | Player ID: {player.GetPlayerID()} | Player is Local: {player.isLocalPlayer()}");
 
+        // Trigger animation locally on the owner
+        if (animator != null)
+            animator.SetTrigger("GlobShot");
+
         int damage = Mathf.RoundToInt(globBaseDamage);
-        PlayGlobShotAnim();
 
         Debug.Log("[Mosquito] Sending GlobShot ServerRpc.");
         ServerSpawnGlobShotRpc(globFirePoint.position, globFirePoint.rotation, damage);
@@ -244,6 +274,9 @@ public class Mosquito : NetworkBehaviour
     private void ServerSpawnGlobShotRpc(Vector3 position, Quaternion rotation, int damage)
     {
         if (!isServer) return;
+
+        // Replay animation on all non-owner observers
+        PlayAnimationObserversRpc("GlobShot");
 
         Debug.Log($"[Mosquito] ServerSpawnGlobShotRpc received on server. damage={damage} player id={player.GetPlayerID()}");
         ServerSpawnGlobShot(position, rotation, damage);
@@ -276,19 +309,29 @@ public class Mosquito : NetworkBehaviour
             return;
         }
 
-        PlayAmpUpAnimServerRpc();
+        // Trigger animation locally on the owner
+        if (animator != null)
+            animator.SetTrigger("AmpUp");
 
         ampUpTimer = ampUpDuration;
 
         if (isServer)
+        {
+            // Play animation on all non-owner observers
+            PlayAnimationObserversRpc("AmpUp");
             ApplyAmpUp();
+        }
         else
+        {
             ApplyAmpUpServerRpc();
+        }
     }
 
     [ServerRpc(requireOwnership: false)]
     private void ApplyAmpUpServerRpc()
     {
+        // Play animation on all non-owner observers
+        PlayAnimationObserversRpc("AmpUp");
         ApplyAmpUp();
     }
 
@@ -327,49 +370,14 @@ public class Mosquito : NetworkBehaviour
         Debug.Log($"[Mosquito] Amp Up color set to {(active ? "active" : "original")}.");
     }
 
-    // ========== ANIMATOR METHODS ==========
-    [ServerRpc(requireOwnership: false)]
-    private void PlayBloodShotAnimServerRpc() => PlayBloodShotAnim();
-
-    [ObserversRpc]
-    private void PlayBloodShotAnim()
-    {
-        if (animator != null) animator.SetTrigger("BloodShot");
-    }
-
-    [ServerRpc(requireOwnership: false)]
-    private void PlayQuickPokeAnimServerRpc() => PlayQuickPokeAnim();
-
-    [ObserversRpc]
-    private void PlayQuickPokeAnim()
-    {
-        if (animator != null) animator.SetTrigger("QuickPoke");
-    }
-
-    [ServerRpc(requireOwnership: false)]
-    private void PlayGlobShotAnimServerRpc() => PlayGlobShotAnim();
-
-    [ObserversRpc]
-    private void PlayGlobShotAnim()
-    {
-        if (animator != null) animator.SetTrigger("GlobShot");
-    }
-
-    [ServerRpc(requireOwnership: false)]
-    private void PlayAmpUpAnimServerRpc() => PlayAmpUpAnimation();
-
-    [ObserversRpc]
-    private void PlayAmpUpAnimation()
-    {
-        if (animator != null) animator.SetTrigger("AmpUp");
-    }
-
+    // ========== DEATH ANIMATION ==========
     [ObserversRpc]
     public void PlayDeathAnimation()
     {
         if (animator != null) animator.SetTrigger("Death");
     }
 
+    // ========== HELPERS ==========
     public float GetMoveSpeedMultiplier() => player != null ? player.GetMoveSpeed() : 1f;
     public float GetAttackSpeedMultiplier() => player != null ? player.attackPower.value : 1f;
 

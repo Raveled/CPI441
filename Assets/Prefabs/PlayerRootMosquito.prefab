@@ -154,7 +154,7 @@ GameObject:
   - component: {fileID: 5612005942367703090}
   m_Layer: 6
   m_Name: PlayerRootMosquito
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -277,6 +277,7 @@ MonoBehaviour:
     _sendIntervalInSeconds: 0
   respawnTime: 10
   outOfBoundsPosition: {x: 0, y: -1000, z: 0}
+  respawnUI: {fileID: 0}
 --- !u!114 &6056569021579865597
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -360,7 +361,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
   items: []
-  maxSlots: 6
 --- !u!65 &5612005942367703090
 BoxCollider:
   m_ObjectHideFlags: 0
