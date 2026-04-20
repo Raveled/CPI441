@@ -67,10 +67,10 @@ public class Beetle : NetworkBehaviour
         beetleRB = GetComponentInParent<Rigidbody>();
         predictedMovement = GetComponentInParent<PredictedPlayerMovement>();
         if (meshRenderer != null) originalColor = meshRenderer.material.color;
-        if (animator == null) animator = GetComponentInChildren<Animator>();
+        //if (animator == null) animator = GetComponentInChildren<Animator>();
     }
 
-    protected override void OnSpawned()
+    protected override void OnSpawned(bool asServer)
     {
         base.OnSpawned();
         Debug.Log($"Beetle OnSpawned {gameObject.name} isOwner:{isOwner} isController:{isController} isServer:{isServer}");
@@ -82,6 +82,19 @@ public class Beetle : NetworkBehaviour
 
         BeetleInputTester inputTester = GetComponent<BeetleInputTester>();
         if (inputTester != null) inputTester.EnableInput();
+
+        StartCoroutine(DelayedSpawn(asServer));
+    }
+    private IEnumerator DelayedSpawn(bool asServer)
+    {
+        yield return new WaitForSeconds(0.05f);
+
+        base.OnSpawned();
+
+        GameObject parentObject = transform.parent != null ? transform.parent.gameObject : gameObject;
+
+        if (animator == null)
+            animator = parentObject.GetComponentInChildren<Animator>();
     }
 
     private void Update()
@@ -118,7 +131,7 @@ public class Beetle : NetworkBehaviour
     [ObserversRpc]
     private void PlayMandibleAnim()
     {
-        if (animator != null) animator.SetTrigger("Mandible");
+        if (animator != null) animator.SetTrigger("MandibleAttack");
     }
 
     [ServerRpc]
@@ -166,7 +179,7 @@ public class Beetle : NetworkBehaviour
     [ObserversRpc]
     private void PlayHornImpaleAnim()
     {
-        if (animator != null) animator.SetTrigger("HornImpale");
+        if (animator != null) animator.SetTrigger("HornImpaleAttack");
     }
 
     [ServerRpc(requireOwnership: false)]
@@ -421,7 +434,7 @@ public class Beetle : NetworkBehaviour
     [ObserversRpc]
     private void PlayStompAnim()
     {
-        if (animator != null) animator.SetTrigger("Stomp");
+        if (animator != null) animator.SetTrigger("StompAttack");
     }
 
     [ServerRpc]

@@ -137,6 +137,9 @@ MonoBehaviour:
     _value: 
     _ownerAuth: 0
     _sendIntervalInSeconds: 0
+  respawnTime: 10
+  outOfBoundsPosition: {x: 0, y: -1000, z: 0}
+  respawnUI: {fileID: 0}
 --- !u!114 &7316770039380160885
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -150,7 +153,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
   items: []
-  maxSlots: 6
 --- !u!114 &474019472368586846
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -172,6 +174,7 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
+  player: {fileID: 0}
   mandibleBaseDamage: 12
   mandibleRange: 2.5
   mandibleCooldown: 1.2
@@ -192,8 +195,8 @@ MonoBehaviour:
   stompRadius: 4
   stompDamage: 8
   stompStunDuration: 1.5
-  animator: {fileID: 712748910838575233, guid: e511ccdc8e7874c4986f5423ad2358bd, type: 3}
-  entity: {fileID: 4751865395330377205}
+  animator: {fileID: 0}
+  rollDuration: 1
 --- !u!114 &-5748678838735300178
 MonoBehaviour:
   m_ObjectHideFlags: 0
