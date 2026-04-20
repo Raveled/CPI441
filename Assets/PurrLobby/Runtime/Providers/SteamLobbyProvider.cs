@@ -111,11 +111,15 @@ namespace PurrLobby.Providers
                 }
             }
 
+            // Local user is always the host when creating
+            string hostSteamId = Steamworks.SteamUser.GetSteamID().m_SteamID.ToString();
+
             return LobbyFactory.Create(
                 lobbyName,
                 lobbyId.m_SteamID.ToString(),
                 maxPlayers,
                 true,
+                hostSteamId,
                 GetLobbyUsers(lobbyId),
                 lobbyProperties
             );
@@ -250,11 +254,14 @@ namespace PurrLobby.Providers
                 return new Lobby { IsValid = false };
             }
 
+            var hostSteamId = Steamworks.SteamMatchmaking.GetLobbyOwner(_currentLobby).m_SteamID.ToString();
+
             var lobby = LobbyFactory.Create(
                 Steamworks.SteamMatchmaking.GetLobbyData(_currentLobby, "Name"),
                 lobbyId,
                 Steamworks.SteamMatchmaking.GetLobbyMemberLimit(_currentLobby),
                 false,
+                hostSteamId,
                 GetLobbyUsers(cLobbyId),
                 GetLobbyProperties(_currentLobby)
             );
@@ -314,6 +321,7 @@ namespace PurrLobby.Providers
                     var lobbyId = Steamworks.SteamMatchmaking.GetLobbyByIndex(i);
                     var lobbyProperties = GetLobbyProperties(lobbyId);
                     int maxPlayers = Steamworks.SteamMatchmaking.GetLobbyMemberLimit(lobbyId);
+                    var hostSteamId = Steamworks.SteamMatchmaking.GetLobbyOwner(lobbyId).m_SteamID.ToString();
 
                     results.Add(new Lobby
                     {
@@ -322,6 +330,7 @@ namespace PurrLobby.Providers
                         LobbyId = lobbyId.m_SteamID.ToString(),
                         MaxPlayers = maxPlayers,
                         Properties = lobbyProperties,
+                        HostSteamId = hostSteamId,
                         Members = GetLobbyUsers(lobbyId)
                     });
                 }
@@ -578,13 +587,19 @@ namespace PurrLobby.Providers
                 }
             }
 
+            var ownerId = Steamworks.SteamMatchmaking.GetLobbyOwner(_currentLobby).m_SteamID.ToString();
+            var localId = Steamworks.SteamUser.GetSteamID().m_SteamID.ToString();
+            bool isOwner = localId == ownerId;
+
             var updatedLobby = new Lobby
             {
                 Name = Steamworks.SteamMatchmaking.GetLobbyData(_currentLobby, "Name"),
                 IsValid = true,
                 LobbyId = _currentLobby.m_SteamID.ToString(),
                 MaxPlayers = Steamworks.SteamMatchmaking.GetLobbyMemberLimit(_currentLobby),
-                Properties = new Dictionary<string, string>(), // Use existing properties if needed
+                Properties = new Dictionary<string, string>(),
+                HostSteamId = ownerId,
+                IsOwner = isOwner,
                 Members = updatedMembers
             };
 
@@ -596,9 +611,9 @@ namespace PurrLobby.Providers
             if (_currentLobby.m_SteamID != callback.m_ulSteamIDLobby)
                 return;
 
-            var ownerId = Steamworks.SteamMatchmaking.GetLobbyOwner(_currentLobby).m_SteamID.ToString();
+            var owner = Steamworks.SteamMatchmaking.GetLobbyOwner(_currentLobby).m_SteamID.ToString();
             var localId = Steamworks.SteamUser.GetSteamID().m_SteamID.ToString();
-            var isOwner = localId == ownerId;
+            var isOwner = localId == owner;
 
             var updatedLobbyUsers = GetLobbyUsers(_currentLobby);
             var updatedLobby = LobbyFactory.Create(
@@ -606,6 +621,7 @@ namespace PurrLobby.Providers
                 _currentLobby.m_SteamID.ToString(),
                 Steamworks.SteamMatchmaking.GetLobbyMemberLimit(_currentLobby),
                 isOwner,
+                owner,
                 updatedLobbyUsers,
                 GetLobbyProperties(_currentLobby)
             );
@@ -665,19 +681,16 @@ namespace PurrLobby.Providers
 
             var ownerId = Steamworks.SteamMatchmaking.GetLobbyOwner(_currentLobby).m_SteamID.ToString();
             var localId = Steamworks.SteamUser.GetSteamID().m_SteamID.ToString();
-            var isOwner = localId == ownerId;
-
-            var data = Steamworks.SteamMatchmaking.GetLobbyData(_currentLobby, "Name");
-            var properties = GetLobbyProperties(_currentLobby);
-            var updatedLobbyUsers = GetLobbyUsers(_currentLobby);
+            bool isOwner = localId == ownerId;
 
             var updatedLobby = LobbyFactory.Create(
-                data,
+                Steamworks.SteamMatchmaking.GetLobbyData(_currentLobby, "Name"),
                 _currentLobby.m_SteamID.ToString(),
                 Steamworks.SteamMatchmaking.GetLobbyMemberLimit(_currentLobby),
                 isOwner,
-                updatedLobbyUsers,
-                properties
+                ownerId,
+                GetLobbyUsers(_currentLobby),
+                GetLobbyProperties(_currentLobby)
             );
 
             OnLobbyUpdated?.Invoke(updatedLobby);

@@ -10,11 +10,12 @@ namespace PurrLobby {
         public int MaxPlayers;
         public Dictionary<string, string> Properties;
         public bool IsOwner;
+        public string HostSteamId;
         public List<LobbyUser> Members;
         public object ServerObject;
 
         public bool HasChanged(Lobby @new) {
-            if(!IsValid || Name != @new.Name || LobbyId != @new.LobbyId || LobbyCode != @new.LobbyCode || Members.Count != @new.Members.Count || Properties.Count != @new.Properties.Count || ServerObject != @new.ServerObject)
+            if(!IsValid || Name != @new.Name || LobbyId != @new.LobbyId || LobbyCode != @new.LobbyCode || Members.Count != @new.Members.Count || Properties.Count != @new.Properties.Count || ServerObject != @new.ServerObject || HostSteamId != @new.HostSteamId)
                 return true;
 
             for(int i = 0; i < @new.Members.Count; i++) {
@@ -35,7 +36,7 @@ namespace PurrLobby {
     }
 
     public static class LobbyFactory {
-        public static Lobby Create(string name, string lobbyId, int maxPlayers, bool isOwner, List<LobbyUser> members, Dictionary<string, string> properties) {
+        public static Lobby Create(string name, string lobbyId, int maxPlayers, bool isOwner, string hostSteamId, List<LobbyUser> members, Dictionary<string, string> properties) {
             return new Lobby {
                 Name = name,
                 IsValid = true,
@@ -43,11 +44,12 @@ namespace PurrLobby {
                 MaxPlayers = maxPlayers,
                 Properties = properties ?? new Dictionary<string, string>(),
                 IsOwner = isOwner,
+                HostSteamId = hostSteamId,
                 Members = members
             };
         }
 
-        public static Lobby Create(string name, string lobbyId, string lobbyCode, int maxPlayers, bool isOwner, List<LobbyUser> members, Dictionary<string, string> properties, object serverObject = null) {
+        public static Lobby Create(string name, string lobbyId, string lobbyCode, int maxPlayers, bool isOwner, string hostSteamId, List<LobbyUser> members, Dictionary<string, string> properties, object serverObject = null) {
             return new Lobby {
                 Name = name,
                 IsValid = true,
@@ -56,6 +58,7 @@ namespace PurrLobby {
                 MaxPlayers = maxPlayers,
                 Properties = properties ?? new Dictionary<string, string>(),
                 IsOwner = isOwner,
+                HostSteamId = hostSteamId,
                 Members = members,
                 ServerObject = serverObject
             };
