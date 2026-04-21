@@ -82,6 +82,9 @@ public class Mosquito : NetworkBehaviour
         if (animator == null)
             animator = parentObject.GetComponentInChildren<Animator>();
 
+        if (meshRenderer == null)
+            meshRenderer = parentObject.GetComponentInChildren<Renderer>();
+
         if (meshRenderer != null)
             originalColor = meshRenderer.material.color;
 
