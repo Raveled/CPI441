@@ -26,13 +26,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5546006115179192090}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.34929967, y: -0, z: -0, w: 0.9370111}
-  m_LocalPosition: {x: -1.55, y: 4.612, z: -2.16}
+  m_LocalRotation: {x: 0.5, y: 0, z: 0, w: 0.8660254}
+  m_LocalPosition: {x: 0, y: 10.48, z: -7.95}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 9101056435019303872}
-  m_LocalEulerAnglesHint: {x: 40.889, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 60, y: 0, z: 0}
 --- !u!114 &8038132569199358623
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -134,7 +134,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 9101056435019303872}
   m_Father: {fileID: 0}
@@ -246,7 +246,6 @@ MonoBehaviour:
   groundCheckYOffset: 0.9
   acceleration: 20
   planarDamping: 10
-  groundCheckDistance: 0.1
   groundLayer:
     serializedVersion: 2
     m_Bits: 57
@@ -282,7 +281,7 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
-  stats: {fileID: 0}
+  stats: {fileID: 11400000, guid: a2f27d92d0618f749a6dee4eb1e13594, type: 2}
 --- !u!1 &8917012355507029038
 GameObject:
   m_ObjectHideFlags: 0
