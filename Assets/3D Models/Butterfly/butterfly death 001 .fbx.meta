@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: a5151db9348d7d645bc7d591c46df465
+guid: 88264b20fa924c241a2440b03343f438
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -31,11 +31,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: B flying
+      name: B Death
       takeName: Armature|ArmatureAction
-      internalID: 4781951162920444690
+      internalID: -2674958278859614444
       firstFrame: 0
-      lastFrame: 24
+      lastFrame: 18
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
