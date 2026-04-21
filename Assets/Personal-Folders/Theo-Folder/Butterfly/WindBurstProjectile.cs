@@ -6,25 +6,28 @@ public class WindBurstProjectile : Projectile
     protected override void OnTriggerEnter(Collider other)
     {
         if (!isServer || !isActive) return;
+        Entity target = other.GetComponent<Entity>();
 
+        // Ignore non-entities
+        if (target == null)
+        {
+            return;
+        }
+
+        // Ignore owner
         if (ownerId.HasValue)
         {
             Entity ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
             if (ownerEntity != null)
             {
-                if (other.transform.IsChildOf(ownerEntity.transform) || other.gameObject == ownerEntity.gameObject)
+                if (other.transform.IsChildOf(ownerEntity.transform) || ownerId == target.GetNetworkID(isServer))
                 {
                     return;
                 }
             }
         }
 
-        Entity target = other.GetComponent<Entity>();
-        if (target == null)
-        {
-            return;
-        }
-
+        // Ignore friendlies
         if (ownerId.HasValue)
         {
             Entity ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
@@ -54,13 +57,13 @@ public class WindBurstProjectile : Projectile
         foreach (Collider c in hitColliders)
         {
             Entity e = Entity.GetEntityFromCollider(c);
-            if (e == null) continue;
-            if (e.GetIsDead()) continue;
-            if (e == ownerEntity) continue;
-            if (e.GetTeam() == ownerEntity.GetTeam()) continue;
+            if (e == null) { continue; }
+            if (e.GetIsDead()) { continue; }
+            if (e.GetNetworkID(isServer) == ownerId) { continue; }
+            if (e.GetTeam() == ownerEntity.GetTeam()) { continue; }
 
             Debug.Log($"[WindBurst] Hit {e.name} for {damage} damage!");
             e.TakeDamage(damage, ownerEntity);
         }
-    }
+    }       
 }

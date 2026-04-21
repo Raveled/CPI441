@@ -494,9 +494,6 @@ MonoBehaviour:
   targetId:
     _ownerAuth: 0
     _sendIntervalInSeconds: 0
-  targetPlayerId:
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
   hasTarget:
     _value: 0
     _ownerAuth: 0
@@ -556,7 +553,7 @@ NavMeshAgent:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7434539554110800588}
-  m_Enabled: 1
+  m_Enabled: 0
   m_AgentTypeID: -1372625422
   m_Radius: 0.5
   m_Speed: 3.5

@@ -54,6 +54,7 @@ public class Minion : NonPlayerEntity
 
             if (isServer)
             {  
+                agent.enabled = true;
                 StartCoroutine(DelayedInitialAINav());
             }
             else agent.enabled = false;

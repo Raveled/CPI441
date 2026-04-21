@@ -516,8 +516,8 @@ public class Entity : NetworkBehaviour
     public static Entity GetEntityFromCollider(Collider other) 
     {
         if (other.TryGetComponent<Entity>(out Entity e)) return e;
-        else if (other.transform.parent != null && other.transform.parent.TryGetComponent<Entity>(out e)) return e;
         else if (other.GetComponentInChildren<Entity>() != null) return other.GetComponentInChildren<Entity>();
+        else if (other.transform.parent != null && other.transform.parent.TryGetComponent<Entity>(out e)) return e;
         return null;
     }
 }

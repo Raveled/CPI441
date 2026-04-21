@@ -51,6 +51,15 @@ public class Player : Entity
 
         base.OnSpawned(asServer);
 
+        // Fix sizing and placement issue
+        GameObject thisPlayerObject = this.gameObject;
+        if (thisPlayerObject.name.Contains("PlayerRoot"))
+        {
+            thisPlayerObject.transform.localScale = Vector3.one;
+            thisPlayerObject.transform.localPosition = Vector3.zero;
+            thisPlayerObject.transform.localRotation = Quaternion.identity;
+        }
+
         if (!isServer)
         {
             PredictedPlayerMovement[] ppMovements = FindObjectsByType<PredictedPlayerMovement>(FindObjectsSortMode.None);
@@ -75,27 +84,29 @@ public class Player : Entity
             if (predictedMovement == null) predictedMovement = parentObject.GetComponent<PredictedPlayerMovement>();
         }
 
+        predictedMovement.LoadStatsFromPlayer();
+
         // Find PlayerID
         playerID = GetPlayerID();
 
         if (isServer)
         {
-            Debug.Log("[PLAYER] OnSpawned Called on SERVER for Player ID: " + playerID + " | IsLocalPlayer: " + isLocalPlayer());
-
             // Cross Reference PlayerInfo with GameManager Instance
             // GameManager playerInfo list will be a server side authority of player features like Team/Character
             GameManager.PlayerInfo? playerInfo = GameManager.Instance.GetPlayerConfiguration(playerID);
             if (playerInfo != null)
             {
                 GameManager.PlayerInfo playerInfoNN = (GameManager.PlayerInfo) playerInfo;
-                team.value = (Entity.Team) playerInfoNN.team;
+                SetTeam((Entity.Team) playerInfoNN.team);
                 character.value = playerInfoNN.character;
 
-                //Debug.Log("[PLAYER]  Player ID: " + playerID + " | Team: " + team.value);
+                //Debug.Log("[PLAYER] OnSpawned Called on SERVER for Player ID: " + playerID + " | IsLocalPlayer: " + isLocalPlayer() + " | Team: " + team.value + " | Character: " + character.value);
                 //GameManager.Instance.DebugPrintPlayersInfo();
 
                 // Tell all clients to do their LOCAL-only setup
                 RPC_InitializePlayerLocals();
+
+                this.isDead.value = false;
             }
             else Debug.Log("[PLAYER - WARNING] NO PLAYER INFO FOUND");
         }
@@ -135,11 +146,18 @@ public class Player : Entity
             if (GetTeam() == t.GetTeam()) friendlyTowers.Add(t);
         }
 
-        //Debug.Log($"[Client] Player {GetPlayerID()} locals initialized, team: {GetTeam()}");
+        Debug.Log($"[Client] Player {GetPlayerID()} locals initialized, team: {GetTeam()}");
     }
 
     public override bool TakeDamage(int damage, Entity damageOrigin) {
         if (isDead.value) return false;
+
+        if (friendlyTowers == null) 
+        {
+            Debug.Log($"[Player] {playerID} has no friendly towers list! This should have been initialized in RPC_InitializePlayerLocals.");
+            
+            return base.TakeDamage(0, damageOrigin);
+        }
 
         //Check Friendly Tower Aggro
         Tower closestTower = null;
@@ -212,14 +230,16 @@ public class Player : Entity
             healthBarSliderUI.value = currentHitPoints.value;
         }
     }
-
+    
     protected override void Die(Entity damageOrigin) {
+        if (playerInfoSO == null) return; // Should never happen, but just in case
+
         base.Die(damageOrigin);
         currentHitPoints.value = 0;
         UpdateHealthBars();
         Debug.Log("Player: " + GetPlayerID() + " has died");
 
-        if (isLocalPlayer() && respawnUI != null) respawnUI.Show();
+        //RPC_ShowRespawnUI();
 
         // Update PlayerStats
         playerInfoSO.DeathCount = playerInfoSO.DeathCount + 1;
@@ -247,6 +267,8 @@ public class Player : Entity
 
         // Reset health server-side
         currentHitPoints.value = maximumHitPoints.value;
+        UpdateHealthBars();
+
         isDead.value = false;
 
         // Tell all clients to teleport and refresh UI
@@ -281,6 +303,11 @@ public class Player : Entity
     [ObserversRpc]
     private void RPC_MoveToOutOfBounds()
     {
+        if (isLocalPlayer() && respawnUI != null)
+        {
+            respawnUI.Show();
+        }
+
         if (predictedMovement != null)
         {
             predictedMovement.transform.position = outOfBoundsPosition;
@@ -291,14 +318,24 @@ public class Player : Entity
     [ObserversRpc]
     private void RPC_Respawn(Vector3 spawnPosition)
     {
+        if (isLocalPlayer() && respawnUI != null)
+        {
+            respawnUI.Hide();
+        }
+
         if (predictedMovement != null)
         {
             predictedMovement.transform.position = spawnPosition;
             predictedMovement._rigidbody.linearVelocity = Vector3.zero;
         }
 
+        if (predictedMovement.transform.position == outOfBoundsPosition)
+        {
+            Debug.LogWarning($"[Player] {entityName} was still at out-of-bounds position during RPC_Respawn. Teleporting to spawn point.");
+            predictedMovement.transform.position = spawnPosition;
+        }
+
         Debug.Log($"[Player] {entityName} respawned at {spawnPosition}");
-        if (isLocalPlayer() && respawnUI != null) respawnUI.Hide();
     }
 
     //Update Player stats on kill
@@ -341,12 +378,15 @@ public class Player : Entity
 
     public bool isLocalPlayer()
     {
+        if (predictedMovement == null) return false;
+
         return predictedMovement.predictionManager.localPlayer == GetPlayerID();
     }
+
     [ObserversRpc]
-    public void RPC_ShowGameResult(Entity.Team result)
+    public void RPC_ShowGameResult(Entity.Team? result)
     {
-        if (!isLocalPlayer()) return;
+        if (!isLocalPlayer() || result == null) return;
 
         bool iWon = false;
         if (GetTeam() == result) iWon = true;

@@ -6,6 +6,15 @@ public class BloodShotProjectile : Projectile
     protected override void OnTriggerEnter(Collider other)
     {
         if (!isServer || !isActive) return;
+        Entity target = other.GetComponent<Entity>();
+
+        // Ignore non-entities
+        if (target == null || target.GetNetworkID(isServer) == null)
+        {
+            return;
+        }
+
+        Debug.Log($"[Projectile] OnTriggerEnter with OBJ: {target.name} | ID: {target.GetNetworkID(isServer)}");
 
         // Ignore owner
         if (ownerId.HasValue)
@@ -13,18 +22,11 @@ public class BloodShotProjectile : Projectile
             Entity ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
             if (ownerEntity != null)
             {
-                if (other.transform.IsChildOf(ownerEntity.transform) || other.gameObject == ownerEntity.gameObject)
+                if (other.transform.IsChildOf(ownerEntity.transform) || ownerId == target.GetNetworkID(isServer))
                 {
                     return;
                 }
             }
-        }
-
-        // Ignore non-entities
-        Entity target = other.GetComponent<Entity>();
-        if (target == null)
-        {
-            return;
         }
 
         // Ignore friendlies
@@ -59,7 +61,7 @@ public class BloodShotProjectile : Projectile
             Entity e = Entity.GetEntityFromCollider(c);
             if (e == null) { continue; }
             if (e.GetIsDead()) { continue; }
-            if (e == ownerEntity) { continue; }
+            if (e.GetNetworkID(isServer) == ownerId) { continue; }
             if (e.GetTeam() == ownerEntity.GetTeam()) { continue; }
 
             Debug.Log($"[BloodShot] Hit {e.name} for {damage} damage!");

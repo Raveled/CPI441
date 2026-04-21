@@ -3,6 +3,7 @@ using PurrNet.Prediction;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement.MoveInput, PredictedPlayerMovement.MoveState>
 {
@@ -19,13 +20,15 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     [SerializeField] private float moveSpeed = 0f;
     [SerializeField] private float jumpForce = 0f;
     [SerializeField] private float jumpCooldownTime = 0f;
-    [SerializeField] private float groundCheckYOffset = 0.9f;
 
     [SerializeField] private float acceleration = 0f;
     [SerializeField] private float planarDamping = 0f;
 
-    [Header("Ground Check Settings")]
-    [SerializeField] private float groundCheckDistance = 0.1f;
+    [Header("Grounding")]
+    [SerializeField] private GameObject groundCheckObject;
+    [SerializeField] private float groundCheckDistance = 0.3f;
+    [SerializeField] private float groundCheckRadius = 0.5f;
+    [SerializeField] private bool grounded;
     [SerializeField] private LayerMask groundLayer;
 
     [Header("Butterfly Fly Runtime")]
@@ -72,17 +75,17 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
 
         if (_player == null && isServer)
         {
-            Debug.Log($"Player {owner.Value} spawning playerRoot prefab");
+            //Debug.Log($"Player {owner.Value} spawning playerRoot prefab");
             GameObject playerObject = Instantiate(playerObj, this.transform);
             playerObject.transform.SetParent(this.transform);
-            playerObject.GetComponent<Player>().SetStatblock(stats);
 
             _player = playerObject.GetComponent<Player>();
-
+            
             if (_player != null)
             {
                 _player.predictedMovement = this;
                 _player.GiveOwnership(owner.Value);
+                _player.SetStatblock(stats);
             }
 
             if (visualRoot != null)
@@ -91,15 +94,7 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
             }
         }
 
-        if (_player != null)
-        {
-            LoadStatsFromPlayer();
-        }
-        else
-        {
-            Debug.LogWarning($"PredictedPlayerMovement on {name} could not find a Player component. If this appears when a player is spawning, it is expected, since there is a slight delay.\n" +
-                $"If you are concerned about a character not having access to the 'player' component, uncomment the debug check in 'update' in this file! - Theo", this);
-        }
+        _rigidbody.isKinematic = false;
 
         if (isOwner)
         {
@@ -117,11 +112,8 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
         beetleAbility = GetComponentInChildren<Beetle>();
     }
 
-    private void LoadStatsFromPlayer()
+    public void LoadStatsFromPlayer()
     {
-        if (_player == null)
-            return;
-
         if (_player.GetEntityStatblock() == null)
             return;
 
@@ -242,16 +234,21 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
         state.jumpCooldown -= delta;
 
         state.isGrounded = CheckGrounded(state.position);
+        if (state.isGrounded && state.velocity.y <= 0f)
+        {
+            state.velocity.y = Mathf.Max(state.velocity.y, -2f); // small downward bias
+        }
 
         // Movement
         Vector3 targetVelocity = (transform.forward * input.moveDirection.y + transform.right * input.moveDirection.x) * moveSpeed;
-        Vector3 velocityDelta = targetVelocity - state.velocity;
+        Vector3 currentVelocity = _rigidbody.linearVelocity;
+        Vector3 velocityDelta = targetVelocity - currentVelocity;
         velocityDelta.y = 0f;
 
         _rigidbody.AddForce(velocityDelta * acceleration, ForceMode.Acceleration);
 
         var horizontal = new Vector3(state.velocity.x, 0f, state.velocity.z);
-        _rigidbody.AddForce(-horizontal * planarDamping);
+        _rigidbody.AddForce(-horizontal * planarDamping * (1f - input.moveDirection.sqrMagnitude));
         if (horizontal.magnitude > moveSpeed)
         {
             state.velocity = new Vector3(targetVelocity.x, state.velocity.y, targetVelocity.z);
@@ -279,11 +276,6 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
         state.position = transform.position;
     }
 
-    private bool CheckGrounded(Vector3 statePosition)
-    {
-        return Physics.Raycast(statePosition, Vector3.down, groundCheckDistance, groundLayer);
-    }
-
     protected override void Update()
     {
         base.Update();
@@ -308,10 +300,12 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     }
 
     private static Collider[] groundColliders = new Collider[8];
-    private bool IsGrounded()
+    private bool CheckGrounded(Vector3 statePosition)
     {
-        var hit = Physics.OverlapSphereNonAlloc(transform.position, groundCheckDistance, groundColliders, groundLayer);
-        return hit > 0;
+        Vector3 origin = statePosition + Vector3.down * groundCheckObject.transform.localPosition.y;
+        int hits = Physics.OverlapSphereNonAlloc(origin, groundCheckRadius, groundColliders, groundLayer, QueryTriggerInteraction.Ignore);
+        grounded = hits > 0;
+        return grounded;
     }
 
     protected override void UpdateInput(ref MoveInput input)

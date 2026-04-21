@@ -44,6 +44,7 @@ public class Projectile : NetworkBehaviour
             {
                 rb.isKinematic = true;
                 hitCollider.enabled = false;
+                hitCollider.isTrigger = false;
             }
         }
     }
@@ -56,8 +57,8 @@ public class Projectile : NetworkBehaviour
             return;
         }
 
-        ownerId = ownerEntity.GetNetworkID(true);
-        targetId = targetEntity ? targetEntity.GetNetworkID(true) : null;
+        ownerId = ownerEntity.GetNetworkID(isServer);
+        targetId = targetEntity ? targetEntity.GetNetworkID(isServer) : null;
         this.damage = damage;
         this.enemyTeams = ownerEntity.GetEnemyTeams();
         lifetime = maxLifetime;
@@ -81,7 +82,7 @@ public class Projectile : NetworkBehaviour
     {
         if (!isServer || !isActive) return;
 
-        Debug.Log($"[Projectile] OnTriggerEnter with {other.gameObject.name}");
+        //Debug.Log($"[Projectile] OnTriggerEnter with {other.gameObject.name}");
 
         if (!Entity.GetEntityFromCollider(other))
             Detonate();
@@ -121,7 +122,7 @@ public class Projectile : NetworkBehaviour
 
             if (enemyTeams.Contains(e.GetTeam()))
             {
-                Debug.Log($"[Projectile] Dealing {damage} damage to {e.name}");
+                //Debug.Log($"[Projectile] Dealing {damage} damage to {e.name}");
                 e.TakeDamage(damage, ownerEntity);
             }
         }

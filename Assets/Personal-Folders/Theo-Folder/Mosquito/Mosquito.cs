@@ -68,7 +68,7 @@ public class Mosquito : NetworkBehaviour
 
     private IEnumerator DelayedSpawn(bool asServer)
     {
-        yield return new WaitForSeconds(0.05f);
+        yield return new WaitForSeconds(0.1f);
 
         base.OnSpawned();
 

@@ -8,7 +8,7 @@ using PurrNet.Prediction;
 public class Tower : NonPlayerEntity
 {
     [Header("Tower Setup")]
-    [SerializeField] TowerProjectile towerProjectilePrefab = null;
+    [SerializeField] GameObject towerProjectilePrefab = null;
     [SerializeField] SyncVar<float> projectileSpeed = new(5f);
     protected override void Start() {
         base.Start();
@@ -44,13 +44,34 @@ public class Tower : NonPlayerEntity
             //Get direction between target and this tower
             Vector3 direction = (currentTarget.transform.position - attackRangeOrigin.position).normalized;
 
-            //Instantiate new projectile and set it's properties
-            PredictionManager predictionManager = FindFirstObjectByType<PredictionManager>();
-            PredictedObjectID? projPredictedId = predictionManager.hierarchy.Create(towerProjectilePrefab.gameObject, attackRangeOrigin.position, attackRangeOrigin.rotation);
-            GameObject proj = predictionManager.hierarchy.GetGameObject(projPredictedId);
-            proj.GetComponent<TowerProjectile>().SpawnSetup(this, attackPower.value, direction, projectileSpeed.value, currentTarget);
+            // Send ServerRpc to handle the projectile spawning
+            ServerSpawnTowerProjectileRpc(attackRangeOrigin.position, attackRangeOrigin.rotation, direction, currentTarget);
         }
     }
+
+    [ServerRpc(requireOwnership: false)]
+    private void ServerSpawnTowerProjectileRpc(Vector3 position, Quaternion rotation, Vector3 direction, Entity target)
+    {
+        if (!isServer) return;
+
+        ServerSpawnTowerProjectile(position, rotation, direction, target);
+    }
+
+    private void ServerSpawnTowerProjectile(Vector3 position, Quaternion rotation, Vector3 direction, Entity target)
+    {
+        if (towerProjectilePrefab == null) 
+        { 
+            Debug.LogError("[Tower] towerProjectilePrefab is NULL!"); 
+            return; 
+        }
+
+        GameObject proj = Instantiate(towerProjectilePrefab, position, rotation);
+
+        proj.GetComponent<TowerProjectile>().SpawnSetup(this, attackPower.value, direction, projectileSpeed.value, target);
+
+        NetworkManager.main.Spawn(proj);
+    }
+
     protected override void Die(Entity damageOrigin) {
         if (isServer)
         {
