@@ -42,6 +42,8 @@ public class Beetle : NetworkBehaviour
     [SerializeField] private GameObject stompPrefab;
     [SerializeField] private float stompRadius = 4f;
     [SerializeField] private int stompDamage = 8;
+    [SerializeField] private float stompDuration = 3f;
+    [SerializeField] private float stompTickInterval = 0.5f;
     [SerializeField] private float stompStunDuration = 1.5f;
 
     [Header("Animator")]
@@ -85,6 +87,7 @@ public class Beetle : NetworkBehaviour
 
         StartCoroutine(DelayedSpawn(asServer));
     }
+
     private IEnumerator DelayedSpawn(bool asServer)
     {
         yield return new WaitForSeconds(0.05f);
@@ -263,7 +266,6 @@ public class Beetle : NetworkBehaviour
         Debug.Log("Horn Impale! - Beetle.cs");
     }
 
-
     // ABILITY 2 - SWAGGER
     public void ActivateSwagger()
     {
@@ -420,7 +422,6 @@ public class Beetle : NetworkBehaviour
     public void CastGroundStomp()
     {
         if (!isController) return;
-        if (stompPrefab == null || player == null) return;
 
         PlayStompAnimServerRpc();
 
@@ -442,25 +443,32 @@ public class Beetle : NetworkBehaviour
 
     private void ApplyGroundStomp()
     {
-        // Visual effect
-        if (stompPrefab != null)
+        if (stompPrefab == null) { Debug.LogError("[Beetle] stompPrefab is NULL!"); return; }
+        if (player == null) { Debug.LogError("[Beetle] player is NULL!"); return; }
+        if (networkManager == null) { Debug.LogError("[Beetle] networkManager is NULL!"); return; }
+
+        GameObject stompGO = Instantiate(stompPrefab, transform.position, Quaternion.identity);
+
+        GroundStompArea stomp = stompGO.GetComponent<GroundStompArea>();
+        if (stomp == null)
         {
-            GameObject stompGO = Instantiate(stompPrefab, transform.position, Quaternion.identity);
-            NetworkManager.main.Spawn(stompGO);
+            Debug.LogError("[Beetle] GroundStompArea component missing from stompPrefab root!");
+            Destroy(stompGO);
+            return;
         }
 
-        // AOE damage + stun
-        Collider[] hits = Physics.OverlapSphere(transform.position, stompRadius);
-        foreach (var hit in hits)
-        {
-            Player target = hit.GetComponent<Player>();
-            if (target != null && target != player && !player.GetEnemyTeams().Contains(target.GetTeam()))
-            {
-                target.TakeDamage(stompDamage, player);
-                target.ModifyMoveSpeedMultiplier(0f, stompStunDuration);
-            }
-        }
-        Debug.Log("GROUND STOMP! - Beetle.cs");
+        NetworkManager.main.Spawn(stompGO);
+
+        stomp.SpawnSetup(
+            player,
+            stompRadius,
+            stompDuration,
+            stompDamage,
+            stompTickInterval,
+            stompStunDuration
+        );
+
+        Debug.Log($"[Beetle] Ground Stomp spawned at {transform.position}");
     }
 
     public float GetMoveSpeedMultiplier()
