@@ -54,8 +54,6 @@ public class BloodShotProjectile : Projectile
             return;
         }
 
-        Debug.LogError($"[BloodShot] ApplyDamage - owner ID={ownerId}");
-
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, hitRadius);
 
         foreach (Collider c in hitColliders)

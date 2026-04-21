@@ -100,7 +100,7 @@ public class Player : Entity
                 SetTeam((Entity.Team) playerInfoNN.team);
                 character.value = playerInfoNN.character;
 
-                Debug.Log("[PLAYER] OnSpawned Called on SERVER for Player ID: " + playerID + " | IsLocalPlayer: " + isLocalPlayer() + " | Team: " + team.value + " | Character: " + character.value);
+                //Debug.Log("[PLAYER] OnSpawned Called on SERVER for Player ID: " + playerID + " | IsLocalPlayer: " + isLocalPlayer() + " | Team: " + team.value + " | Character: " + character.value);
                 //GameManager.Instance.DebugPrintPlayersInfo();
 
                 // Tell all clients to do their LOCAL-only setup
@@ -230,7 +230,7 @@ public class Player : Entity
             healthBarSliderUI.value = currentHitPoints.value;
         }
     }
-
+    
     protected override void Die(Entity damageOrigin) {
         if (playerInfoSO == null) return; // Should never happen, but just in case
 
@@ -239,7 +239,7 @@ public class Player : Entity
         UpdateHealthBars();
         Debug.Log("Player: " + GetPlayerID() + " has died");
 
-        if (isLocalPlayer() && respawnUI != null) respawnUI.Show();
+        //RPC_ShowRespawnUI();
 
         // Update PlayerStats
         playerInfoSO.DeathCount = playerInfoSO.DeathCount + 1;
@@ -303,6 +303,11 @@ public class Player : Entity
     [ObserversRpc]
     private void RPC_MoveToOutOfBounds()
     {
+        if (isLocalPlayer() && respawnUI != null)
+        {
+            respawnUI.Show();
+        }
+
         if (predictedMovement != null)
         {
             predictedMovement.transform.position = outOfBoundsPosition;
@@ -313,6 +318,11 @@ public class Player : Entity
     [ObserversRpc]
     private void RPC_Respawn(Vector3 spawnPosition)
     {
+        if (isLocalPlayer() && respawnUI != null)
+        {
+            respawnUI.Hide();
+        }
+
         if (predictedMovement != null)
         {
             predictedMovement.transform.position = spawnPosition;
@@ -326,7 +336,6 @@ public class Player : Entity
         }
 
         Debug.Log($"[Player] {entityName} respawned at {spawnPosition}");
-        if (isLocalPlayer() && respawnUI != null) respawnUI.Hide();
     }
 
     //Update Player stats on kill

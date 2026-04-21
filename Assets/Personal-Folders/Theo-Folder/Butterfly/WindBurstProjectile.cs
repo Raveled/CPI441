@@ -57,13 +57,13 @@ public class WindBurstProjectile : Projectile
         foreach (Collider c in hitColliders)
         {
             Entity e = Entity.GetEntityFromCollider(c);
-            if (e == null) continue;
-            if (e.GetIsDead()) continue;
-            if (e == ownerEntity) continue;
-            if (e.GetTeam() == ownerEntity.GetTeam()) continue;
+            if (e == null) { continue; }
+            if (e.GetIsDead()) { continue; }
+            if (e.GetNetworkID(isServer) == ownerId) { continue; }
+            if (e.GetTeam() == ownerEntity.GetTeam()) { continue; }
 
             Debug.Log($"[WindBurst] Hit {e.name} for {damage} damage!");
             e.TakeDamage(damage, ownerEntity);
         }
-    }
+    }       
 }

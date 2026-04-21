@@ -549,7 +549,7 @@ public class GameManager : NetworkBehaviour
         {
             if (i.playerID == player)
             {
-                Debug.Log($"[GameManager] Found configuration for Player {player}: Team {i.team}, Character {i.character}");
+                //Debug.Log($"[GameManager] Found configuration for Player {player}: Team {i.team}, Character {i.character}");
                 return i;
             }
         }

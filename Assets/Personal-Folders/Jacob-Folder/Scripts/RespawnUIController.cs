@@ -13,12 +13,14 @@ public class RespawnUIController : MonoBehaviour
 
     public void Hide()
     {
+        Debug.Log("Hiding Respawn UI");
         respawnText.alpha = 0f;
         respawnBackground.color = new Color(respawnBackground.color.r, respawnBackground.color.g, respawnBackground.color.b, 0f);
     }
 
     public void Show()
     {
+        Debug.Log("Showing Respawn UI");
         respawnText.alpha = 1f;
         respawnBackground.color = new Color(respawnBackground.color.r, respawnBackground.color.g, respawnBackground.color.b, 1f);
     }
