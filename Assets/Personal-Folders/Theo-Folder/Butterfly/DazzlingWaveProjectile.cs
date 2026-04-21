@@ -6,6 +6,13 @@ public class DazzlingWaveProjectile : Projectile
     protected override void OnTriggerEnter(Collider other)
     {
         if (!isServer || !isActive) return;
+        Entity target = other.GetComponent<Entity>();
+
+        // Ignore non-entities
+        if (target == null)
+        {
+            return;
+        }
 
         // Ignore owner
         if (ownerId.HasValue)
@@ -13,18 +20,11 @@ public class DazzlingWaveProjectile : Projectile
             Entity ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
             if (ownerEntity != null)
             {
-                if (other.transform.IsChildOf(ownerEntity.transform) || other.gameObject == ownerEntity.gameObject)
+                if (other.transform.IsChildOf(ownerEntity.transform) || ownerId == target.GetNetworkID(isServer))
                 {
                     return;
                 }
             }
-        }
-
-        // Ignore non-entities
-        Entity target = other.GetComponent<Entity>();
-        if (target == null)
-        {
-            return;
         }
 
         // Ignore friendlies

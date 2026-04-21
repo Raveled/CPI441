@@ -75,23 +75,23 @@ public class Player : Entity
             if (predictedMovement == null) predictedMovement = parentObject.GetComponent<PredictedPlayerMovement>();
         }
 
+        predictedMovement.LoadStatsFromPlayer();
+
         // Find PlayerID
         playerID = GetPlayerID();
 
         if (isServer)
         {
-            Debug.Log("[PLAYER] OnSpawned Called on SERVER for Player ID: " + playerID + " | IsLocalPlayer: " + isLocalPlayer());
-
             // Cross Reference PlayerInfo with GameManager Instance
             // GameManager playerInfo list will be a server side authority of player features like Team/Character
             GameManager.PlayerInfo? playerInfo = GameManager.Instance.GetPlayerConfiguration(playerID);
             if (playerInfo != null)
             {
                 GameManager.PlayerInfo playerInfoNN = (GameManager.PlayerInfo) playerInfo;
-                team.value = (Entity.Team) playerInfoNN.team;
+                SetTeam((Entity.Team) playerInfoNN.team);
                 character.value = playerInfoNN.character;
 
-                //Debug.Log("[PLAYER]  Player ID: " + playerID + " | Team: " + team.value);
+                Debug.Log("[PLAYER] OnSpawned Called on SERVER for Player ID: " + playerID + " | IsLocalPlayer: " + isLocalPlayer() + " | Team: " + team.value + " | Character: " + character.value);
                 //GameManager.Instance.DebugPrintPlayersInfo();
 
                 // Tell all clients to do their LOCAL-only setup
@@ -135,11 +135,18 @@ public class Player : Entity
             if (GetTeam() == t.GetTeam()) friendlyTowers.Add(t);
         }
 
-        //Debug.Log($"[Client] Player {GetPlayerID()} locals initialized, team: {GetTeam()}");
+        Debug.Log($"[Client] Player {GetPlayerID()} locals initialized, team: {GetTeam()}");
     }
 
     public override bool TakeDamage(int damage, Entity damageOrigin) {
         if (isDead.value) return false;
+
+        if (friendlyTowers == null) 
+        {
+            Debug.Log($"[Player] {playerID} has no friendly towers list! This should have been initialized in RPC_InitializePlayerLocals.");
+            
+            return base.TakeDamage(0, damageOrigin);
+        }
 
         //Check Friendly Tower Aggro
         Tower closestTower = null;
@@ -214,6 +221,8 @@ public class Player : Entity
     }
 
     protected override void Die(Entity damageOrigin) {
+        if (playerInfoSO == null) return; // Should never happen, but just in case
+
         base.Die(damageOrigin);
         currentHitPoints.value = 0;
         UpdateHealthBars();
@@ -341,12 +350,15 @@ public class Player : Entity
 
     public bool isLocalPlayer()
     {
+        if (predictedMovement == null) return false;
+
         return predictedMovement.predictionManager.localPlayer == GetPlayerID();
     }
+
     [ObserversRpc]
-    public void RPC_ShowGameResult(Entity.Team result)
+    public void RPC_ShowGameResult(Entity.Team? result)
     {
-        if (!isLocalPlayer()) return;
+        if (!isLocalPlayer() || result == null) return;
 
         bool iWon = false;
         if (GetTeam() == result) iWon = true;

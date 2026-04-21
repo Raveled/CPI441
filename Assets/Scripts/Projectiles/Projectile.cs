@@ -44,6 +44,7 @@ public class Projectile : NetworkBehaviour
             {
                 rb.isKinematic = true;
                 hitCollider.enabled = false;
+                hitCollider.isTrigger = false;
             }
         }
     }
@@ -81,7 +82,7 @@ public class Projectile : NetworkBehaviour
     {
         if (!isServer || !isActive) return;
 
-        Debug.Log($"[Projectile] OnTriggerEnter with {other.gameObject.name}");
+        //Debug.Log($"[Projectile] OnTriggerEnter with {other.gameObject.name}");
 
         if (!Entity.GetEntityFromCollider(other))
             Detonate();

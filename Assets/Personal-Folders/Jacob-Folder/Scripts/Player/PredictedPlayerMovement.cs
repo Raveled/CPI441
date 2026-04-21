@@ -25,7 +25,6 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     [SerializeField] private float planarDamping = 0f;
 
     [Header("Ground Check Settings")]
-    [SerializeField] private float groundCheckDistance = 0.1f;
     [SerializeField] private LayerMask groundLayer;
 
     [Header("Butterfly Fly Runtime")]
@@ -72,17 +71,17 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
 
         if (_player == null && isServer)
         {
-            Debug.Log($"Player {owner.Value} spawning playerRoot prefab");
+            //Debug.Log($"Player {owner.Value} spawning playerRoot prefab");
             GameObject playerObject = Instantiate(playerObj, this.transform);
             playerObject.transform.SetParent(this.transform);
-            playerObject.GetComponent<Player>().SetStatblock(stats);
 
             _player = playerObject.GetComponent<Player>();
-
+            
             if (_player != null)
             {
                 _player.predictedMovement = this;
                 _player.GiveOwnership(owner.Value);
+                _player.SetStatblock(stats);
             }
 
             if (visualRoot != null)
@@ -91,15 +90,7 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
             }
         }
 
-        if (_player != null)
-        {
-            LoadStatsFromPlayer();
-        }
-        else
-        {
-            Debug.LogWarning($"PredictedPlayerMovement on {name} could not find a Player component. If this appears when a player is spawning, it is expected, since there is a slight delay.\n" +
-                $"If you are concerned about a character not having access to the 'player' component, uncomment the debug check in 'update' in this file! - Theo", this);
-        }
+        _rigidbody.isKinematic = false;
 
         if (isOwner)
         {
@@ -117,11 +108,8 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
         beetleAbility = GetComponentInChildren<Beetle>();
     }
 
-    private void LoadStatsFromPlayer()
+    public void LoadStatsFromPlayer()
     {
-        if (_player == null)
-            return;
-
         if (_player.GetEntityStatblock() == null)
             return;
 
@@ -281,7 +269,7 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
 
     private bool CheckGrounded(Vector3 statePosition)
     {
-        return Physics.Raycast(statePosition, Vector3.down, groundCheckDistance, groundLayer);
+        return Physics.Raycast(statePosition, Vector3.down, groundCheckYOffset, groundLayer);
     }
 
     protected override void Update()
@@ -310,7 +298,7 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     private static Collider[] groundColliders = new Collider[8];
     private bool IsGrounded()
     {
-        var hit = Physics.OverlapSphereNonAlloc(transform.position, groundCheckDistance, groundColliders, groundLayer);
+        var hit = Physics.OverlapSphereNonAlloc(transform.position, groundCheckYOffset, groundColliders, groundLayer);
         return hit > 0;
     }
 
