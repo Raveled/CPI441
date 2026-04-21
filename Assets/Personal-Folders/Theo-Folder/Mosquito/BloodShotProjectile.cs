@@ -9,10 +9,12 @@ public class BloodShotProjectile : Projectile
         Entity target = other.GetComponent<Entity>();
 
         // Ignore non-entities
-        if (target == null)
+        if (target == null || target.GetNetworkID(isServer) == null)
         {
             return;
         }
+
+        Debug.Log($"[Projectile] OnTriggerEnter with OBJ: {target.name} | ID: {target.GetNetworkID(isServer)}");
 
         // Ignore owner
         if (ownerId.HasValue)
@@ -52,6 +54,8 @@ public class BloodShotProjectile : Projectile
             return;
         }
 
+        Debug.LogError($"[BloodShot] ApplyDamage - owner ID={ownerId}");
+
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, hitRadius);
 
         foreach (Collider c in hitColliders)
@@ -59,7 +63,7 @@ public class BloodShotProjectile : Projectile
             Entity e = Entity.GetEntityFromCollider(c);
             if (e == null) { continue; }
             if (e.GetIsDead()) { continue; }
-            if (e == ownerEntity) { continue; }
+            if (e.GetNetworkID(isServer) == ownerId) { continue; }
             if (e.GetTeam() == ownerEntity.GetTeam()) { continue; }
 
             Debug.Log($"[BloodShot] Hit {e.name} for {damage} damage!");

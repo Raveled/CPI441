@@ -151,7 +151,7 @@ GameObject:
   - component: {fileID: 6056569021579865597}
   - component: {fileID: 2235254202730599474}
   - component: {fileID: 709166347520052202}
-  - component: {fileID: 5612005942367703090}
+  - component: {fileID: -3887538155044755821}
   m_Layer: 6
   m_Name: PlayerRootMosquito
   m_TagString: Untagged
@@ -169,7 +169,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 3881523764543931839}
@@ -277,6 +277,7 @@ MonoBehaviour:
     _sendIntervalInSeconds: 0
   respawnTime: 10
   outOfBoundsPosition: {x: 0, y: -1000, z: 0}
+  respawnUI: {fileID: 0}
 --- !u!114 &6056569021579865597
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -360,15 +361,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
   items: []
-  maxSlots: 6
---- !u!65 &5612005942367703090
+--- !u!65 &-3887538155044755821
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6682633530466954004}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: ac871b7548cf83549be076810d264e18, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -376,12 +376,12 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.6599617, y: 0.7590864, z: 1.659962}
-  m_Center: {x: 0, y: 0.35, z: 0.24}
+  m_Size: {x: 0.92, y: 2.58, z: 1.94}
+  m_Center: {x: 0, y: 1.29, z: 0.07}
 --- !u!1001 &1496728147115558914
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -468,7 +468,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2384800166135074237, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 7.26
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 2384800166135074237, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

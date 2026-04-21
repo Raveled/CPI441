@@ -51,6 +51,15 @@ public class Player : Entity
 
         base.OnSpawned(asServer);
 
+        // Fix sizing and placement issue
+        GameObject thisPlayerObject = this.gameObject;
+        if (thisPlayerObject.name.Contains("PlayerRoot"))
+        {
+            thisPlayerObject.transform.localScale = Vector3.one;
+            thisPlayerObject.transform.localPosition = Vector3.zero;
+            thisPlayerObject.transform.localRotation = Quaternion.identity;
+        }
+
         if (!isServer)
         {
             PredictedPlayerMovement[] ppMovements = FindObjectsByType<PredictedPlayerMovement>(FindObjectsSortMode.None);
@@ -96,6 +105,8 @@ public class Player : Entity
 
                 // Tell all clients to do their LOCAL-only setup
                 RPC_InitializePlayerLocals();
+
+                this.isDead.value = false;
             }
             else Debug.Log("[PLAYER - WARNING] NO PLAYER INFO FOUND");
         }
@@ -256,6 +267,8 @@ public class Player : Entity
 
         // Reset health server-side
         currentHitPoints.value = maximumHitPoints.value;
+        UpdateHealthBars();
+
         isDead.value = false;
 
         // Tell all clients to teleport and refresh UI
@@ -304,6 +317,12 @@ public class Player : Entity
         {
             predictedMovement.transform.position = spawnPosition;
             predictedMovement._rigidbody.linearVelocity = Vector3.zero;
+        }
+
+        if (predictedMovement.transform.position == outOfBoundsPosition)
+        {
+            Debug.LogWarning($"[Player] {entityName} was still at out-of-bounds position during RPC_Respawn. Teleporting to spawn point.");
+            predictedMovement.transform.position = spawnPosition;
         }
 
         Debug.Log($"[Player] {entityName} respawned at {spawnPosition}");

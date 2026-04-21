@@ -3,6 +3,7 @@ using PurrNet.Prediction;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement.MoveInput, PredictedPlayerMovement.MoveState>
 {
@@ -19,12 +20,15 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     [SerializeField] private float moveSpeed = 0f;
     [SerializeField] private float jumpForce = 0f;
     [SerializeField] private float jumpCooldownTime = 0f;
-    [SerializeField] private float groundCheckYOffset = 0.9f;
 
     [SerializeField] private float acceleration = 0f;
     [SerializeField] private float planarDamping = 0f;
 
-    [Header("Ground Check Settings")]
+    [Header("Grounding")]
+    [SerializeField] private GameObject groundCheckObject;
+    [SerializeField] private float groundCheckDistance = 0.3f;
+    [SerializeField] private float groundCheckRadius = 0.5f;
+    [SerializeField] private bool grounded;
     [SerializeField] private LayerMask groundLayer;
 
     [Header("Butterfly Fly Runtime")]
@@ -230,16 +234,21 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
         state.jumpCooldown -= delta;
 
         state.isGrounded = CheckGrounded(state.position);
+        if (state.isGrounded && state.velocity.y <= 0f)
+        {
+            state.velocity.y = Mathf.Max(state.velocity.y, -2f); // small downward bias
+        }
 
         // Movement
         Vector3 targetVelocity = (transform.forward * input.moveDirection.y + transform.right * input.moveDirection.x) * moveSpeed;
-        Vector3 velocityDelta = targetVelocity - state.velocity;
+        Vector3 currentVelocity = _rigidbody.linearVelocity;
+        Vector3 velocityDelta = targetVelocity - currentVelocity;
         velocityDelta.y = 0f;
 
         _rigidbody.AddForce(velocityDelta * acceleration, ForceMode.Acceleration);
 
         var horizontal = new Vector3(state.velocity.x, 0f, state.velocity.z);
-        _rigidbody.AddForce(-horizontal * planarDamping);
+        _rigidbody.AddForce(-horizontal * planarDamping * (1f - input.moveDirection.sqrMagnitude));
         if (horizontal.magnitude > moveSpeed)
         {
             state.velocity = new Vector3(targetVelocity.x, state.velocity.y, targetVelocity.z);
@@ -267,11 +276,6 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
         state.position = transform.position;
     }
 
-    private bool CheckGrounded(Vector3 statePosition)
-    {
-        return Physics.Raycast(statePosition, Vector3.down, groundCheckYOffset, groundLayer);
-    }
-
     protected override void Update()
     {
         base.Update();
@@ -296,10 +300,12 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
     }
 
     private static Collider[] groundColliders = new Collider[8];
-    private bool IsGrounded()
+    private bool CheckGrounded(Vector3 statePosition)
     {
-        var hit = Physics.OverlapSphereNonAlloc(transform.position, groundCheckYOffset, groundColliders, groundLayer);
-        return hit > 0;
+        Vector3 origin = statePosition + Vector3.down * groundCheckObject.transform.localPosition.y;
+        int hits = Physics.OverlapSphereNonAlloc(origin, groundCheckRadius, groundColliders, groundLayer, QueryTriggerInteraction.Ignore);
+        grounded = hits > 0;
+        return grounded;
     }
 
     protected override void UpdateInput(ref MoveInput input)
