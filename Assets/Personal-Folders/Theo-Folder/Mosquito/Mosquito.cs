@@ -4,6 +4,7 @@ using PurrNet;
 using PurrNet.Prediction;
 using UnityEngine.EventSystems;
 using System;
+using Unity.VisualScripting;
 
 public class Mosquito : NetworkBehaviour
 {
@@ -199,6 +200,7 @@ public class Mosquito : NetworkBehaviour
         Debug.Log($"[Mosquito] Quick Poke - overlap sphere at {origin}, range={quickPokeRange}");
 
         Collider[] hits = Physics.OverlapSphere(origin, quickPokeRange);
+
         int hitCount = 0;
 
         foreach (Collider hit in hits)
@@ -384,4 +386,14 @@ public class Mosquito : NetworkBehaviour
 
     [ContextMenu("Test Amp Up")]
     private void TestAmpUp() => ActivateAmpUp();
+
+    // ========== GIZMOS FOR VISUALIZATION ==========
+    private void OnDrawGizmosSelected()
+    {
+        if (quickPokeOrigin != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(quickPokeOrigin.position, quickPokeRange);
+        }
+    }
 }
