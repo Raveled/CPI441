@@ -20703,6 +20703,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: T2_Spawn3
       objectReference: {fileID: 0}
+    - target: {fileID: 2221630867754063606, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 57.45
+      objectReference: {fileID: 0}
     - target: {fileID: 2895013378547183781, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: m_Name
       value: T1_Spawn2
@@ -20726,6 +20730,14 @@ PrefabInstance:
     - target: {fileID: 4048333129934864333, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: m_Name
       value: T1_Spawn1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4378048839524894691, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 57.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4524921500119811135, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 57.49
       objectReference: {fileID: 0}
     - target: {fileID: 5391069861843759595, guid: 29fbce7a0d404494092bf93d390514f7, type: 3}
       propertyPath: m_LocalPosition.y
