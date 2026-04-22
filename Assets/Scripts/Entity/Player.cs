@@ -28,6 +28,7 @@ public class Player : Entity
 
     private GameObject parentObject;
     private UnityEngine.UI.Slider healthBarSliderUI;
+    private HPBarHelper hpBarHelper;
 
     [Header("Respawn Settings")]
     [SerializeField] private float respawnTime = 10f;
@@ -128,7 +129,9 @@ public class Player : Entity
     private void InitHealthBars()
     {
         if (healthBar != null) healthBar.transform.parent.gameObject.SetActive(false);
-        healthBarSliderUI = GameObject.Find("HealthSlider").GetComponent<UnityEngine.UI.Slider>();
+        GameObject obj = GameObject.Find("HealthSlider");
+        healthBarSliderUI = obj.GetComponent<UnityEngine.UI.Slider>();
+        hpBarHelper = obj.GetComponent<HPBarHelper>();
         UpdateHealthBars();
     }
 
@@ -228,6 +231,7 @@ public class Player : Entity
         {
             healthBarSliderUI.maxValue = maximumHitPoints.value;
             healthBarSliderUI.value = currentHitPoints.value;
+            hpBarHelper.SetText(currentHitPoints + " / " + maximumHitPoints);
         }
     }
     
