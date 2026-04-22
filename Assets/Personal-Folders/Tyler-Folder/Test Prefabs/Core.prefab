@@ -353,9 +353,6 @@ MonoBehaviour:
   targetId:
     _ownerAuth: 0
     _sendIntervalInSeconds: 0
-  targetPlayerId:
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
   hasTarget:
     _value: 0
     _ownerAuth: 0
@@ -1592,7 +1589,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2384800166135074237, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 7.26
+      value: 5.6
       objectReference: {fileID: 0}
     - target: {fileID: 2384800166135074237, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -1609,6 +1606,18 @@ PrefabInstance:
     - target: {fileID: 2511729879105113337, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
       propertyPath: m_Name
       value: NPE Health Bar
+      objectReference: {fileID: 0}
+    - target: {fileID: 2842436794248288932, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 169.494
+      objectReference: {fileID: 0}
+    - target: {fileID: 2842436794248288932, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 27.269
+      objectReference: {fileID: 0}
+    - target: {fileID: 3638462808540575202, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
+      propertyPath: m_PresetInfoIsWorld
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3937284958113983709, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
       propertyPath: m_AnchorMax.x
