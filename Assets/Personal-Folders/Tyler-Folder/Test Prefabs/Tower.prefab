@@ -1,5 +1,109 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &80786600580210095
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7737099275697393950}
+  - component: {fileID: 2779267412853624100}
+  - component: {fileID: 624458714113182990}
+  - component: {fileID: 4529148729930383312}
+  m_Layer: 0
+  m_Name: ProjectileOrigin
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7737099275697393950
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 80786600580210095}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 5.13, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 52383368268841401}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &2779267412853624100
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 80786600580210095}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &624458714113182990
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 80786600580210095}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: f1a3d16d251966c44a77347e736e632a, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &4529148729930383312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 80786600580210095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3380a30c495ab443b0f333f53ba34c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DisableVisualOnStart
+  disableOnAwake: 1
 --- !u!1 &722777375104885105
 GameObject:
   m_ObjectHideFlags: 0
@@ -240,6 +344,7 @@ Transform:
   - {fileID: 5200355125836496265}
   - {fileID: 2091050431416320281}
   - {fileID: 2427360568847953857}
+  - {fileID: 7737099275697393950}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!136 &6734672149623736926
@@ -378,6 +483,7 @@ MonoBehaviour:
     _value: 5
     _ownerAuth: 0
     _sendIntervalInSeconds: 0
+  projectileOrigin: {fileID: 7737099275697393950}
 --- !u!54 &5377689714364696824
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -485,7 +591,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4629226148207852019
 Transform:
   m_ObjectHideFlags: 0
@@ -845,6 +951,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: NPE Health Bar
       objectReference: {fileID: 0}
+    - target: {fileID: 2842436794248288932, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 200
+      objectReference: {fileID: 0}
+    - target: {fileID: 2842436794248288932, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 34.95
+      objectReference: {fileID: 0}
+    - target: {fileID: 2842436794248288932, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -16
+      objectReference: {fileID: 0}
+    - target: {fileID: 3638462808540575202, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
+      propertyPath: m_PresetInfoIsWorld
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3937284958113983709, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -896,7 +1018,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8633370519846755494, guid: 0b8e6a3dc015e174ea8ec65c3598ee51, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.22
+      value: 0.13
       objectReference: {fileID: 0}
     - target: {fileID: 8633370519846755494, guid: 0b8e6a3dc015e174ea8ec65c3598ee51, type: 3}
       propertyPath: m_LocalPosition.y
@@ -904,7 +1026,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8633370519846755494, guid: 0b8e6a3dc015e174ea8ec65c3598ee51, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.57
+      value: 0.22
       objectReference: {fileID: 0}
     - target: {fileID: 8633370519846755494, guid: 0b8e6a3dc015e174ea8ec65c3598ee51, type: 3}
       propertyPath: m_LocalRotation.w

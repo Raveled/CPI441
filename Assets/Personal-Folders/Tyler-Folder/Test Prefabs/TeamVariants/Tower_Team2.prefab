@@ -48,6 +48,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1642926214052374171, guid: c33c0bd8404863147bc7aabd2814f5f5, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1642926214052374171, guid: c33c0bd8404863147bc7aabd2814f5f5, type: 3}
+      propertyPath: m_Color.g
+      value: 0.9647059
+      objectReference: {fileID: 0}
+    - target: {fileID: 1642926214052374171, guid: c33c0bd8404863147bc7aabd2814f5f5, type: 3}
+      propertyPath: m_Color.r
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2166498419418047786, guid: c33c0bd8404863147bc7aabd2814f5f5, type: 3}
       propertyPath: m_Name
       value: Tower_Team2

@@ -56,6 +56,18 @@ PrefabInstance:
       propertyPath: team
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4863767797016840031, guid: 2591120a107ce4244b4c4c6e3db00828, type: 3}
+      propertyPath: m_Color.b
+      value: 0.5803922
+      objectReference: {fileID: 0}
+    - target: {fileID: 4863767797016840031, guid: 2591120a107ce4244b4c4c6e3db00828, type: 3}
+      propertyPath: m_Color.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4863767797016840031, guid: 2591120a107ce4244b4c4c6e3db00828, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5762904067972339026, guid: 2591120a107ce4244b4c4c6e3db00828, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
