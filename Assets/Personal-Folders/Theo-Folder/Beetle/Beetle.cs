@@ -7,6 +7,7 @@ using static UnityEngine.EventSystems.EventTrigger;
 public class Beetle : NetworkBehaviour
 {
     [SerializeField] public Player player;
+    [SerializeField] public BeetleInputTester inputTester;
 
     [Header("Basic Attack - Mandible Attack")]
     [SerializeField] private int mandibleBaseDamage = 12;
@@ -74,17 +75,6 @@ public class Beetle : NetworkBehaviour
 
     protected override void OnSpawned(bool asServer)
     {
-        base.OnSpawned();
-        Debug.Log($"Beetle OnSpawned {gameObject.name} isOwner:{isOwner} isController:{isController} isServer:{isServer}");
-        player = GetComponent<Player>();
-        if (player == null)
-            player = GetComponentInParent<Player>();
-
-        predictedMovement = GetComponentInParent<PredictedPlayerMovement>();
-
-        BeetleInputTester inputTester = GetComponent<BeetleInputTester>();
-        if (inputTester != null) inputTester.EnableInput();
-
         StartCoroutine(DelayedSpawn(asServer));
     }
 
@@ -93,6 +83,18 @@ public class Beetle : NetworkBehaviour
         yield return new WaitForSeconds(0.05f);
 
         base.OnSpawned();
+
+        Debug.Log($"Beetle OnSpawned {gameObject.name} isOwner:{isOwner} isController:{isController} isServer:{isServer}");
+        if (player == null)
+            player = GetComponentInParent<Player>();
+
+        predictedMovement = GetComponentInParent<PredictedPlayerMovement>();
+
+        if (inputTester == null) 
+        {
+            inputTester = GetComponent<BeetleInputTester>();
+        }
+        inputTester.EnableInput();
 
         GameObject parentObject = transform.parent != null ? transform.parent.gameObject : gameObject;
 

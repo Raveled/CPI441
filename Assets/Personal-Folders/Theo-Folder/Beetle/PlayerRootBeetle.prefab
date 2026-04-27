@@ -174,7 +174,7 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
-  player: {fileID: 0}
+  player: {fileID: 4751865395330377205}
   mandibleBaseDamage: 12
   mandibleRange: 2.5
   mandibleCooldown: 1.2
@@ -194,6 +194,8 @@ MonoBehaviour:
   stompPrefab: {fileID: 5615598041355943147, guid: 627e61fe7547f6e47b82eb0e241bfe42, type: 3}
   stompRadius: 4
   stompDamage: 8
+  stompDuration: 3
+  stompTickInterval: 0.5
   stompStunDuration: 1.5
   animator: {fileID: 0}
   rollDuration: 1

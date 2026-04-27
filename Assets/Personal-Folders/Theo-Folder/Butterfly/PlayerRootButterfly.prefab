@@ -179,8 +179,8 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
-  player: {fileID: 0}
-  inputTester: {fileID: 0}
+  player: {fileID: 4751865395330377205}
+  inputTester: {fileID: -8601327763796926948}
   windBurstProjectilePrefab: {fileID: 7660528519338353513, guid: b499944282f2c7b4c99f69d1c1224545, type: 3}
   windBurstFirePoint: {fileID: 0}
   windBurstBaseDamage: 4
