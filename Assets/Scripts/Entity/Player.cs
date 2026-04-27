@@ -18,6 +18,8 @@ public class Player : Entity
     [SerializeField] SyncVar<int> xpTotal = new(0);
     [SerializeField] MinimapTracker minimapTracker = null;
     [SerializeField] protected UnityEngine.UI.Slider healthBar = null;
+    [SerializeField] private AbilityBarUI abilityBarUI;
+    [SerializeField] private CharacterAbilityIconLoader abilityIconLoader;
     SO_PlayerInfo playerInfoSO = null;
     List<Tower> friendlyTowers;
 
@@ -117,6 +119,12 @@ public class Player : Entity
             if (minimapTracker != null) minimapTracker.AttachMinimapCamera();
             InitHealthBars();
             InitRespawnUI();
+
+            if (abilityBarUI == null)
+                abilityBarUI = FindFirstObjectByType<AbilityBarUI>();
+
+            if (abilityIconLoader == null)
+                abilityIconLoader = FindFirstObjectByType<CharacterAbilityIconLoader>();
         }
     }
 
@@ -192,7 +200,18 @@ public class Player : Entity
 
         return base.TakeDamage(damage, damageOrigin);
     }
+    public bool IsAbilityReady(int slotIndex)
+    {
+        return abilityBarUI != null && abilityBarUI.IsReady(slotIndex);
+    }
 
+    public void NotifyAbilityUsed(int slotIndex, float cooldown)
+    {
+        if (!isLocalPlayer() || abilityBarUI == null)
+            return;
+
+        abilityBarUI.UseAbility(slotIndex, cooldown);
+    }
     protected override void OnHealthChanged(int newHealth)
     {
         base.OnHealthChanged(newHealth);
