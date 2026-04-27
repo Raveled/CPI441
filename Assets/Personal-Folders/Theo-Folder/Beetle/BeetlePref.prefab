@@ -324,7 +324,7 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
-  stats: {fileID: 11400000, guid: a2f27d92d0618f749a6dee4eb1e13594, type: 2}
+  stats: {fileID: 11400000, guid: f1ac5180a9d4c9148bc45bcfb02ef474, type: 2}
 --- !u!1 &8917012355507029038
 GameObject:
   m_ObjectHideFlags: 0

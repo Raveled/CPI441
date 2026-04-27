@@ -50,7 +50,7 @@ public class Player : Entity
 
     private IEnumerator DelayedSpawn(bool asServer)
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.05f);
 
         base.OnSpawned(asServer);
 
