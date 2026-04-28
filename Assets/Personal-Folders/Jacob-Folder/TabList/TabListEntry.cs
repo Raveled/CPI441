@@ -19,22 +19,22 @@ public class TabListEntry : NetworkBehaviour
     public SyncVar<string> steamID;
     public SyncVar<PlayerID> playerID;
     public SyncVar<string> displayName;
-    public SyncVar<Texture2D> avatar;
+    public Texture2D avatar;
     public SyncVar<int> team;
     public SyncVar<string> character;
     public SyncVar<int> kills;
     public SyncVar<int> deaths;
 
-    public void Init(string steamID, PlayerID playerID, string displayName, Texture2D avatar, int team, string character)
+    public void Init(string steamID, PlayerID playerID, string displayName, int team, string character)
     {
         this.steamID.value = steamID;
         this.playerID.value = playerID;
         this.displayName.value = displayName;
-        this.avatar.value = avatar;
         this.team.value = team;
         this.character.value = character;
-        kills.value = 0;
-        deaths.value = 0;
+        this.kills.value = 0;
+        this.deaths.value = 0;
+        this.avatar = null;
     }
 
     private void Update()
@@ -52,8 +52,12 @@ public class TabListEntry : NetworkBehaviour
             }
         }
 
+        if (avatarImage.sprite == null || avatar == null)
+        {
+            setupAvatar();
+        }
+
         displayNameText.text = displayName.value;
-        avatarImage.sprite = avatar.value != null ? Sprite.Create(avatar.value, new Rect(0, 0, avatar.value.width, avatar.value.height), new Vector2(0.5f, 0.5f)) : null;
         switch(character.value.ToLower())
         {
             case "mosquito":
@@ -93,5 +97,24 @@ public class TabListEntry : NetworkBehaviour
     public float GetHeight()
     {
         return backgroundImage.rectTransform.rect.height;
+    }
+
+    public void setupAvatar()
+    {
+        LobbyPlayerRegistry lobbyPlayerRegistry = FindAnyObjectByType<LobbyPlayerRegistry>();
+        List<GameManager.PlayerInfo> playerInfo = GameManager.Instance.GetPlayerInfos();
+
+        if (lobbyPlayerRegistry != null)
+        {
+            List<LobbyUser> lobbyUsers = lobbyPlayerRegistry.GetPlayers();
+            foreach (LobbyUser lobbyUser in lobbyUsers)
+            {
+                if (lobbyUser.Id == steamID.value)
+                {
+                    avatar = lobbyUser.Avatar;
+                    avatarImage.sprite = Sprite.Create(avatar, new Rect(0, 0, avatar.width, avatar.height), new Vector2(0.5f, 0.5f));
+                }
+            }
+        }
     }
 }

@@ -66,7 +66,7 @@ public class TabList : NetworkBehaviour
                     if (lobbyUser.Id == info.steamID.ToString())
                     {
                         TabListEntry entry = Instantiate(tabListEntryPrefab, transform);
-                        entry.Init(lobbyUser.Id, info.playerID, lobbyUser.DisplayName, lobbyUser.Avatar, lobbyUser.Team, lobbyUser.Character);
+                        entry.Init(lobbyUser.Id, info.playerID, lobbyUser.DisplayName, lobbyUser.Team, lobbyUser.Character);
 
                         entries.Add(entry);
                     }
@@ -80,7 +80,7 @@ public class TabList : NetworkBehaviour
             foreach (GameManager.PlayerInfo info in playerInfo)
             {
                 TabListEntry entry = Instantiate(tabListEntryPrefab, transform);
-                entry.Init(null, info.playerID, info.playerID.ToString(), null, (int) info.team, info.character);
+                entry.Init(null, info.playerID, info.playerID.ToString(), (int) info.team, info.character);
 
                 entries.Add(entry);
             }
@@ -124,7 +124,7 @@ public class TabList : NetworkBehaviour
         {
             GameManager.PlayerInfo info = (GameManager.PlayerInfo) playerInfo;
             TabListEntry entry = Instantiate(tabListEntryPrefab, transform);
-            entry.Init(null, info.playerID, info.playerID.ToString(), null, (int) info.team, info.character);
+            entry.Init(null, info.playerID, info.playerID.ToString(), (int) info.team, info.character);
 
             entries.Add(entry);
             SortEntries();
