@@ -11,6 +11,7 @@ public sealed class CharacterAbilityIconLoader : MonoBehaviour
         public Sprite ability1;
         public Sprite ability2;
         public Sprite ability3;
+        public Sprite ability4;
     }
 
     [Header("References")]
@@ -20,126 +21,141 @@ public sealed class CharacterAbilityIconLoader : MonoBehaviour
     [SerializeField] private CharacterAbilitySet[] characterSets;
 
     [Header("Behavior")]
-    [SerializeField] private bool keepWatchingForCharacterChanges = false;
+    [SerializeField] private bool keepWatchingForCharacterChanges = true;
     [SerializeField] private float retryIntervalSeconds = 0.25f;
 
-    private Player cachedLocalPlayer;
+    private Player boundPlayer;
     private string appliedCharacterKey = string.Empty;
+    private Coroutine watchRoutine;
 
     private void Awake()
     {
         if (abilityBar == null)
-        {
             abilityBar = FindFirstObjectByType<AbilityBarUI>();
-        }
     }
 
     private void Start()
     {
-        StartCoroutine(BindLocalPlayerAndApplyIcons());
+        if (keepWatchingForCharacterChanges && watchRoutine == null)
+            watchRoutine = StartCoroutine(WatchBoundPlayer());
     }
 
-    private IEnumerator BindLocalPlayerAndApplyIcons()
-    {
-        while (abilityBar == null)
-        {
-            abilityBar = FindFirstObjectByType<AbilityBarUI>();
-            yield return new WaitForSeconds(retryIntervalSeconds);
-        }
-
-        while (true)
-        {
-            if (cachedLocalPlayer == null)
-            {
-                cachedLocalPlayer = FindLocalPlayer();
-            }
-
-            if (cachedLocalPlayer != null)
-            {
-                string characterName = ReadCharacterName(cachedLocalPlayer);
-                if (!string.IsNullOrWhiteSpace(characterName))
-                {
-                    ApplyIconsForCharacter(characterName);
-
-                    if (!keepWatchingForCharacterChanges)
-                    {
-                        yield break;
-                    }
-                }
-            }
-
-            yield return new WaitForSeconds(retryIntervalSeconds);
-        }
-    }
-
-    private Player FindLocalPlayer()
-    {
-        Player[] players = FindObjectsByType<Player>(FindObjectsSortMode.None);
-
-        for (int i = 0; i < players.Length; i++)
-        {
-            if (players[i] != null && players[i].isLocalPlayer())
-            {
-                return players[i];
-            }
-        }
-
-        return null;
-    }
-
-    private string ReadCharacterName(Player player)
+    public void BindPlayer(Player player)
     {
         if (player == null)
         {
-            return string.Empty;
+            Debug.LogWarning("[CharacterAbilityIconLoader] BindPlayer called with null.");
+            return;
         }
 
-        string raw = player.character.value;
-        return NormalizeKey(raw);
+        boundPlayer = player;
+        appliedCharacterKey = string.Empty;
+
+        Debug.Log(
+            $"[CharacterAbilityIconLoader] Bound player '{boundPlayer.gameObject.name}' " +
+            $"with character '{boundPlayer.character.value}'."
+        );
+
+        TryApplyFromBoundPlayer();
     }
 
-    private void ApplyIconsForCharacter(string characterName)
+    public void RefreshIcons()
     {
-        string normalized = NormalizeKey(characterName);
-        if (string.IsNullOrEmpty(normalized) || normalized == appliedCharacterKey)
+        TryApplyFromBoundPlayer();
+    }
+
+    private IEnumerator WatchBoundPlayer()
+    {
+        while (true)
         {
+            TryApplyFromBoundPlayer();
+            yield return new WaitForSeconds(retryIntervalSeconds);
+        }
+    }
+
+    private void TryApplyFromBoundPlayer()
+    {
+        if (abilityBar == null)
+            abilityBar = FindFirstObjectByType<AbilityBarUI>();
+
+        if (abilityBar == null || boundPlayer == null)
             return;
+
+        string detectedFromComponents = DetectCharacterFromComponents(boundPlayer);
+        string detectedFromNetwork = NormalizeKey(boundPlayer.character.value);
+
+        string resolvedCharacter = !string.IsNullOrEmpty(detectedFromComponents)
+            ? detectedFromComponents
+            : detectedFromNetwork;
+
+        if (string.IsNullOrEmpty(resolvedCharacter))
+            return;
+
+        if (!string.IsNullOrEmpty(detectedFromComponents) &&
+            !string.IsNullOrEmpty(detectedFromNetwork) &&
+            detectedFromComponents != detectedFromNetwork)
+        {
+            Debug.LogWarning(
+                $"[CharacterAbilityIconLoader] Character mismatch on '{boundPlayer.gameObject.name}'. " +
+                $"Component='{detectedFromComponents}', NetworkValue='{detectedFromNetwork}'. " +
+                $"Using component detection for UI."
+            );
         }
 
-        CharacterAbilitySet set = FindSet(normalized);
+        if (resolvedCharacter == appliedCharacterKey)
+            return;
+
+        CharacterAbilitySet set = FindSet(resolvedCharacter);
         if (set == null)
         {
-            Debug.LogWarning($"[CharacterAbilityIconLoader] No icon set configured for character '{characterName}'.");
+            Debug.LogWarning(
+                $"[CharacterAbilityIconLoader] No icon set configured for character '{resolvedCharacter}'."
+            );
             return;
         }
 
-        abilityBar.SetIcons(set.ability1, set.ability2, set.ability3);
-        appliedCharacterKey = normalized;
-        Debug.Log($"[CharacterAbilityIconLoader] Loaded ability icons for '{characterName}'.");
+        abilityBar.SetIcons(set.ability1, set.ability2, set.ability3, set.ability4);
+        appliedCharacterKey = resolvedCharacter;
+
+        Debug.Log(
+            $"[CharacterAbilityIconLoader] Applied icons for '{resolvedCharacter}' " +
+            $"from bound player '{boundPlayer.gameObject.name}'."
+        );
     }
 
     private CharacterAbilitySet FindSet(string normalizedCharacterName)
     {
         if (characterSets == null)
-        {
             return null;
-        }
 
         for (int i = 0; i < characterSets.Length; i++)
         {
             CharacterAbilitySet set = characterSets[i];
             if (set == null)
-            {
                 continue;
-            }
 
             if (NormalizeKey(set.characterName) == normalizedCharacterName)
-            {
                 return set;
-            }
         }
 
         return null;
+    }
+
+    private static string DetectCharacterFromComponents(Player player)
+    {
+        if (player == null)
+            return string.Empty;
+
+        if (player.GetComponentInChildren<Butterfly>(true) != null)
+            return "butterfly";
+
+        if (player.GetComponentInChildren<Mosquito>(true) != null)
+            return "mosquito";
+
+        if (player.GetComponentInChildren<Beetle>(true) != null)
+            return "beetle";
+
+        return string.Empty;
     }
 
     private static string NormalizeKey(string value)

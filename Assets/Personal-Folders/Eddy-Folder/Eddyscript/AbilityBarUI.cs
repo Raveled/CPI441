@@ -17,7 +17,7 @@ public sealed class AbilityBarUI : MonoBehaviour
     }
 
     [Header("Slots")]
-    [SerializeField] private AbilitySlot[] slots = new AbilitySlot[3];
+    [SerializeField] private AbilitySlot[] slots = new AbilitySlot[4];
 
     [Header("Colors")]
     [SerializeField] private Color readyColor = Color.white;
@@ -50,6 +50,7 @@ public sealed class AbilityBarUI : MonoBehaviour
     {
         if (!IsValidSlot(slotIndex))
         {
+            Debug.LogWarning($"[AbilityBarUI] UseAbility failed. Slot {slotIndex} is not configured. Slots length: {GetSlotCount()}");
             return;
         }
 
@@ -60,6 +61,7 @@ public sealed class AbilityBarUI : MonoBehaviour
     {
         if (!IsValidSlot(slotIndex))
         {
+            Debug.LogWarning($"[AbilityBarUI] UseAbility failed. Slot {slotIndex} is not configured. Slots length: {GetSlotCount()}");
             return;
         }
 
@@ -75,17 +77,19 @@ public sealed class AbilityBarUI : MonoBehaviour
         SetCooldownVisual(slot);
     }
 
-    public void SetIcons(Sprite first, Sprite second, Sprite third)
+    public void SetIcons(Sprite first, Sprite second, Sprite third, Sprite fourth)
     {
         SetIcon(0, first);
         SetIcon(1, second);
         SetIcon(2, third);
+        SetIcon(3, fourth);
     }
 
     public void SetIcon(int slotIndex, Sprite sprite)
     {
         if (!IsValidSlot(slotIndex))
         {
+            Debug.LogWarning($"[AbilityBarUI] SetIcon failed. Slot {slotIndex} is not configured. Slots length: {GetSlotCount()}");
             return;
         }
 
@@ -110,6 +114,7 @@ public sealed class AbilityBarUI : MonoBehaviour
             AbilitySlot slot = slots[i];
             if (slot == null)
             {
+                Debug.LogWarning($"[AbilityBarUI] Slot {i} is null.");
                 continue;
             }
 
@@ -212,5 +217,10 @@ public sealed class AbilityBarUI : MonoBehaviour
     private bool IsValidSlot(int slotIndex)
     {
         return slots != null && slotIndex >= 0 && slotIndex < slots.Length;
+    }
+
+    private int GetSlotCount()
+    {
+        return slots == null ? 0 : slots.Length;
     }
 }
