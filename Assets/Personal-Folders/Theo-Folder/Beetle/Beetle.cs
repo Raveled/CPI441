@@ -7,6 +7,10 @@ using static UnityEngine.EventSystems.EventTrigger;
 public class Beetle : NetworkBehaviour
 {
     [SerializeField] public Player player;
+    [SerializeField] public BeetleInputTester inputTester;
+
+    [Header("UI cooldown hook up")]
+    [SerializeField] private AbilityBarUI abilityBar;
 
     [Header("Basic Attack - Mandible Attack")]
     [SerializeField] private int mandibleBaseDamage = 12;
@@ -42,6 +46,8 @@ public class Beetle : NetworkBehaviour
     [SerializeField] private GameObject stompPrefab;
     [SerializeField] private float stompRadius = 4f;
     [SerializeField] private int stompDamage = 8;
+    [SerializeField] private float stompDuration = 3f;
+    [SerializeField] private float stompTickInterval = 0.5f;
     [SerializeField] private float stompStunDuration = 1.5f;
 
     [Header("Animator")]
@@ -72,24 +78,26 @@ public class Beetle : NetworkBehaviour
 
     protected override void OnSpawned(bool asServer)
     {
-        base.OnSpawned();
-        Debug.Log($"Beetle OnSpawned {gameObject.name} isOwner:{isOwner} isController:{isController} isServer:{isServer}");
-        player = GetComponent<Player>();
-        if (player == null)
-            player = GetComponentInParent<Player>();
-
-        predictedMovement = GetComponentInParent<PredictedPlayerMovement>();
-
-        BeetleInputTester inputTester = GetComponent<BeetleInputTester>();
-        if (inputTester != null) inputTester.EnableInput();
-
         StartCoroutine(DelayedSpawn(asServer));
     }
+
     private IEnumerator DelayedSpawn(bool asServer)
     {
         yield return new WaitForSeconds(0.05f);
 
         base.OnSpawned();
+
+        Debug.Log($"Beetle OnSpawned {gameObject.name} isOwner:{isOwner} isController:{isController} isServer:{isServer}");
+        if (player == null)
+            player = GetComponentInParent<Player>();
+
+        predictedMovement = GetComponentInParent<PredictedPlayerMovement>();
+
+        if (inputTester == null) 
+        {
+            inputTester = GetComponent<BeetleInputTester>();
+        }
+        inputTester.EnableInput();
 
         GameObject parentObject = transform.parent != null ? transform.parent.gameObject : gameObject;
 
@@ -103,7 +111,8 @@ public class Beetle : NetworkBehaviour
         if (mandibleCooldownTimer > 0f) mandibleCooldownTimer -= Time.deltaTime;
         if (hornCooldownTimer > 0f) hornCooldownTimer -= Time.deltaTime;
         if (rollCooldownTimer > 0f) rollCooldownTimer -= Time.deltaTime;
-
+        if (abilityBar == null && player != null && player.isLocalPlayer())
+            abilityBar = FindFirstObjectByType<AbilityBarUI>();
         // Swagger Update
         if (swaggerTimer > 0f)
         {
@@ -169,6 +178,9 @@ public class Beetle : NetworkBehaviour
 
         PlayHornImpaleAnimServerRpc();
         ServerStartHornImpaleRpc(dashDirection);
+
+        if (abilityBar != null && player != null && player.isLocalPlayer())
+            abilityBar.UseAbility(0, hornCooldown);
 
         return true;
     }
@@ -263,7 +275,6 @@ public class Beetle : NetworkBehaviour
         Debug.Log("Horn Impale! - Beetle.cs");
     }
 
-
     // ABILITY 2 - SWAGGER
     public void ActivateSwagger()
     {
@@ -282,6 +293,9 @@ public class Beetle : NetworkBehaviour
 
         if (isServer) ApplySwagger();
         else ApplySwaggerServerRpc();
+
+        if (abilityBar != null && player != null && player.isLocalPlayer())
+            abilityBar.UseAbility(1, swaggerDuration);
 
         Debug.Log("Swagger ACTIVATED! - Beetle.cs");
     }
@@ -329,6 +343,9 @@ public class Beetle : NetworkBehaviour
 
         PlayRollAnimServerRpc();
         ServerStartRollRpc(finalDirection);
+
+        if (abilityBar != null && player != null && player.isLocalPlayer())
+            abilityBar.UseAbility(2, rollCooldown);
 
         Debug.Log("Roll requested! - Beetle.cs");
         return true;
@@ -420,7 +437,6 @@ public class Beetle : NetworkBehaviour
     public void CastGroundStomp()
     {
         if (!isController) return;
-        if (stompPrefab == null || player == null) return;
 
         PlayStompAnimServerRpc();
 
@@ -442,25 +458,32 @@ public class Beetle : NetworkBehaviour
 
     private void ApplyGroundStomp()
     {
-        // Visual effect
-        if (stompPrefab != null)
+        if (stompPrefab == null) { Debug.LogError("[Beetle] stompPrefab is NULL!"); return; }
+        if (player == null) { Debug.LogError("[Beetle] player is NULL!"); return; }
+        if (networkManager == null) { Debug.LogError("[Beetle] networkManager is NULL!"); return; }
+
+        GameObject stompGO = Instantiate(stompPrefab, transform.position, Quaternion.identity);
+
+        GroundStompArea stomp = stompGO.GetComponent<GroundStompArea>();
+        if (stomp == null)
         {
-            GameObject stompGO = Instantiate(stompPrefab, transform.position, Quaternion.identity);
-            NetworkManager.main.Spawn(stompGO);
+            Debug.LogError("[Beetle] GroundStompArea component missing from stompPrefab root!");
+            Destroy(stompGO);
+            return;
         }
 
-        // AOE damage + stun
-        Collider[] hits = Physics.OverlapSphere(transform.position, stompRadius);
-        foreach (var hit in hits)
-        {
-            Player target = hit.GetComponent<Player>();
-            if (target != null && target != player && !player.GetEnemyTeams().Contains(target.GetTeam()))
-            {
-                target.TakeDamage(stompDamage, player);
-                target.ModifyMoveSpeedMultiplier(0f, stompStunDuration);
-            }
-        }
-        Debug.Log("GROUND STOMP! - Beetle.cs");
+        NetworkManager.main.Spawn(stompGO);
+
+        stomp.SpawnSetup(
+            player,
+            stompRadius,
+            stompDuration,
+            stompDamage,
+            stompTickInterval,
+            stompStunDuration
+        );
+
+        Debug.Log($"[Beetle] Ground Stomp spawned at {transform.position}");
     }
 
     public float GetMoveSpeedMultiplier()

@@ -4,9 +4,13 @@ using PurrNet;
 using PurrNet.Prediction;
 using UnityEngine.EventSystems;
 using System;
+using Unity.VisualScripting;
 
 public class Mosquito : NetworkBehaviour
 {
+    [Header("UI cooldown hook up")]
+    [SerializeField] private AbilityBarUI abilityBar;
+
     [Header("Basic Attack - Blood Shot")]
     [SerializeField] private GameObject bloodShotProjectilePrefab;
     [SerializeField] private Transform bloodShotFirePoint;
@@ -40,6 +44,8 @@ public class Mosquito : NetworkBehaviour
     [SerializeField] private float globMaxMeterUsageFraction = 0.5f;
     [SerializeField] private float globDamagePerBloodUnit = 0.3f;
     [SerializeField] private float globSizePerBloodUnit = 0.01f;
+    [SerializeField] private float globShotCooldown = 5f;
+    private float globShotCooldownTimer = 0f;
 
     [Header("Glob Shot Threshold")]
     [SerializeField] private float globShotMinBloodThreshold = 10f;
@@ -81,8 +87,14 @@ public class Mosquito : NetworkBehaviour
         if (animator == null)
             animator = parentObject.GetComponentInChildren<Animator>();
 
+        if (meshRenderer == null)
+            meshRenderer = parentObject.GetComponentInChildren<Renderer>();
+
         if (meshRenderer != null)
             originalColor = meshRenderer.material.color;
+
+        if (abilityBar == null && player != null && player.isLocalPlayer())
+            abilityBar = FindFirstObjectByType<AbilityBarUI>();
 
         if (inputTester != null)
             inputTester.EnableInput();
@@ -92,7 +104,8 @@ public class Mosquito : NetworkBehaviour
     {
         if (bloodMeterDecayPerSecond > 0f && currentBloodMeter > 0f)
             ModifyBloodMeter(-bloodMeterDecayPerSecond * Time.deltaTime);
-
+        if (globShotCooldownTimer > 0f)
+            globShotCooldownTimer -= Time.deltaTime;
         if (quickPokeCooldownTimer > 0f)
             quickPokeCooldownTimer -= Time.deltaTime;
 
@@ -184,6 +197,9 @@ public class Mosquito : NetworkBehaviour
         else
             ApplyQuickPokeServerRpc();
 
+        if (abilityBar != null && player != null && player.isLocalPlayer())
+            abilityBar.UseAbility(1, quickPokeCooldown);
+
         return true;
     }
 
@@ -199,6 +215,7 @@ public class Mosquito : NetworkBehaviour
         Debug.Log($"[Mosquito] Quick Poke - overlap sphere at {origin}, range={quickPokeRange}");
 
         Collider[] hits = Physics.OverlapSphere(origin, quickPokeRange);
+
         int hitCount = 0;
 
         foreach (Collider hit in hits)
@@ -230,6 +247,7 @@ public class Mosquito : NetworkBehaviour
     public void CastGlobShot()
     {
         if (!player.isLocalPlayer()) return;
+        if (globShotCooldownTimer > 0f) return;
 
         Debug.Log($"[Mosquito] CastGlobShot on {gameObject.name} | Player ID: {player.GetPlayerID()} | Player is Local: {player.isLocalPlayer()}");
 
@@ -238,6 +256,11 @@ public class Mosquito : NetworkBehaviour
 
         Debug.Log("[Mosquito] Sending GlobShot ServerRpc.");
         ServerSpawnGlobShotRpc(globFirePoint.position, globFirePoint.rotation, damage);
+
+        globShotCooldownTimer = globShotCooldown;
+
+        if (abilityBar != null)
+            abilityBar.UseAbility(2, globShotCooldown);
     }
 
     [ServerRpc(requireOwnership: false)]
@@ -384,4 +407,14 @@ public class Mosquito : NetworkBehaviour
 
     [ContextMenu("Test Amp Up")]
     private void TestAmpUp() => ActivateAmpUp();
+
+    // ========== GIZMOS FOR VISUALIZATION ==========
+    private void OnDrawGizmosSelected()
+    {
+        if (quickPokeOrigin != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(quickPokeOrigin.position, quickPokeRange);
+        }
+    }
 }

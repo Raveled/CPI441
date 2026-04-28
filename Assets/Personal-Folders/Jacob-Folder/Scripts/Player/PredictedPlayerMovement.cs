@@ -1,3 +1,4 @@
+using System.Collections;
 using PurrNet;
 using PurrNet.Prediction;
 using Unity.VisualScripting;
@@ -96,6 +97,21 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
 
         _rigidbody.isKinematic = false;
 
+        //butterfly handling for flying / dash
+        butterflyAbility = GetComponentInChildren<Butterfly>();
+
+        //beetle handling for most attacks
+        beetleAbility = GetComponentInChildren<Beetle>();
+
+        // Input setup
+        StartCoroutine(SetupInput());
+    }
+
+    public IEnumerator SetupInput()
+    {
+        yield return new WaitForSeconds(0.3f);
+
+        Debug.Log($"[PredictedPlayerMovement] Setting up input for player {owner.Value}. isOwner:{isOwner} isController:{isController} isServer:{isServer}");
         if (isOwner)
         {
             moveAction = InputSystem.actions.FindAction("Move");
@@ -104,12 +120,6 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
             jumpAction?.Enable();
             _playerCamera.Init();
         }
-
-        //butterfly handling for flying / dash
-        butterflyAbility = GetComponentInChildren<Butterfly>();
-
-        //beetle handling for most attacks
-        beetleAbility = GetComponentInChildren<Beetle>();
     }
 
     public void LoadStatsFromPlayer()

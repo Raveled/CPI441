@@ -8,6 +8,9 @@ public class Butterfly : NetworkBehaviour
     [SerializeField] public Player player;
     [SerializeField] public ButterflyInputTester inputTester;
 
+    [Header("UI cooldown hook up")]
+    [SerializeField] private AbilityBarUI abilityBar;
+
     [Header("Basic Attack - Wind Burst")]
     [SerializeField] private GameObject windBurstProjectilePrefab;
     [SerializeField] private Transform windBurstFirePoint;
@@ -66,7 +69,7 @@ public class Butterfly : NetworkBehaviour
 
     private IEnumerator DelayedSpawn(bool asServer)
     {
-        yield return new WaitForSeconds(0.05f);
+        yield return new WaitForSeconds(0.1f);
 
         base.OnSpawned();
 
@@ -80,6 +83,9 @@ public class Butterfly : NetworkBehaviour
 
         if (windBurstFirePoint == null)
             windBurstFirePoint = parentObject.GetComponent<PredictedPlayerMovement>().firingPoint.transform;
+        
+        if (abilityBar == null && player != null && player.isLocalPlayer())
+            abilityBar = FindFirstObjectByType<AbilityBarUI>();
 
         if (dustWaveOrigin == null)
             dustWaveOrigin = windBurstFirePoint;
@@ -179,7 +185,6 @@ public class Butterfly : NetworkBehaviour
         if (!player.isLocalPlayer()) return;
         if (dustWaveCooldownTimer > 0f) return;
 
-        // Trigger animation locally
         if (animator != null)
             animator.SetTrigger("DustStorm");
 
@@ -190,6 +195,9 @@ public class Butterfly : NetworkBehaviour
 
         ServerSpawnDustWaveRpc(dustWaveOrigin.position, dustWaveOrigin.rotation, damage);
         dustWaveCooldownTimer = dustWaveCooldown;
+
+        if (abilityBar != null)
+            abilityBar.UseAbility(0, dustWaveCooldown);
     }
 
     [ServerRpc(requireOwnership: false)]
@@ -246,7 +254,6 @@ public class Butterfly : NetworkBehaviour
         if (!player.isLocalPlayer()) return;
         if (dazzlingWaveCooldownTimer > 0f) return;
 
-        // Trigger animation locally
         if (animator != null)
             animator.SetTrigger("DazzlingWave");
 
@@ -257,6 +264,9 @@ public class Butterfly : NetworkBehaviour
 
         ServerSpawnDazzlingWaveRpc(dazzlingWaveOrigin.position, dazzlingWaveOrigin.rotation, damage);
         dazzlingWaveCooldownTimer = dazzlingWaveCooldown;
+
+        if (abilityBar != null)
+            abilityBar.UseAbility(1, dazzlingWaveCooldown);
     }
 
     [ServerRpc(requireOwnership: false)]
@@ -324,7 +334,6 @@ public class Butterfly : NetworkBehaviour
             return;
         }
 
-        // Trigger animation locally
         if (animator != null)
             animator.SetTrigger("Fly");
 
@@ -334,6 +343,9 @@ public class Butterfly : NetworkBehaviour
 
         Debug.Log($"[Butterfly] StartFly requested by local player. dir={finalDirection}");
         ServerStartFlyRpc(finalDirection);
+
+        if (abilityBar != null)
+            abilityBar.UseAbility(2, flyCooldown);
     }
 
     [ServerRpc(requireOwnership: false)]

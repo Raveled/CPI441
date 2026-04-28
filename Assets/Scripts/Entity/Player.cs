@@ -18,6 +18,8 @@ public class Player : Entity
     [SerializeField] SyncVar<int> xpTotal = new(0);
     [SerializeField] MinimapTracker minimapTracker = null;
     [SerializeField] protected UnityEngine.UI.Slider healthBar = null;
+    [SerializeField] private AbilityBarUI abilityBarUI;
+    [SerializeField] private CharacterAbilityIconLoader abilityIconLoader;
     SO_PlayerInfo playerInfoSO = null;
     List<Tower> friendlyTowers;
 
@@ -28,6 +30,7 @@ public class Player : Entity
 
     private GameObject parentObject;
     private UnityEngine.UI.Slider healthBarSliderUI;
+    private HPBarHelper hpBarHelper;
 
     [Header("Respawn Settings")]
     [SerializeField] private float respawnTime = 10f;
@@ -47,7 +50,7 @@ public class Player : Entity
 
     private IEnumerator DelayedSpawn(bool asServer)
     {
-        yield return new WaitForSeconds(0.05f);
+        yield return new WaitUntil(() => predictedMovement != null);
 
         base.OnSpawned(asServer);
 
@@ -116,6 +119,12 @@ public class Player : Entity
             if (minimapTracker != null) minimapTracker.AttachMinimapCamera();
             InitHealthBars();
             InitRespawnUI();
+
+            if (abilityBarUI == null)
+                abilityBarUI = FindFirstObjectByType<AbilityBarUI>();
+
+            if (abilityIconLoader == null)
+                abilityIconLoader = FindFirstObjectByType<CharacterAbilityIconLoader>();
         }
     }
 
@@ -128,7 +137,9 @@ public class Player : Entity
     private void InitHealthBars()
     {
         if (healthBar != null) healthBar.transform.parent.gameObject.SetActive(false);
-        healthBarSliderUI = GameObject.Find("HealthSlider").GetComponent<UnityEngine.UI.Slider>();
+        GameObject obj = GameObject.Find("HealthSlider");
+        healthBarSliderUI = obj.GetComponent<UnityEngine.UI.Slider>();
+        hpBarHelper = obj.GetComponent<HPBarHelper>();
         UpdateHealthBars();
     }
 
@@ -189,7 +200,18 @@ public class Player : Entity
 
         return base.TakeDamage(damage, damageOrigin);
     }
+    public bool IsAbilityReady(int slotIndex)
+    {
+        return abilityBarUI != null && abilityBarUI.IsReady(slotIndex);
+    }
 
+    public void NotifyAbilityUsed(int slotIndex, float cooldown)
+    {
+        if (!isLocalPlayer() || abilityBarUI == null)
+            return;
+
+        abilityBarUI.UseAbility(slotIndex, cooldown);
+    }
     protected override void OnHealthChanged(int newHealth)
     {
         base.OnHealthChanged(newHealth);
@@ -228,6 +250,7 @@ public class Player : Entity
         {
             healthBarSliderUI.maxValue = maximumHitPoints.value;
             healthBarSliderUI.value = currentHitPoints.value;
+            hpBarHelper.SetText(currentHitPoints + " / " + maximumHitPoints);
         }
     }
     

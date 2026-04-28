@@ -10,6 +10,7 @@ public class Tower : NonPlayerEntity
     [Header("Tower Setup")]
     [SerializeField] GameObject towerProjectilePrefab = null;
     [SerializeField] SyncVar<float> projectileSpeed = new(5f);
+    [SerializeField] Transform projectileOrigin = null;
     protected override void Start() {
         base.Start();
     }
@@ -42,22 +43,22 @@ public class Tower : NonPlayerEntity
             attackCooldownTimer.value = defaultAttackCooldown.value;
 
             //Get direction between target and this tower
-            Vector3 direction = (currentTarget.transform.position - attackRangeOrigin.position).normalized;
+            Vector3 direction = (currentTarget.transform.position - projectileOrigin.position).normalized;
 
             // Send ServerRpc to handle the projectile spawning
-            ServerSpawnTowerProjectileRpc(attackRangeOrigin.position, attackRangeOrigin.rotation, direction, currentTarget);
+            ServerSpawnTowerProjectileRpc(projectileOrigin.position, attackRangeOrigin.rotation, direction, currentTarget);
         }
     }
 
     [ServerRpc(requireOwnership: false)]
-    private void ServerSpawnTowerProjectileRpc(Vector3 position, Quaternion rotation, Vector3 direction, Entity target)
+    private void ServerSpawnTowerProjectileRpc(Vector3 projectileOrigin, Quaternion rotation, Vector3 direction, Entity target)
     {
         if (!isServer) return;
 
-        ServerSpawnTowerProjectile(position, rotation, direction, target);
+        ServerSpawnTowerProjectile(projectileOrigin, rotation, direction, target);
     }
 
-    private void ServerSpawnTowerProjectile(Vector3 position, Quaternion rotation, Vector3 direction, Entity target)
+    private void ServerSpawnTowerProjectile(Vector3 projectileOrigin, Quaternion rotation, Vector3 direction, Entity target)
     {
         if (towerProjectilePrefab == null) 
         { 
@@ -65,7 +66,7 @@ public class Tower : NonPlayerEntity
             return; 
         }
 
-        GameObject proj = Instantiate(towerProjectilePrefab, position, rotation);
+        GameObject proj = Instantiate(towerProjectilePrefab, projectileOrigin, rotation);
 
         proj.GetComponent<TowerProjectile>().SpawnSetup(this, attackPower.value, direction, projectileSpeed.value, target);
 
