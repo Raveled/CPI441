@@ -52,6 +52,8 @@ public class LobbyPlayerRegistry : MonoBehaviour
         return false;
     }
 
+    public List<LobbyUser> GetPlayers() => new(players);
+
     public void Clear() => players.Clear();
 
     private void OnDestroy()

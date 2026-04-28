@@ -104,7 +104,7 @@ public class Projectile : NetworkBehaviour
         Entity ownerEntity = Entity.GetEntityByNetworkID(ownerId.Value, isServer);
         if (!ownerEntity)
         {
-            Debug.LogError($"[Projectile] ApplyDamage - could not find owner entity for ID={ownerId}");
+            Debug.LogWarning($"[Projectile] ApplyDamage - could not find owner entity for ID={ownerId}");
             return;
         }
 

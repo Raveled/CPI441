@@ -118,3 +118,18 @@ MonoBehaviour:
     prefab: {fileID: 6095882534552082540, guid: 6ff1fabe97157dd4793400b1e1905ffb, type: 3}
     pooled: 0
     warmupCount: 5
+<<<<<<< Updated upstream
+=======
+  - guid: 627e61fe7547f6e47b82eb0e241bfe42
+    prefab: {fileID: 5615598041355943147, guid: 627e61fe7547f6e47b82eb0e241bfe42, type: 3}
+    pooled: 0
+    warmupCount: 5
+  - guid: 575cec789fce48346be5ddafda2a286f
+    prefab: {fileID: 5463015978938759543, guid: 575cec789fce48346be5ddafda2a286f, type: 3}
+    pooled: 0
+    warmupCount: 5
+  - guid: 53e8380395473dd42b11907a763204ea
+    prefab: {fileID: 4565008707524336993, guid: 53e8380395473dd42b11907a763204ea, type: 3}
+    pooled: 0
+    warmupCount: 5
+>>>>>>> Stashed changes
