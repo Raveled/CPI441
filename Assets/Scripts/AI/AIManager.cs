@@ -1,6 +1,7 @@
+using PurrNet;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using System.Collections;
 using UnityEngine.Networking;
 [System.Serializable]
 public class UnityAndGeminiKey {
@@ -37,9 +38,11 @@ public class AIManager : MonoBehaviour
 {
     //Setup
     [Header("Setup")]
+    [SerializeField] GameManager gameManager;
     [SerializeField] bool ai_enabled = true;
     [SerializeField] JSON_MatchData matchData = null;
     [SerializeField] JSON_EntityData entityData = null;
+    public bool connectedToServer = false;
 
     //Prompt
     [Header("Prompt")]
@@ -69,13 +72,13 @@ public class AIManager : MonoBehaviour
 
     private void Update() {
         //Testing Message Send
-        if (Keyboard.current.oKey.wasPressedThisFrame) {
-            Debug.Log("button pressed");
-            CreatePrompt();
-            Debug.Log(prompt);
-            SendNewMessage(prompt);
-            Debug.Log("msg sent");
-        }
+        //if (Keyboard.current.oKey.wasPressedThisFrame) {
+        //    Debug.Log("button pressed");
+        //    CreatePrompt();
+        //    Debug.Log(prompt);
+        //    SendNewMessage(prompt);
+        //    Debug.Log("msg sent");
+        //}
     }
     //Concatenate the mesage to send to ai
     void CreatePrompt() {
@@ -90,25 +93,47 @@ public class AIManager : MonoBehaviour
         if (ai_enabled) SendNewMessage(prompt);
         else ResponseReceived("");
     }
-    public void ResponseReceived(string response) {
-        Debug.Log("AI BALACNING DONE, SENDING TO LOBBY");
+    //public void ResponseReceived(string response) {
+    //    Debug.Log("AI BALACNING DONE, SENDING TO LOBBY");
+
+    //    if (ai_enabled)
+    //    {
+    //        this.response = response;
+    //        Debug.Log("AIManager.cs - Response Recieved");
+    //        Debug.Log(response);
+    //        entityData.LoadFromJSONString(response);
+    //        entityData.SaveToJSON();
+    //    }
+    //    FindFirstObjectByType<GameManager>().SendToLobby();
+    //}
+    public void ResponseReceived(string response)
+    {
+        Debug.Log("AI BALANCING DONE");
 
         if (ai_enabled)
         {
             this.response = response;
-            Debug.Log("AIManager.cs - Response Recieved");
-            Debug.Log(response);
+
             entityData.LoadFromJSONString(response);
             entityData.SaveToJSON();
+
+            //gameManager.RPC_ApplyBalance(response);
         }
-        FindFirstObjectByType<GameManager>().SendToLobby();
+
+        gameManager.SendToLobby();
     }
     public void ErrorReceived() {
         Debug.Log("AI ERROR RECEIVED");
-        FindFirstObjectByType<GameManager>().SendToLobby();
+        gameManager.SendToLobby();
     }
-
+    
     public void SendNewMessage(string prompt) {
+        if (!connectedToServer)
+        {
+            Debug.Log("NOT CONNECTED TO SERVER");
+            ErrorReceived();
+            return;
+        }
         this.prompt = prompt;
         if (prompt != "") { StartCoroutine(SendPromptRequestToGemini(prompt)); };
     }
@@ -159,10 +184,12 @@ public class AIManager : MonoBehaviour
         if (request.result == UnityWebRequest.Result.Success) {
             KeyResponse response = JsonUtility.FromJson<KeyResponse>(request.downloadHandler.text);
             apiKey = response.apiKey;
+            connectedToServer = true;
             Debug.Log("api key is in: " + apiKey);
             //Debug.Log("api key: " + ApiKey);
         } else {
             Debug.LogError("Error: " + request.error);
+            connectedToServer = false;
         }
     }
 }
