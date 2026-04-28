@@ -9,6 +9,9 @@ public class Beetle : NetworkBehaviour
     [SerializeField] public Player player;
     [SerializeField] public BeetleInputTester inputTester;
 
+    [Header("UI cooldown hook up")]
+    [SerializeField] private AbilityBarUI abilityBar;
+
     [Header("Basic Attack - Mandible Attack")]
     [SerializeField] private int mandibleBaseDamage = 12;
     [SerializeField] private float mandibleRange = 2.5f;
@@ -108,7 +111,8 @@ public class Beetle : NetworkBehaviour
         if (mandibleCooldownTimer > 0f) mandibleCooldownTimer -= Time.deltaTime;
         if (hornCooldownTimer > 0f) hornCooldownTimer -= Time.deltaTime;
         if (rollCooldownTimer > 0f) rollCooldownTimer -= Time.deltaTime;
-
+        if (abilityBar == null && player != null && player.isLocalPlayer())
+            abilityBar = FindFirstObjectByType<AbilityBarUI>();
         // Swagger Update
         if (swaggerTimer > 0f)
         {
@@ -174,6 +178,9 @@ public class Beetle : NetworkBehaviour
 
         PlayHornImpaleAnimServerRpc();
         ServerStartHornImpaleRpc(dashDirection);
+
+        if (abilityBar != null && player != null && player.isLocalPlayer())
+            abilityBar.UseAbility(0, hornCooldown);
 
         return true;
     }
@@ -287,6 +294,9 @@ public class Beetle : NetworkBehaviour
         if (isServer) ApplySwagger();
         else ApplySwaggerServerRpc();
 
+        if (abilityBar != null && player != null && player.isLocalPlayer())
+            abilityBar.UseAbility(1, swaggerDuration);
+
         Debug.Log("Swagger ACTIVATED! - Beetle.cs");
     }
 
@@ -333,6 +343,9 @@ public class Beetle : NetworkBehaviour
 
         PlayRollAnimServerRpc();
         ServerStartRollRpc(finalDirection);
+
+        if (abilityBar != null && player != null && player.isLocalPlayer())
+            abilityBar.UseAbility(2, rollCooldown);
 
         Debug.Log("Roll requested! - Beetle.cs");
         return true;
