@@ -40,6 +40,7 @@ public class AIManager : MonoBehaviour
     [SerializeField] bool ai_enabled = true;
     [SerializeField] JSON_MatchData matchData = null;
     [SerializeField] JSON_EntityData entityData = null;
+    public bool connectedToServer = false;
 
     //Prompt
     [Header("Prompt")]
@@ -109,6 +110,11 @@ public class AIManager : MonoBehaviour
     }
 
     public void SendNewMessage(string prompt) {
+        if (!connectedToServer)
+        {
+            ErrorReceived();
+            return;
+        }
         this.prompt = prompt;
         if (prompt != "") { StartCoroutine(SendPromptRequestToGemini(prompt)); };
     }
@@ -159,10 +165,12 @@ public class AIManager : MonoBehaviour
         if (request.result == UnityWebRequest.Result.Success) {
             KeyResponse response = JsonUtility.FromJson<KeyResponse>(request.downloadHandler.text);
             apiKey = response.apiKey;
+            connectedToServer = true;
             Debug.Log("api key is in: " + apiKey);
             //Debug.Log("api key: " + ApiKey);
         } else {
             Debug.LogError("Error: " + request.error);
+            connectedToServer = false;
         }
     }
 }

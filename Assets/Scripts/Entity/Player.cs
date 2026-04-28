@@ -92,6 +92,7 @@ public class Player : Entity
         // Find PlayerID
         playerID = GetPlayerID();
 
+
         if (isServer)
         {
             // Cross Reference PlayerInfo with GameManager Instance
@@ -110,6 +111,16 @@ public class Player : Entity
                 RPC_InitializePlayerLocals();
 
                 this.isDead.value = false;
+
+                if (team == Team.TEAM1)
+                {
+                    //Magenta
+                    healthBar.gameObject.GetComponent<HPBarFill>().SetColor(new Color32(255, 0, 148, 255));
+                } else if (team == Team.TEAM2)
+                {
+                    //Blue
+                    healthBar.gameObject.GetComponent<HPBarFill>().SetColor(new Color32(0, 246, 255, 255));
+                }
             }
             else Debug.Log("[PLAYER - WARNING] NO PLAYER INFO FOUND");
         }
@@ -153,14 +164,15 @@ public class Player : Entity
         GameObject obj = GameObject.Find("HealthSlider");
         healthBarSliderUI = obj.GetComponent<UnityEngine.UI.Slider>();
         hpBarHelper = obj.GetComponent<HPBarHelper>();
-        if(GetTeam() == Team.TEAM1) {
+        if (team == Team.TEAM1)
+        {
             //Magenta
             healthBar.gameObject.GetComponent<HPBarFill>().SetColor(new Color32(255, 0, 148, 255));
-        } else if(GetTeam() == Team.TEAM2) {
+        } else if (team == Team.TEAM2)
+        {
             //Blue
             healthBar.gameObject.GetComponent<HPBarFill>().SetColor(new Color32(0, 246, 255, 255));
         }
-
         UpdateHealthBars();
     }
     private StatModifiers inventoryModifiers = new StatModifiers
