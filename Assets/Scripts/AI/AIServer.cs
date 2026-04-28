@@ -22,7 +22,7 @@ public class AIServer : MonoBehaviour {
         if (request.result == UnityWebRequest.Result.Success) {
             KeyResponse response = JsonUtility.FromJson<KeyResponse>(request.downloadHandler.text);
             ApiKey = response.apiKey;
-            GetComponent<UnityAndGeminiV3>().ApiKeyResponse(ApiKey);
+            //GetComponent<UnityAndGeminiV3>().ApiKeyResponse(ApiKey);
             //Debug.Log("api key: " + ApiKey);
         } else {
             Debug.LogError("Error: " + request.error);

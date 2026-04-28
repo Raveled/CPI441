@@ -44,7 +44,10 @@ public class ChatRequest
     public TextContent system_instruction;
 }
 
-
+[System.Serializable]
+public class KeyResponse {
+    public string apiKey;
+}
 public class UnityAndGeminiV3: MonoBehaviour
 {
     [Header("JSON API Configuration")]
@@ -58,22 +61,20 @@ public class UnityAndGeminiV3: MonoBehaviour
     public string prompt = "";
 
     AIManager aiManager = null;
-    AIServer aiServer = null;
+
+    private string url = "http://localhost:3000/get-key";
+
+    
 
     private void Awake() {
         aiManager = GetComponent<AIManager>();
-        aiServer = GetComponent<AIServer>();
     }
 
     void Start()
     {
         //UnityAndGeminiKey jsonApiKey = JsonUtility.FromJson<UnityAndGeminiKey>(jsonApi.text);
         //apiKey = jsonApiKey.key;  
-        aiServer.FetchApiKey();
-    }
-    public void ApiKeyResponse(string key) {
-        apiKey = aiServer.ApiKey;
-        Debug.Log("api key is in: " + apiKey);
+        FetchApiKey();
     }
     //Called from AIManager
     public void SendNewMessage(string prompt) {
@@ -122,6 +123,24 @@ public class UnityAndGeminiV3: MonoBehaviour
                 Debug.Log("Balanced Stats Received: " + cleanJson);
                 aiManager.ResponseReceived(cleanJson);
             }
+        }
+    }
+    
+    public void FetchApiKey() {
+        StartCoroutine(GetKeyCoroutine());
+    }
+
+    IEnumerator GetKeyCoroutine() {
+        UnityWebRequest request = UnityWebRequest.Get(url);
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success) {
+            KeyResponse response = JsonUtility.FromJson<KeyResponse>(request.downloadHandler.text);
+            apiKey = response.apiKey;
+            Debug.Log("api key is in: " + apiKey);
+            //Debug.Log("api key: " + ApiKey);
+        } else {
+            Debug.LogError("Error: " + request.error);
         }
     }
 }
