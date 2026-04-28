@@ -430,7 +430,8 @@ MonoBehaviour:
     _sendIntervalInSeconds: 0
   canMove: 1
   canDefaultAttack: 1
-  rewardRange: 50
+  showRewardRange: 1
+  rewardRange: 20
   currentHitPoints:
     _value: 0
     _ownerAuth: 0
