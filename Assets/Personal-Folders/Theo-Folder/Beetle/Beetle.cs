@@ -66,6 +66,7 @@ public class Beetle : NetworkBehaviour
 
     private Vector3 currentRollDirection = Vector3.forward;
     [SerializeField] private float rollDuration = 1.0f;
+    private bool isMovingAnimState = false;
 
     private void Awake()
     {
@@ -111,14 +112,44 @@ public class Beetle : NetworkBehaviour
         if (mandibleCooldownTimer > 0f) mandibleCooldownTimer -= Time.deltaTime;
         if (hornCooldownTimer > 0f) hornCooldownTimer -= Time.deltaTime;
         if (rollCooldownTimer > 0f) rollCooldownTimer -= Time.deltaTime;
+
         if (abilityBar == null && player != null && player.isLocalPlayer())
             abilityBar = FindFirstObjectByType<AbilityBarUI>();
+
         // Swagger Update
         if (swaggerTimer > 0f)
         {
             swaggerTimer -= Time.deltaTime;
             if (swaggerTimer <= 0f) EndSwagger();
         }
+
+        UpdateIsMovingAnimation();
+    }
+
+    private void UpdateIsMovingAnimation()
+    {
+        if (!isServer) return;
+        if (animator == null || predictedMovement == null || predictedMovement._rigidbody == null) return;
+
+        Vector3 velocity = predictedMovement._rigidbody.linearVelocity;
+        velocity.y = 0f;
+
+        bool isWalking = velocity.sqrMagnitude > 0.05f;
+        bool shouldBeMoving = isWalking || isHornImpaling || isRolling;
+
+        if (shouldBeMoving == isMovingAnimState) return;
+
+        isMovingAnimState = shouldBeMoving;
+        SetIsMovingObserversRpc(shouldBeMoving);
+    }
+
+    [ObserversRpc]
+    private void SetIsMovingObserversRpc(bool moving)
+    {
+        isMovingAnimState = moving;
+
+        if (animator != null)
+            animator.SetBool("IsMoving", moving);
     }
 
     // BASIC ATTACK - MANDIBLE ATTACK
