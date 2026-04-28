@@ -70687,6 +70687,14 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7812661071418618967, guid: abfce021c14b157469204f0521a51799, type: 3}
+      propertyPath: characterSets.Array.data[0].ability1
+      value: 
+      objectReference: {fileID: 21300000, guid: d8cce33525df02947b3623ab732cd93f, type: 3}
+    - target: {fileID: 7812661071418618967, guid: abfce021c14b157469204f0521a51799, type: 3}
+      propertyPath: characterSets.Array.data[0].ability2
+      value: 
+      objectReference: {fileID: 21300000, guid: 19d320f7c860f7648bb4ce357a52925d, type: 3}
+    - target: {fileID: 7812661071418618967, guid: abfce021c14b157469204f0521a51799, type: 3}
       propertyPath: characterSets.Array.data[1].ability2
       value: 
       objectReference: {fileID: 21300000, guid: 264b6f2829ff31a4997b1ab17e832326, type: 3}
