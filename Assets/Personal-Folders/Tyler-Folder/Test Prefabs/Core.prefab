@@ -379,6 +379,8 @@ MonoBehaviour:
   waypoints_Path1: []
   waypoints_Path2: []
   enemyCore: {fileID: 0}
+  canSpawnMinions: 1
+  visualRoot: {fileID: 7952312797331344277}
 --- !u!114 &-1121830826594692187
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -16,6 +16,7 @@ public class Core : NonPlayerEntity
     [SerializeField] List<Transform> waypoints_Path2 = new List<Transform>();
     [SerializeField] Core enemyCore = null;
     [SerializeField] bool canSpawnMinions = true;
+    [SerializeField] GameObject visualRoot = null;
 
     Vector3 basePOSThis;
     Vector3 basePOSTarget;
@@ -104,6 +105,7 @@ public class Core : NonPlayerEntity
                 Debug.Log(gameObject.name + " is targeting self -- Attack()");
             }
 
+            Debug.Log("core is attacking");
             animator.SetTrigger("Attack");
             //deal dmg directly to target
             currentTarget.TakeDamage(attackPower, this);
@@ -131,7 +133,7 @@ public class Core : NonPlayerEntity
 
             //Rotate
             Quaternion targetRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotateAngularSpeed / 2 * Time.deltaTime);
+            visualRoot.transform.rotation = Quaternion.Slerp(visualRoot.transform.rotation, targetRotation, rotateAngularSpeed / 2 * Time.deltaTime);
         }
     }
     //Setter
