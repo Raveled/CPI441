@@ -4,9 +4,11 @@ public class MainMenu : MonoBehaviour
 {
     [SerializeField] GameObject settingsMenu;
     [SerializeField] GameObject creditsMenu;
+    [SerializeField] GameObject characterInfoMenu;
     private void Start() {
         if(settingsMenu)settingsMenu.SetActive(false);
         if(creditsMenu)creditsMenu.SetActive(false);
+        if(characterInfoMenu)characterInfoMenu.SetActive(false);
     }
     public void QuitGame() {
         Application.Quit();
@@ -16,6 +18,10 @@ public class MainMenu : MonoBehaviour
     }
     public void ToggleCreditsMenu(bool open) {
         HelperToggleMenu(creditsMenu, open);
+    }
+    public void ToggleCharacterInfoMenu(bool open) {
+        HelperToggleMenu(characterInfoMenu, open);
+
     }
     void HelperToggleMenu(GameObject menu, bool open) {
         if (open) {
