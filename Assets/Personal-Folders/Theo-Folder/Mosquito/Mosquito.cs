@@ -18,6 +18,12 @@ public class Mosquito : NetworkBehaviour
     [SerializeField] private float bloodShotSpeed = 12f;
     [SerializeField] private float bloodShotRange = 8f;
 
+    [Header("Basic Attack Cooldown")]
+    [SerializeField] private float bloodShotCooldown = 0.35f;
+    [SerializeField] private int bloodShotAbilityBarIndex = 0;
+    [SerializeField] private bool startBloodShotCooldownLocallyOnInput = true;
+    [SerializeField] private bool enableBloodShotDebugLogs = true;
+
     [Header("Blood Energy - Ability 1 (Passive)")]
     [SerializeField] private float maxBloodMeter = 100f;
     [SerializeField] private float bloodMeterGainOnBasicHit = 5f;
@@ -64,8 +70,13 @@ public class Mosquito : NetworkBehaviour
     private float ampUpTimer = 0f;
     private Color originalColor;
     private Renderer meshRenderer;
+
     [SerializeField] public Player player;
     [SerializeField] public MosquitoInputTester inputTester;
+
+    // Basic attack cooldown state
+    private float bloodShotCooldownTimer = 0f;
+    private float bloodShotNextAllowedTimeServer = 0f;
 
     protected override void OnSpawned(bool asServer)
     {
@@ -96,6 +107,17 @@ public class Mosquito : NetworkBehaviour
         if (abilityBar == null && player != null && player.isLocalPlayer())
             abilityBar = FindFirstObjectByType<AbilityBarUI>();
 
+        if (enableBloodShotDebugLogs)
+        {
+            Debug.Log(
+                $"[Mosquito] DelayedSpawn complete on {gameObject.name} | " +
+                $"isServer={isServer} | isController={isController} | " +
+                $"player={(player != null ? player.name : "NULL")} | " +
+                $"bloodShotFirePoint={(bloodShotFirePoint != null ? bloodShotFirePoint.name : "NULL")} | " +
+                $"abilityBar={(abilityBar != null ? abilityBar.name : "NULL")}"
+            );
+        }
+
         if (inputTester != null)
             inputTester.EnableInput();
     }
@@ -104,8 +126,13 @@ public class Mosquito : NetworkBehaviour
     {
         if (bloodMeterDecayPerSecond > 0f && currentBloodMeter > 0f)
             ModifyBloodMeter(-bloodMeterDecayPerSecond * Time.deltaTime);
+
+        if (bloodShotCooldownTimer > 0f)
+            bloodShotCooldownTimer -= Time.deltaTime;
+
         if (globShotCooldownTimer > 0f)
             globShotCooldownTimer -= Time.deltaTime;
+
         if (quickPokeCooldownTimer > 0f)
             quickPokeCooldownTimer -= Time.deltaTime;
 
@@ -122,15 +149,164 @@ public class Mosquito : NetworkBehaviour
     // ========== BASIC ATTACK - BLOOD SHOT ==========
     public void CastBloodShot()
     {
-        if (!player.isLocalPlayer()) return;
+        if (player == null)
+        {
+            Debug.LogError("[Mosquito] CastBloodShot blocked - player is NULL.");
+            return;
+        }
 
-        Debug.Log($"[Mosquito] CastBloodShot on {gameObject.name} | Player ID: {player.GetPlayerID()} | Player is Local: {player.isLocalPlayer()}");
+        if (!player.isLocalPlayer())
+            return;
+
+        if (bloodShotFirePoint == null)
+        {
+            Debug.LogError("[Mosquito] CastBloodShot blocked - bloodShotFirePoint is NULL.");
+            return;
+        }
+
+        if (!CanCastBloodShotClient())
+        {
+            if (enableBloodShotDebugLogs)
+            {
+                Debug.Log(
+                    $"[Mosquito] Blood Shot blocked locally on {gameObject.name} | " +
+                    $"localRemaining={Mathf.Max(0f, bloodShotCooldownTimer):F2}s | " +
+                    $"playerId={player.GetPlayerID()}"
+                );
+            }
+            return;
+        }
+
+        if (enableBloodShotDebugLogs)
+        {
+            Debug.Log(
+                $"[Mosquito] CastBloodShot local request | " +
+                $"object={gameObject.name} | playerId={player.GetPlayerID()} | " +
+                $"isLocal={player.isLocalPlayer()} | localTimer={bloodShotCooldownTimer:F2}s"
+            );
+        }
+
+        if (startBloodShotCooldownLocallyOnInput)
+            StartBloodShotCooldownClient(bloodShotCooldown);
+
+        PlayBloodShotAnimServerRpc();
+        RequestBloodShotServerRpc(bloodShotFirePoint.position, bloodShotFirePoint.rotation);
+    }
+
+    private bool CanCastBloodShotClient()
+    {
+        return bloodShotCooldownTimer <= 0f;
+    }
+
+    private void StartBloodShotCooldownClient(float cooldown)
+    {
+        bloodShotCooldownTimer = cooldown;
+
+        if (abilityBar != null && player != null && player.isLocalPlayer())
+            abilityBar.UseAbility(bloodShotAbilityBarIndex, cooldown);
+
+        if (enableBloodShotDebugLogs)
+        {
+            Debug.Log(
+                $"[Mosquito] Started local Blood Shot cooldown | " +
+                $"cooldown={cooldown:F2}s | playerId={(player != null ? player.GetPlayerID().ToString() : "NULL")}"
+            );
+        }
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void RequestBloodShotServerRpc(Vector3 position, Quaternion rotation)
+    {
+        if (!isServer)
+            return;
+
+        if (player == null)
+        {
+            Debug.LogError("[Mosquito] RequestBloodShotServerRpc failed - player is NULL on server.");
+            return;
+        }
+
+        float serverTime = Time.time;
+        float remaining = bloodShotNextAllowedTimeServer - serverTime;
+
+        if (enableBloodShotDebugLogs)
+        {
+            Debug.Log(
+                $"[Mosquito] Blood Shot request arrived on server | " +
+                $"playerId={player.GetPlayerID()} | serverTime={serverTime:F2} | " +
+                $"nextAllowed={bloodShotNextAllowedTimeServer:F2} | remaining={Mathf.Max(0f, remaining):F2}s"
+            );
+        }
+
+        if (serverTime < bloodShotNextAllowedTimeServer)
+        {
+            if (enableBloodShotDebugLogs)
+            {
+                Debug.Log(
+                    $"[Mosquito] Blood Shot rejected on server | " +
+                    $"playerId={player.GetPlayerID()} | remaining={Mathf.Max(0f, remaining):F2}s"
+                );
+            }
+
+            RejectBloodShotCooldownClientRpc(Mathf.Max(0f, remaining));
+            return;
+        }
+
+        bloodShotNextAllowedTimeServer = serverTime + bloodShotCooldown;
 
         int damage = GetBasicAttackDamageWithBlood(bloodShotBaseDamage);
-        PlayBloodShotAnim();
 
-        Debug.Log("[Mosquito] Sending BloodShot ServerRpc.");
-        ServerSpawnBloodShotRpc(bloodShotFirePoint.position, bloodShotFirePoint.rotation, damage);
+        if (enableBloodShotDebugLogs)
+        {
+            Debug.Log(
+                $"[Mosquito] Blood Shot approved on server | " +
+                $"playerId={player.GetPlayerID()} | damage={damage} | " +
+                $"nextAllowed={bloodShotNextAllowedTimeServer:F2}"
+            );
+        }
+
+        ServerSpawnBloodShot(position, rotation, damage);
+        SyncBloodShotCooldownClientRpc(bloodShotCooldown);
+    }
+
+    [ObserversRpc]
+    private void SyncBloodShotCooldownClientRpc(float cooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        bloodShotCooldownTimer = Mathf.Max(bloodShotCooldownTimer, cooldown);
+
+        if (abilityBar != null)
+            abilityBar.UseAbility(bloodShotAbilityBarIndex, cooldown);
+
+        if (enableBloodShotDebugLogs)
+        {
+            Debug.Log(
+                $"[Mosquito] Blood Shot cooldown synced to local player | " +
+                $"cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}"
+            );
+        }
+    }
+
+    [ObserversRpc]
+    private void RejectBloodShotCooldownClientRpc(float remainingCooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        bloodShotCooldownTimer = Mathf.Max(bloodShotCooldownTimer, remainingCooldown);
+
+        if (abilityBar != null && remainingCooldown > 0f)
+            abilityBar.UseAbility(bloodShotAbilityBarIndex, remainingCooldown);
+
+        if (enableBloodShotDebugLogs)
+        {
+            Debug.Log(
+                $"[Mosquito] Blood Shot rejected sync received by local player | " +
+                $"remainingCooldown={remainingCooldown:F2}s | playerId={player.GetPlayerID()}"
+            );
+        }
     }
 
     [ServerRpc(requireOwnership: false)]
@@ -346,7 +522,10 @@ public class Mosquito : NetworkBehaviour
             meshRenderer = GetComponentInChildren<MeshRenderer>();
             Debug.Log($"Force search found meshRenderer={meshRenderer}");
         }
-        meshRenderer.material.color = active ? ampUpColor : originalColor;
+
+        if (meshRenderer != null)
+            meshRenderer.material.color = active ? ampUpColor : originalColor;
+
         Debug.Log($"[Mosquito] Amp Up color set to {(active ? "active" : "original")}.");
     }
 

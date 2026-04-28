@@ -206,6 +206,7 @@ MonoBehaviour:
     _sendIntervalInSeconds: 0
   canMove: 1
   canDefaultAttack: 1
+  showRewardRange: 1
   rewardRange: 50
   currentHitPoints:
     _value: 0
@@ -307,6 +308,10 @@ MonoBehaviour:
   bloodShotBaseDamage: 8
   bloodShotSpeed: 20
   bloodShotRange: 50
+  bloodShotCooldown: 1
+  bloodShotAbilityBarIndex: 0
+  startBloodShotCooldownLocallyOnInput: 1
+  enableBloodShotDebugLogs: 1
   maxBloodMeter: 100
   bloodMeterGainOnBasicHit: 5
   bloodMeterGainOnPlayerHit: 10
