@@ -9,6 +9,11 @@ public class MainMenu : MonoBehaviour
         if(settingsMenu)settingsMenu.SetActive(false);
         if(creditsMenu)creditsMenu.SetActive(false);
         if(characterInfoMenu)characterInfoMenu.SetActive(false);
+        if (FindFirstObjectByType<GameManager>())
+        {
+
+            Destroy(FindFirstObjectByType<GameManager>());
+        }
     }
     public void QuitGame() {
         Application.Quit();
