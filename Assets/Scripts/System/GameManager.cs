@@ -11,6 +11,7 @@ using Steamworks;
 using PurrLobby;
 using UnityEngine.SceneManagement;
 
+
 public class GameManager : NetworkBehaviour
 {
     public enum GameState : int { NULL = 0, INPROGRESS = 1, PAUSED = 2, END = 3}
@@ -18,6 +19,7 @@ public class GameManager : NetworkBehaviour
 
     //GameManager
     [Header("GameManager Setup")]
+    [SerializeField] AIManager aiManager = null;
     [SerializeField] Transform[] spawnpoints_Team1 = null;
     [SerializeField] Transform[] spawnpoints_Team2 = null;
     [Tooltip("Time In Seconds")][SerializeField] float minionWaveSpawnInterval = 5f;
@@ -148,6 +150,9 @@ public class GameManager : NetworkBehaviour
         matchData = GetComponent<JSON_MatchData>();
         entityData = GetComponent<JSON_EntityData>();
         if (LoadJSONOnStart)LoadEntityJSON();
+
+        //Get APIKey in
+        aiManager.FetchApiKey();
     }
     void Start() {
         //Init
@@ -338,9 +343,8 @@ public class GameManager : NetworkBehaviour
         ChangeGameState(GameState.END);
         GenerateMatchJSON();
 
-        //WIP
         if (!aiprompted) {
-            FindFirstObjectByType<AIManager>().AskAIForBalance();
+            aiManager.AskAIForBalance();
             aiprompted = true;
         }
 
