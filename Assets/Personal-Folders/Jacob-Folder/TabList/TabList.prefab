@@ -59,4 +59,16 @@ MonoBehaviour:
   _visitiblityRules: {fileID: 0}
   tabListEntryPrefab: {fileID: 4931376941988920906, guid: 53e8380395473dd42b11907a763204ea, type: 3}
   startY: 25
-  entries: []
+  entries:
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
+    _list: []
+  tabAction:
+    m_Name: Tab
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 958d8100-b195-4d37-a7ea-0cabc1ac6848
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0

@@ -12,38 +12,41 @@ public class TabListEntry : NetworkBehaviour
     [SerializeField] private Image avatarImage;
     [SerializeField] private Image characterIcon;
     [SerializeField] private Image backgroundImage;
+    [SerializeField] private TextMeshProUGUI killsText;
+    [SerializeField] private TextMeshProUGUI deathsText;
     [SerializeField] private List<Sprite> characterIcons;
 
-    public string steamID;
-    public PlayerID playerID;
-    public string displayName;
-    public Texture2D avatar;
-    public int team;
-    public string character;
-
-    private Player player;
+    public SyncVar<string> steamID;
+    public SyncVar<PlayerID> playerID;
+    public SyncVar<string> displayName;
+    public SyncVar<Texture2D> avatar;
+    public SyncVar<int> team;
+    public SyncVar<string> character;
+    public SyncVar<int> kills;
+    public SyncVar<int> deaths;
 
     public void Init(string steamID, PlayerID playerID, string displayName, Texture2D avatar, int team, string character)
     {
-        this.steamID = steamID;
-        this.playerID = playerID;
-        this.displayName = displayName;
-        this.avatar = avatar;
-        this.team = team;
-        this.character = character;
+        this.steamID.value = steamID;
+        this.playerID.value = playerID;
+        this.displayName.value = displayName;
+        this.avatar.value = avatar;
+        this.team.value = team;
+        this.character.value = character;
+        kills.value = 0;
+        deaths.value = 0;
+    }
 
-        foreach (Player player in FindObjectsByType<Player>(FindObjectsSortMode.None))
-        {
-            if (player.GetPlayerID() == playerID)
-            {
-                this.player = player;
-                break; 
-            }
-        }
+    private void Update()
+    {
+        if (isServer) ServerUpdate();
+    }
 
-        displayNameText.text = displayName;
-        avatarImage.sprite = avatar != null ? Sprite.Create(avatar, new Rect(0, 0, avatar.width, avatar.height), new Vector2(0.5f, 0.5f)) : null;
-        switch(character.ToLower())
+    private void ServerUpdate()
+    {
+        displayNameText.text = displayName.value;
+        avatarImage.sprite = avatar.value != null ? Sprite.Create(avatar.value, new Rect(0, 0, avatar.value.width, avatar.value.height), new Vector2(0.5f, 0.5f)) : null;
+        switch(character.value.ToLower())
         {
             case "mosquito":
                 characterIcon.sprite = characterIcons[0];
@@ -60,7 +63,7 @@ public class TabListEntry : NetworkBehaviour
         }
 
         Color teamColor;
-        switch(team)
+        switch(team.value)
         {
             case 1:
                 teamColor = GameManager.Instance.team1Color; 
@@ -74,6 +77,19 @@ public class TabListEntry : NetworkBehaviour
         }
         teamColor.a = 0.5f;
         backgroundImage.color = teamColor;
+
+        Player[] players = FindObjectsByType<Player>(FindObjectsSortMode.None);
+        foreach (Player p in players)
+        {
+            if (p.playerID == this.playerID.value)
+            {
+                kills.value = p.GetPlayerInfoSO().KillCount;
+                deaths.value = p.GetPlayerInfoSO().DeathCount;
+            }
+        }
+
+        killsText.text = $"Kills: {kills}";
+        deathsText.text = $"Deaths: {deaths}";
     }
 
     public float GetHeight()
@@ -81,6 +97,7 @@ public class TabListEntry : NetworkBehaviour
         return backgroundImage.rectTransform.rect.height;
     }
 
+    [ObserversRpc (bufferLast: true)]
     public void UpdateEntry()
     {
         

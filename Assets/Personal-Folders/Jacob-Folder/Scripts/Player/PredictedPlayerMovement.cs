@@ -69,12 +69,14 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
 
     public SO_EntityStatBlock stats;
 
+    protected void Start()
+    {
+        StartCoroutine(SetupInput());
+    }
+
     protected override void LateAwake()
     {
-        if (_player == null)
-            _player = GetComponentInChildren<Player>();
-
-        if (_player == null && isServer)
+        if (isServer)
         {
             //Debug.Log($"Player {owner.Value} spawning playerRoot prefab");
             GameObject playerObject = Instantiate(playerObj, this.transform);
@@ -94,24 +96,35 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
                 visualRoot.transform.SetParent(this.transform);
             }
         }
+        else
+        {
+            if (_player == null)
+                _player = GetComponentInChildren<Player>();
+        }
+
+        Debug.Log($"[PredictedPlayerMovement] LateAwake called for {name}. isOwner:{isOwner} isServer:{isServer}");
 
         _rigidbody.isKinematic = false;
+
+        // Input setup
+        if (isOwner)
+        {
+            //StartCoroutine(SetupInput());
+        }
 
         //butterfly handling for flying / dash
         butterflyAbility = GetComponentInChildren<Butterfly>();
 
         //beetle handling for most attacks
         beetleAbility = GetComponentInChildren<Beetle>();
-
-        // Input setup
-        StartCoroutine(SetupInput());
     }
 
     public IEnumerator SetupInput()
     {
         yield return new WaitForSeconds(0.3f);
 
-        Debug.Log($"[PredictedPlayerMovement] Setting up input for player {owner.Value}. isOwner:{isOwner} isController:{isController} isServer:{isServer}");
+        Debug.Log($"[PredictedPlayerMovement] Setting up input for player {owner.Value}.");
+
         if (isOwner)
         {
             moveAction = InputSystem.actions.FindAction("Move");
