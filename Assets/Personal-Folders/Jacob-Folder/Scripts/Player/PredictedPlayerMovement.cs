@@ -246,8 +246,8 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
             {
                 beetleHornImpaleActive = false;
 
-                if (isServer && beetleAbility != null)
-                    beetleAbility.NotifyHornImpaleEndedFromMovement();
+                /*if (isServer && beetleAbility != null)
+                    beetleAbility.NotifyHornImpaleEndedFromMovement();*/
             }
 
             return;

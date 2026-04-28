@@ -1,4 +1,4 @@
-// BeetleInputTester.cs - FULLY ADAPTED TO MOSQUITO INPUT TESTER STRUCTURE
+// BeetleInputTester.cs - FIXED
 // ******************************************* 
 // ****** THEO XENAKIS - 2026 - CPI 441 ****** 
 // ******************************************* 
@@ -58,8 +58,8 @@ public class BeetleInputTester : MonoBehaviour
     {
         if (context.started && beetle != null && beetle.isOwner)
         {
-            if (beetle.TryHornImpale())
-                Debug.Log("[InputTester] Horn Impale Tried!");
+            beetle.TryHornImpale();  // This returns void, not bool
+            Debug.Log("[InputTester] Horn Impale Tried!");
         }
     }
 
@@ -76,8 +76,8 @@ public class BeetleInputTester : MonoBehaviour
     {
         if (context.started && beetle != null && beetle.isOwner)
         {
-            if (beetle.TryRoll())
-                Debug.Log("[InputTester] Roll Tried!");
+            beetle.TryRoll();  // This returns void, not bool
+            Debug.Log("[InputTester] Roll Tried!");
         }
     }
 
