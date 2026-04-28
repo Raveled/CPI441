@@ -16,6 +16,7 @@ public class Entity : NetworkBehaviour
     [SerializeField] protected SyncVar<Team> team = new(Team.NULL);
     [SerializeField] protected bool canMove = true;
     [SerializeField] protected bool canDefaultAttack = true;
+    [SerializeField] protected bool showRewardRange = true;
 
     [Tooltip("Only Core & Guardian Tower need this set in inspector")]
     [SerializeField] PredictedObjectID[] protector = null; // Changed from Entity[] to PredictedObjectID[] for better network referencing
@@ -454,10 +455,10 @@ public class Entity : NetworkBehaviour
 
     protected virtual void OnDrawGizmos()
     {
-        /*if (showRewardRange) {
+        if (showRewardRange) {
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, rewardRange);
-        }*/
+        }
     }
 
     #region Setters
