@@ -36,7 +36,11 @@ public class Mosquito : NetworkBehaviour
     [SerializeField] private float quickPokeCooldown = 2f;
     [SerializeField] private float quickPokeBloodGain = 10f;
     [SerializeField] private float quickPokeBloodGainPlayer = 20f;
-    private float quickPokeCooldownTimer = 0f;
+
+    [Header("Quick Poke Cooldown")]
+    [SerializeField] private int quickPokeAbilityBarIndex = 1;
+    [SerializeField] private bool startQuickPokeCooldownLocallyOnInput = true;
+    [SerializeField] private bool enableQuickPokeDebugLogs = true;
 
     [Header("Quick Poke - Ability 2 Setup")]
     [SerializeField] private float quickPokeRange = 2f;
@@ -51,7 +55,11 @@ public class Mosquito : NetworkBehaviour
     [SerializeField] private float globDamagePerBloodUnit = 0.3f;
     [SerializeField] private float globSizePerBloodUnit = 0.01f;
     [SerializeField] private float globShotCooldown = 5f;
-    private float globShotCooldownTimer = 0f;
+
+    [Header("Glob Shot Cooldown")]
+    [SerializeField] private int globShotAbilityBarIndex = 2;
+    [SerializeField] private bool startGlobShotCooldownLocallyOnInput = true;
+    [SerializeField] private bool enableGlobShotDebugLogs = true;
 
     [Header("Glob Shot Threshold")]
     [SerializeField] private float globShotMinBloodThreshold = 10f;
@@ -61,6 +69,12 @@ public class Mosquito : NetworkBehaviour
     [SerializeField] private float ampUpInitialMoveMult = 2f;
     [SerializeField] private float ampUpInitialAttackSpeedMult = 2f;
     [SerializeField] private Color ampUpColor = Color.red;
+
+    [Header("Amp Up Cooldown")]
+    [SerializeField] private float ampUpCooldown = 12f;
+    [SerializeField] private int ampUpAbilityBarIndex = 3;
+    [SerializeField] private bool startAmpUpCooldownLocallyOnInput = true;
+    [SerializeField] private bool enableAmpUpDebugLogs = true;
 
     [Header("Animator")]
     [SerializeField] private Animator animator;
@@ -74,9 +88,17 @@ public class Mosquito : NetworkBehaviour
     [SerializeField] public Player player;
     [SerializeField] public MosquitoInputTester inputTester;
 
-    // Basic attack cooldown state
+    // Local cooldown timers
     private float bloodShotCooldownTimer = 0f;
+    private float quickPokeCooldownTimer = 0f;
+    private float globShotCooldownTimer = 0f;
+    private float ampUpCooldownTimer = 0f;
+
+    // Server authoritative cooldown times
     private float bloodShotNextAllowedTimeServer = 0f;
+    private float quickPokeNextAllowedTimeServer = 0f;
+    private float globShotNextAllowedTimeServer = 0f;
+    private float ampUpNextAllowedTimeServer = 0f;
 
     protected override void OnSpawned(bool asServer)
     {
@@ -130,11 +152,14 @@ public class Mosquito : NetworkBehaviour
         if (bloodShotCooldownTimer > 0f)
             bloodShotCooldownTimer -= Time.deltaTime;
 
+        if (quickPokeCooldownTimer > 0f)
+            quickPokeCooldownTimer -= Time.deltaTime;
+
         if (globShotCooldownTimer > 0f)
             globShotCooldownTimer -= Time.deltaTime;
 
-        if (quickPokeCooldownTimer > 0f)
-            quickPokeCooldownTimer -= Time.deltaTime;
+        if (ampUpCooldownTimer > 0f)
+            ampUpCooldownTimer -= Time.deltaTime;
 
         UpdateAmpUp();
     }
@@ -146,44 +171,50 @@ public class Mosquito : NetworkBehaviour
 
     public float GetBloodMeter01() => maxBloodMeter <= 0f ? 0f : currentBloodMeter / maxBloodMeter;
 
-    // ========== BASIC ATTACK - BLOOD SHOT ==========
-    public void CastBloodShot()
+    private bool ValidateLocalAbilityCast(string abilityName, Transform requiredPoint = null)
     {
         if (player == null)
         {
-            Debug.LogError("[Mosquito] CastBloodShot blocked - player is NULL.");
-            return;
+            Debug.LogError($"[Mosquito] {abilityName} blocked - player is NULL.");
+            return false;
         }
 
         if (!player.isLocalPlayer())
-            return;
+            return false;
 
-        if (bloodShotFirePoint == null)
+        if (requiredPoint == null && abilityName != "Quick Poke" && abilityName != "Amp Up")
         {
-            Debug.LogError("[Mosquito] CastBloodShot blocked - bloodShotFirePoint is NULL.");
-            return;
+            Debug.LogError($"[Mosquito] {abilityName} blocked - required point is NULL.");
+            return false;
         }
 
-        if (!CanCastBloodShotClient())
+        return true;
+    }
+
+    private void UpdateAbilityBarCooldown(int index, float cooldown)
+    {
+        if (abilityBar != null && player != null && player.isLocalPlayer())
+            abilityBar.UseAbility(index, cooldown);
+    }
+
+    // ========== BASIC ATTACK - BLOOD SHOT ==========
+    public void CastBloodShot()
+    {
+        if (!ValidateLocalAbilityCast("Blood Shot", bloodShotFirePoint))
+            return;
+
+        if (bloodShotCooldownTimer > 0f)
         {
             if (enableBloodShotDebugLogs)
             {
-                Debug.Log(
-                    $"[Mosquito] Blood Shot blocked locally on {gameObject.name} | " +
-                    $"localRemaining={Mathf.Max(0f, bloodShotCooldownTimer):F2}s | " +
-                    $"playerId={player.GetPlayerID()}"
-                );
+                Debug.Log($"[Mosquito] Blood Shot blocked locally | remaining={Mathf.Max(0f, bloodShotCooldownTimer):F2}s | playerId={player.GetPlayerID()}");
             }
             return;
         }
 
         if (enableBloodShotDebugLogs)
         {
-            Debug.Log(
-                $"[Mosquito] CastBloodShot local request | " +
-                $"object={gameObject.name} | playerId={player.GetPlayerID()} | " +
-                $"isLocal={player.isLocalPlayer()} | localTimer={bloodShotCooldownTimer:F2}s"
-            );
+            Debug.Log($"[Mosquito] Blood Shot requested locally | playerId={player.GetPlayerID()} | localTimer={bloodShotCooldownTimer:F2}s");
         }
 
         if (startBloodShotCooldownLocallyOnInput)
@@ -193,24 +224,14 @@ public class Mosquito : NetworkBehaviour
         RequestBloodShotServerRpc(bloodShotFirePoint.position, bloodShotFirePoint.rotation);
     }
 
-    private bool CanCastBloodShotClient()
-    {
-        return bloodShotCooldownTimer <= 0f;
-    }
-
     private void StartBloodShotCooldownClient(float cooldown)
     {
         bloodShotCooldownTimer = cooldown;
-
-        if (abilityBar != null && player != null && player.isLocalPlayer())
-            abilityBar.UseAbility(bloodShotAbilityBarIndex, cooldown);
+        UpdateAbilityBarCooldown(bloodShotAbilityBarIndex, cooldown);
 
         if (enableBloodShotDebugLogs)
         {
-            Debug.Log(
-                $"[Mosquito] Started local Blood Shot cooldown | " +
-                $"cooldown={cooldown:F2}s | playerId={(player != null ? player.GetPlayerID().ToString() : "NULL")}"
-            );
+            Debug.Log($"[Mosquito] Blood Shot local cooldown started | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
         }
     }
 
@@ -231,23 +252,11 @@ public class Mosquito : NetworkBehaviour
 
         if (enableBloodShotDebugLogs)
         {
-            Debug.Log(
-                $"[Mosquito] Blood Shot request arrived on server | " +
-                $"playerId={player.GetPlayerID()} | serverTime={serverTime:F2} | " +
-                $"nextAllowed={bloodShotNextAllowedTimeServer:F2} | remaining={Mathf.Max(0f, remaining):F2}s"
-            );
+            Debug.Log($"[Mosquito] Blood Shot request on server | playerId={player.GetPlayerID()} | serverTime={serverTime:F2} | nextAllowed={bloodShotNextAllowedTimeServer:F2} | remaining={Mathf.Max(0f, remaining):F2}s");
         }
 
         if (serverTime < bloodShotNextAllowedTimeServer)
         {
-            if (enableBloodShotDebugLogs)
-            {
-                Debug.Log(
-                    $"[Mosquito] Blood Shot rejected on server | " +
-                    $"playerId={player.GetPlayerID()} | remaining={Mathf.Max(0f, remaining):F2}s"
-                );
-            }
-
             RejectBloodShotCooldownClientRpc(Mathf.Max(0f, remaining));
             return;
         }
@@ -255,16 +264,6 @@ public class Mosquito : NetworkBehaviour
         bloodShotNextAllowedTimeServer = serverTime + bloodShotCooldown;
 
         int damage = GetBasicAttackDamageWithBlood(bloodShotBaseDamage);
-
-        if (enableBloodShotDebugLogs)
-        {
-            Debug.Log(
-                $"[Mosquito] Blood Shot approved on server | " +
-                $"playerId={player.GetPlayerID()} | damage={damage} | " +
-                $"nextAllowed={bloodShotNextAllowedTimeServer:F2}"
-            );
-        }
-
         ServerSpawnBloodShot(position, rotation, damage);
         SyncBloodShotCooldownClientRpc(bloodShotCooldown);
     }
@@ -276,16 +275,11 @@ public class Mosquito : NetworkBehaviour
             return;
 
         bloodShotCooldownTimer = Mathf.Max(bloodShotCooldownTimer, cooldown);
-
-        if (abilityBar != null)
-            abilityBar.UseAbility(bloodShotAbilityBarIndex, cooldown);
+        UpdateAbilityBarCooldown(bloodShotAbilityBarIndex, cooldown);
 
         if (enableBloodShotDebugLogs)
         {
-            Debug.Log(
-                $"[Mosquito] Blood Shot cooldown synced to local player | " +
-                $"cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}"
-            );
+            Debug.Log($"[Mosquito] Blood Shot cooldown synced | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
         }
     }
 
@@ -297,25 +291,13 @@ public class Mosquito : NetworkBehaviour
 
         bloodShotCooldownTimer = Mathf.Max(bloodShotCooldownTimer, remainingCooldown);
 
-        if (abilityBar != null && remainingCooldown > 0f)
-            abilityBar.UseAbility(bloodShotAbilityBarIndex, remainingCooldown);
+        if (remainingCooldown > 0f)
+            UpdateAbilityBarCooldown(bloodShotAbilityBarIndex, remainingCooldown);
 
         if (enableBloodShotDebugLogs)
         {
-            Debug.Log(
-                $"[Mosquito] Blood Shot rejected sync received by local player | " +
-                $"remainingCooldown={remainingCooldown:F2}s | playerId={player.GetPlayerID()}"
-            );
+            Debug.Log($"[Mosquito] Blood Shot rejected by server | remaining={remainingCooldown:F2}s | playerId={player.GetPlayerID()}");
         }
-    }
-
-    [ServerRpc(requireOwnership: false)]
-    private void ServerSpawnBloodShotRpc(Vector3 position, Quaternion rotation, int damage)
-    {
-        if (!isServer) return;
-
-        Debug.Log($"[Mosquito] ServerSpawnBloodShotRpc received on server. damage={damage} player id = {player.GetPlayerID()}");
-        ServerSpawnBloodShot(position, rotation, damage);
     }
 
     private void ServerSpawnBloodShot(Vector3 position, Quaternion rotation, int damage)
@@ -327,9 +309,7 @@ public class Mosquito : NetworkBehaviour
         if (networkManager == null) { Debug.LogError("[Mosquito] networkManager is NULL!"); return; }
 
         GameObject proj = Instantiate(bloodShotProjectilePrefab, position, rotation);
-
         proj.GetComponent<BloodShotProjectile>().SpawnSetup(player, damage, player.transform.forward, bloodShotSpeed, null);
-
         NetworkManager.main.Spawn(proj);
 
         Debug.Log($"[Mosquito] Instantiated projectile: {proj.name}. PurrNet will auto-sync via NetworkBehaviour.");
@@ -358,31 +338,104 @@ public class Mosquito : NetworkBehaviour
     public bool TryQuickPoke()
     {
         if (!isController) return false;
-        if (quickPokeCooldownTimer > 0f || player == null)
+        if (!ValidateLocalAbilityCast("Quick Poke"))
+            return false;
+
+        if (quickPokeCooldownTimer > 0f)
         {
-            Debug.Log($"[Mosquito] Quick Poke blocked - cooldown: {quickPokeCooldownTimer:F2}s remaining");
+            if (enableQuickPokeDebugLogs)
+            {
+                Debug.Log($"[Mosquito] Quick Poke blocked locally | remaining={Mathf.Max(0f, quickPokeCooldownTimer):F2}s | playerId={player.GetPlayerID()}");
+            }
             return false;
         }
 
-        quickPokeCooldownTimer = quickPokeCooldown;
+        if (enableQuickPokeDebugLogs)
+        {
+            Debug.Log($"[Mosquito] Quick Poke requested locally | playerId={player.GetPlayerID()} | localTimer={quickPokeCooldownTimer:F2}s");
+        }
+
+        if (startQuickPokeCooldownLocallyOnInput)
+            StartQuickPokeCooldownClient(quickPokeCooldown);
 
         PlayQuickPokeAnimServerRpc();
-
-        if (isServer)
-            ApplyQuickPoke();
-        else
-            ApplyQuickPokeServerRpc();
-
-        if (abilityBar != null && player != null && player.isLocalPlayer())
-            abilityBar.UseAbility(1, quickPokeCooldown);
+        RequestQuickPokeServerRpc();
 
         return true;
     }
 
-    [ServerRpc(requireOwnership: false)]
-    private void ApplyQuickPokeServerRpc()
+    private void StartQuickPokeCooldownClient(float cooldown)
     {
+        quickPokeCooldownTimer = cooldown;
+        UpdateAbilityBarCooldown(quickPokeAbilityBarIndex, cooldown);
+
+        if (enableQuickPokeDebugLogs)
+        {
+            Debug.Log($"[Mosquito] Quick Poke local cooldown started | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void RequestQuickPokeServerRpc()
+    {
+        if (!isServer)
+            return;
+
+        if (player == null)
+        {
+            Debug.LogError("[Mosquito] RequestQuickPokeServerRpc failed - player is NULL on server.");
+            return;
+        }
+
+        float serverTime = Time.time;
+        float remaining = quickPokeNextAllowedTimeServer - serverTime;
+
+        if (enableQuickPokeDebugLogs)
+        {
+            Debug.Log($"[Mosquito] Quick Poke request on server | playerId={player.GetPlayerID()} | serverTime={serverTime:F2} | nextAllowed={quickPokeNextAllowedTimeServer:F2} | remaining={Mathf.Max(0f, remaining):F2}s");
+        }
+
+        if (serverTime < quickPokeNextAllowedTimeServer)
+        {
+            RejectQuickPokeCooldownClientRpc(Mathf.Max(0f, remaining));
+            return;
+        }
+
+        quickPokeNextAllowedTimeServer = serverTime + quickPokeCooldown;
         ApplyQuickPoke();
+        SyncQuickPokeCooldownClientRpc(quickPokeCooldown);
+    }
+
+    [ObserversRpc]
+    private void SyncQuickPokeCooldownClientRpc(float cooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        quickPokeCooldownTimer = Mathf.Max(quickPokeCooldownTimer, cooldown);
+        UpdateAbilityBarCooldown(quickPokeAbilityBarIndex, cooldown);
+
+        if (enableQuickPokeDebugLogs)
+        {
+            Debug.Log($"[Mosquito] Quick Poke cooldown synced | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
+    }
+
+    [ObserversRpc]
+    private void RejectQuickPokeCooldownClientRpc(float remainingCooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        quickPokeCooldownTimer = Mathf.Max(quickPokeCooldownTimer, remainingCooldown);
+
+        if (remainingCooldown > 0f)
+            UpdateAbilityBarCooldown(quickPokeAbilityBarIndex, remainingCooldown);
+
+        if (enableQuickPokeDebugLogs)
+        {
+            Debug.Log($"[Mosquito] Quick Poke rejected by server | remaining={remainingCooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     private void ApplyQuickPoke()
@@ -391,7 +444,6 @@ public class Mosquito : NetworkBehaviour
         Debug.Log($"[Mosquito] Quick Poke - overlap sphere at {origin}, range={quickPokeRange}");
 
         Collider[] hits = Physics.OverlapSphere(origin, quickPokeRange);
-
         int hitCount = 0;
 
         foreach (Collider hit in hits)
@@ -422,30 +474,116 @@ public class Mosquito : NetworkBehaviour
     // ========== GLOB SHOT - ABILITY 3 ==========
     public void CastGlobShot()
     {
-        if (!player.isLocalPlayer()) return;
-        if (globShotCooldownTimer > 0f) return;
+        if (!ValidateLocalAbilityCast("Glob Shot", globFirePoint))
+            return;
 
-        Debug.Log($"[Mosquito] CastGlobShot on {gameObject.name} | Player ID: {player.GetPlayerID()} | Player is Local: {player.isLocalPlayer()}");
+        if (globShotCooldownTimer > 0f)
+        {
+            if (enableGlobShotDebugLogs)
+            {
+                Debug.Log($"[Mosquito] Glob Shot blocked locally | remaining={Mathf.Max(0f, globShotCooldownTimer):F2}s | playerId={player.GetPlayerID()}");
+            }
+            return;
+        }
 
-        int damage = Mathf.RoundToInt(globBaseDamage);
-        PlayGlobShotAnim();
+        if (currentBloodMeter < globShotMinBloodThreshold)
+        {
+            Debug.Log($"[Mosquito] Glob Shot blocked - insufficient blood: {currentBloodMeter:F1}/{globShotMinBloodThreshold}");
+            return;
+        }
 
-        Debug.Log("[Mosquito] Sending GlobShot ServerRpc.");
-        ServerSpawnGlobShotRpc(globFirePoint.position, globFirePoint.rotation, damage);
+        if (enableGlobShotDebugLogs)
+        {
+            Debug.Log($"[Mosquito] Glob Shot requested locally | playerId={player.GetPlayerID()} | localTimer={globShotCooldownTimer:F2}s");
+        }
 
-        globShotCooldownTimer = globShotCooldown;
+        if (startGlobShotCooldownLocallyOnInput)
+            StartGlobShotCooldownClient(globShotCooldown);
 
-        if (abilityBar != null)
-            abilityBar.UseAbility(2, globShotCooldown);
+        PlayGlobShotAnimServerRpc();
+        RequestGlobShotServerRpc(globFirePoint.position, globFirePoint.rotation);
+    }
+
+    private void StartGlobShotCooldownClient(float cooldown)
+    {
+        globShotCooldownTimer = cooldown;
+        UpdateAbilityBarCooldown(globShotAbilityBarIndex, cooldown);
+
+        if (enableGlobShotDebugLogs)
+        {
+            Debug.Log($"[Mosquito] Glob Shot local cooldown started | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     [ServerRpc(requireOwnership: false)]
-    private void ServerSpawnGlobShotRpc(Vector3 position, Quaternion rotation, int damage)
+    private void RequestGlobShotServerRpc(Vector3 position, Quaternion rotation)
     {
-        if (!isServer) return;
+        if (!isServer)
+            return;
 
-        Debug.Log($"[Mosquito] ServerSpawnGlobShotRpc received on server. damage={damage} player id={player.GetPlayerID()}");
+        if (player == null)
+        {
+            Debug.LogError("[Mosquito] RequestGlobShotServerRpc failed - player is NULL on server.");
+            return;
+        }
+
+        float serverTime = Time.time;
+        float remaining = globShotNextAllowedTimeServer - serverTime;
+
+        if (enableGlobShotDebugLogs)
+        {
+            Debug.Log($"[Mosquito] Glob Shot request on server | playerId={player.GetPlayerID()} | serverTime={serverTime:F2} | nextAllowed={globShotNextAllowedTimeServer:F2} | remaining={Mathf.Max(0f, remaining):F2}s");
+        }
+
+        if (serverTime < globShotNextAllowedTimeServer)
+        {
+            RejectGlobShotCooldownClientRpc(Mathf.Max(0f, remaining));
+            return;
+        }
+
+        if (currentBloodMeter < globShotMinBloodThreshold)
+        {
+            Debug.Log($"[Mosquito] Glob Shot rejected on server - insufficient blood: {currentBloodMeter:F1}/{globShotMinBloodThreshold}");
+            return;
+        }
+
+        globShotNextAllowedTimeServer = serverTime + globShotCooldown;
+
+        int damage = Mathf.RoundToInt(globBaseDamage);
         ServerSpawnGlobShot(position, rotation, damage);
+        SyncGlobShotCooldownClientRpc(globShotCooldown);
+    }
+
+    [ObserversRpc]
+    private void SyncGlobShotCooldownClientRpc(float cooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        globShotCooldownTimer = Mathf.Max(globShotCooldownTimer, cooldown);
+        UpdateAbilityBarCooldown(globShotAbilityBarIndex, cooldown);
+
+        if (enableGlobShotDebugLogs)
+        {
+            Debug.Log($"[Mosquito] Glob Shot cooldown synced | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
+    }
+
+    [ObserversRpc]
+    private void RejectGlobShotCooldownClientRpc(float remainingCooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        globShotCooldownTimer = Mathf.Max(globShotCooldownTimer, remainingCooldown);
+
+        if (remainingCooldown > 0f)
+            UpdateAbilityBarCooldown(globShotAbilityBarIndex, remainingCooldown);
+
+        if (enableGlobShotDebugLogs)
+        {
+            Debug.Log($"[Mosquito] Glob Shot rejected by server | remaining={remainingCooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     private void ServerSpawnGlobShot(Vector3 position, Quaternion rotation, int damage)
@@ -457,9 +595,7 @@ public class Mosquito : NetworkBehaviour
         if (networkManager == null) { Debug.LogError("[Mosquito] networkManager is NULL!"); return; }
 
         GameObject proj = Instantiate(globProjectilePrefab, position, rotation);
-
         proj.GetComponent<GlobProjectile>().SpawnSetup(player, damage, player.transform.forward, globBaseSpeed, null);
-
         NetworkManager.main.Spawn(proj);
 
         Debug.Log($"[Mosquito] Instantiated glob projectile: {proj.name}. PurrNet will auto-sync via NetworkBehaviour.");
@@ -469,26 +605,116 @@ public class Mosquito : NetworkBehaviour
     public void ActivateAmpUp()
     {
         if (!isController) return;
+        if (!ValidateLocalAbilityCast("Amp Up"))
+            return;
+
+        if (ampUpCooldownTimer > 0f)
+        {
+            if (enableAmpUpDebugLogs)
+            {
+                Debug.Log($"[Mosquito] Amp Up blocked locally by cooldown | remaining={Mathf.Max(0f, ampUpCooldownTimer):F2}s | playerId={player.GetPlayerID()}");
+            }
+            return;
+        }
+
         if (ampUpTimer > 0f)
         {
             Debug.Log("[Mosquito] Amp Up blocked - already active.");
             return;
         }
 
+        if (enableAmpUpDebugLogs)
+        {
+            Debug.Log($"[Mosquito] Amp Up requested locally | playerId={player.GetPlayerID()} | localTimer={ampUpCooldownTimer:F2}s");
+        }
+
+        if (startAmpUpCooldownLocallyOnInput)
+            StartAmpUpCooldownClient(ampUpCooldown);
+
         PlayAmpUpAnimServerRpc();
+        RequestAmpUpServerRpc();
+    }
 
-        ampUpTimer = ampUpDuration;
+    private void StartAmpUpCooldownClient(float cooldown)
+    {
+        ampUpCooldownTimer = cooldown;
+        UpdateAbilityBarCooldown(ampUpAbilityBarIndex, cooldown);
 
-        if (isServer)
-            ApplyAmpUp();
-        else
-            ApplyAmpUpServerRpc();
+        if (enableAmpUpDebugLogs)
+        {
+            Debug.Log($"[Mosquito] Amp Up local cooldown started | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     [ServerRpc(requireOwnership: false)]
-    private void ApplyAmpUpServerRpc()
+    private void RequestAmpUpServerRpc()
     {
+        if (!isServer)
+            return;
+
+        if (player == null)
+        {
+            Debug.LogError("[Mosquito] RequestAmpUpServerRpc failed - player is NULL on server.");
+            return;
+        }
+
+        float serverTime = Time.time;
+        float remaining = ampUpNextAllowedTimeServer - serverTime;
+
+        if (enableAmpUpDebugLogs)
+        {
+            Debug.Log($"[Mosquito] Amp Up request on server | playerId={player.GetPlayerID()} | serverTime={serverTime:F2} | nextAllowed={ampUpNextAllowedTimeServer:F2} | remaining={Mathf.Max(0f, remaining):F2}s");
+        }
+
+        if (serverTime < ampUpNextAllowedTimeServer)
+        {
+            RejectAmpUpCooldownClientRpc(Mathf.Max(0f, remaining));
+            return;
+        }
+
+        if (ampUpTimer > 0f)
+        {
+            Debug.Log("[Mosquito] Amp Up blocked on server - already active.");
+            return;
+        }
+
+        ampUpNextAllowedTimeServer = serverTime + ampUpCooldown;
+        ampUpTimer = ampUpDuration;
+
         ApplyAmpUp();
+        SyncAmpUpCooldownClientRpc(ampUpCooldown);
+    }
+
+    [ObserversRpc]
+    private void SyncAmpUpCooldownClientRpc(float cooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        ampUpCooldownTimer = Mathf.Max(ampUpCooldownTimer, cooldown);
+        UpdateAbilityBarCooldown(ampUpAbilityBarIndex, cooldown);
+
+        if (enableAmpUpDebugLogs)
+        {
+            Debug.Log($"[Mosquito] Amp Up cooldown synced | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
+    }
+
+    [ObserversRpc]
+    private void RejectAmpUpCooldownClientRpc(float remainingCooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        ampUpCooldownTimer = Mathf.Max(ampUpCooldownTimer, remainingCooldown);
+
+        if (remainingCooldown > 0f)
+            UpdateAbilityBarCooldown(ampUpAbilityBarIndex, remainingCooldown);
+
+        if (enableAmpUpDebugLogs)
+        {
+            Debug.Log($"[Mosquito] Amp Up rejected by server | remaining={remainingCooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     private void ApplyAmpUp()
