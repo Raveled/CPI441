@@ -119,15 +119,28 @@ public class Player : Entity
             if (minimapTracker != null) minimapTracker.AttachMinimapCamera();
             InitHealthBars();
             InitRespawnUI();
-
-            if (abilityBarUI == null)
-                abilityBarUI = FindFirstObjectByType<AbilityBarUI>();
-
-            if (abilityIconLoader == null)
-                abilityIconLoader = FindFirstObjectByType<CharacterAbilityIconLoader>();
+            InitAbilityUI();
         }
     }
+    private void InitAbilityUI()
+    {
+        if (!isLocalPlayer())
+            return;
 
+        if (abilityBarUI == null)
+            abilityBarUI = FindFirstObjectByType<AbilityBarUI>();
+
+        if (abilityIconLoader == null)
+            abilityIconLoader = FindFirstObjectByType<CharacterAbilityIconLoader>();
+
+        if (abilityIconLoader != null)
+        {
+            abilityIconLoader.BindPlayer(this);
+            abilityIconLoader.RefreshIcons();
+        }
+
+        Debug.Log($"[Player] InitAbilityUI for '{gameObject.name}' with character '{character.value}'.");
+    }
     private void InitRespawnUI()
     {
         respawnUI = GameObject.Find("RespawnUI").GetComponent<RespawnUIController>();

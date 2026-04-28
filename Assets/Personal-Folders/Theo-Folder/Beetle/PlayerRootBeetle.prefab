@@ -68,6 +68,7 @@ MonoBehaviour:
     _sendIntervalInSeconds: 0
   canMove: 1
   canDefaultAttack: 1
+  showRewardRange: 1
   rewardRange: 50
   currentHitPoints:
     _value: 0
@@ -132,6 +133,8 @@ MonoBehaviour:
     _sendIntervalInSeconds: 0
   minimapTracker: {fileID: 2456375710640570300}
   healthBar: {fileID: 8345406130653221562}
+  abilityBarUI: {fileID: 0}
+  abilityIconLoader: {fileID: 0}
   predictedMovement: {fileID: 0}
   character:
     _value: 
@@ -175,30 +178,49 @@ MonoBehaviour:
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
   player: {fileID: 4751865395330377205}
+  inputTester: {fileID: 0}
+  abilityBar: {fileID: 0}
   mandibleBaseDamage: 12
   mandibleRange: 2.5
   mandibleCooldown: 1.2
+  mandibleAbilityBarIndex: -1
+  startMandibleCooldownLocallyOnInput: 1
+  enableMandibleDebugLogs: 1
   hornImpaleDamage: 25
   hornDashDistance: 4
   hornDashDuration: 0.4
   hornSlowAmount: 0.5
   hornSlowDuration: 2
   hornCooldown: 8
+  hornImpaleAbilityBarIndex: 0
+  startHornImpaleCooldownLocallyOnInput: 1
+  enableHornImpaleDebugLogs: 1
   swaggerMoveSpeedMult: 0.6
   swaggerDamageReduction: 0.4
   swaggerDuration: 6
+  swaggerCooldown: 12
+  swaggerAbilityBarIndex: 1
+  startSwaggerCooldownLocallyOnInput: 1
+  enableSwaggerDebugLogs: 1
   rollDamage: 15
   rollSpeed: 15
   rollKnockbackForce: 8
   rollCooldown: 12
+  rollDuration: 1
+  rollAbilityBarIndex: 2
+  startRollCooldownLocallyOnInput: 1
+  enableRollDebugLogs: 1
   stompPrefab: {fileID: 5615598041355943147, guid: 627e61fe7547f6e47b82eb0e241bfe42, type: 3}
   stompRadius: 4
   stompDamage: 8
   stompDuration: 3
   stompTickInterval: 0.5
   stompStunDuration: 1.5
+  stompCooldown: 20
+  stompAbilityBarIndex: 3
+  startStompCooldownLocallyOnInput: 1
+  enableStompDebugLogs: 1
   animator: {fileID: 0}
-  rollDuration: 1
 --- !u!114 &-5748678838735300178
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -309,7 +309,7 @@ MonoBehaviour:
   bloodShotSpeed: 20
   bloodShotRange: 50
   bloodShotCooldown: 1
-  bloodShotAbilityBarIndex: 0
+  bloodShotAbilityBarIndex: -1
   startBloodShotCooldownLocallyOnInput: 1
   enableBloodShotDebugLogs: 1
   maxBloodMeter: 100
@@ -321,6 +321,9 @@ MonoBehaviour:
   quickPokeCooldown: 2
   quickPokeBloodGain: 10
   quickPokeBloodGainPlayer: 20
+  quickPokeAbilityBarIndex: 1
+  startQuickPokeCooldownLocallyOnInput: 1
+  enableQuickPokeDebugLogs: 1
   quickPokeRange: 2
   quickPokeOrigin: {fileID: 0}
   globProjectilePrefab: {fileID: 5426923190247754776, guid: cb04fc2c9ed1de8489498fc3f2bf7fc5, type: 3}
@@ -331,11 +334,22 @@ MonoBehaviour:
   globDamagePerBloodUnit: 0.3
   globSizePerBloodUnit: 0.01
   globShotCooldown: 5
+  globShotAbilityBarIndex: 2
+  startGlobShotCooldownLocallyOnInput: 1
+  enableGlobShotDebugLogs: 1
   globShotMinBloodThreshold: 10
   ampUpDuration: 5
   ampUpInitialMoveMult: 2
   ampUpInitialAttackSpeedMult: 2
   ampUpColor: {r: 1, g: 0, b: 0, a: 1}
+  ampUpCooldownReductionMultiplier: 0.5
+  ampUpBloodShotCooldownReduced: 0.175
+  ampUpQuickPokeCooldownReduced: 1
+  ampUpGlobShotCooldownReduced: 2.5
+  ampUpCooldown: 12
+  ampUpAbilityBarIndex: 3
+  startAmpUpCooldownLocallyOnInput: 1
+  enableAmpUpDebugLogs: 1
   animator: {fileID: 0}
   player: {fileID: 4963532202442652500}
   inputTester: {fileID: 2235254202730599474}

@@ -191,7 +191,7 @@ MonoBehaviour:
   windBurstSpeed: 10
   windBurstRange: 6
   windBurstCooldown: 1
-  windBurstAbilityBarIndex: 0
+  windBurstAbilityBarIndex: -1
   startWindBurstCooldownLocallyOnInput: 1
   enableWindBurstDebugLogs: 1
   dustWavePrefab: {fileID: 6924391199545212785, guid: b819ec516e52b894eb2cbc8b3bbca4a7, type: 3}

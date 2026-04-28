@@ -18,7 +18,7 @@ public class Butterfly : NetworkBehaviour
     [SerializeField] private float windBurstSpeed = 10f;
     [SerializeField] private float windBurstRange = 6f;
     [SerializeField] private float windBurstCooldown = 0.3f;
-    [SerializeField] private int windBurstAbilityBarIndex = 0;
+    [SerializeField] private int windBurstAbilityBarIndex = -1;
     [SerializeField] private bool startWindBurstCooldownLocallyOnInput = true;
     [SerializeField] private bool enableWindBurstDebugLogs = true;
 
@@ -152,8 +152,13 @@ public class Butterfly : NetworkBehaviour
 
     private void UpdateAbilityBarCooldown(int index, float cooldown)
     {
-        if (abilityBar != null && player != null && player.isLocalPlayer())
-            abilityBar.UseAbility(index, cooldown);
+        if (abilityBar == null || player == null || !player.isLocalPlayer())
+            return;
+
+        if (index < 0)
+            return;
+
+        abilityBar.UseAbility(index, cooldown);
     }
 
     #region Basic Attack - Wind Burst
@@ -194,6 +199,8 @@ public class Butterfly : NetworkBehaviour
 
     private void StartWindBurstCooldownClient(float cooldown)
     {
+        Debug.Log($"[Butterfly] Wind Burst UI index = {windBurstAbilityBarIndex}");
+
         windBurstCooldownTimer = cooldown;
         UpdateAbilityBarCooldown(windBurstAbilityBarIndex, cooldown);
 
