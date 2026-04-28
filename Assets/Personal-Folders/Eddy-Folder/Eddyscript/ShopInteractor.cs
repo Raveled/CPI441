@@ -16,7 +16,6 @@ public class ShopInteractor : MonoBehaviour
             return;
 
         localPlayerInRange = player;
-        Debug.Log($"[ShopInteractor] Player entered shop: {player.name} via collider {other.name}");
     }
 
     private void OnTriggerExit(Collider other)
@@ -26,10 +25,7 @@ public class ShopInteractor : MonoBehaviour
             return;
 
         if (localPlayerInRange == player)
-        {
             localPlayerInRange = null;
-            Debug.Log($"[ShopInteractor] Player exited shop: {player.name} via collider {other.name}");
-        }
     }
 
     private void Update()
@@ -41,23 +37,17 @@ public class ShopInteractor : MonoBehaviour
         if (keyboard == null)
             return;
 
-        if (IsInteractPressed(keyboard))
-        {
-            shopUI.Open(catalog);
-            Debug.Log($"[ShopInteractor] Opened shop for {localPlayerInRange.name}");
-        }
-    }
-
-    private bool IsInteractPressed(Keyboard keyboard)
-    {
-        return interactKey switch
+        bool pressed = interactKey switch
         {
             Key.G => keyboard.gKey.wasPressedThisFrame,
             Key.E => keyboard.eKey.wasPressedThisFrame,
-            Key.Q => keyboard.qKey.wasPressedThisFrame,
-            Key.R => keyboard.rKey.wasPressedThisFrame,
             Key.F => keyboard.fKey.wasPressedThisFrame,
             _ => false
         };
+
+        if (!pressed)
+            return;
+
+        shopUI.Toggle(catalog);
     }
 }

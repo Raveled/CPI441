@@ -152,6 +152,7 @@ GameObject:
   - component: {fileID: 2235254202730599474}
   - component: {fileID: 709166347520052202}
   - component: {fileID: -3887538155044755821}
+  - component: {fileID: 246445708149938093}
   m_Layer: 6
   m_Name: PlayerRootMosquito
   m_TagString: Untagged
@@ -257,6 +258,20 @@ MonoBehaviour:
     _ownerAuth: 0
     _sendIntervalInSeconds: 0
   enemyTeams: 
+  baseMaximumHitPoints: 0
+  baseMoveSpeed: 0
+  baseAcceleration: 0
+  basePlanarDamping: 0
+  baseJumpForce: 0
+  baseJumpCooldown: 0
+  baseAttackPower: 0
+  baseDefaultAttackCooldown: 0
+  inventoryHealthBonus: 0
+  inventoryAttackPowerBonus: 0
+  inventoryMoveSpeedMultiplier: 1
+  inventoryAttackCooldownMultiplier: 1
+  temporaryAttackPowerMultiplier: 1
+  temporaryMoveSpeedMultiplier: 1
   playerLevel:
     _value: 1
     _ownerAuth: 0
@@ -384,6 +399,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
   items: []
+  maxSlots: 6
 --- !u!65 &-3887538155044755821
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -405,6 +421,20 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.94, y: 5, z: 2.25}
   m_Center: {x: 0, y: 2, z: 1.58}
+--- !u!114 &246445708149938093
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6682633530466954004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25aaa8968ebad8e44b78b0ae23890c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryStatApplier
+  inventory: {fileID: 709166347520052202}
+  player: {fileID: 4963532202442652500}
 --- !u!1001 &1496728147115558914
 PrefabInstance:
   m_ObjectHideFlags: 0

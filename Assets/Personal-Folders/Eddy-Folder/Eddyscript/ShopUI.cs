@@ -1,21 +1,25 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
-public sealed class ShopUI : MonoBehaviour
+public class ShopUI : MonoBehaviour
 {
     public static bool IsAnyOpen { get; private set; }
 
-    [Header("UI Root")]
+    [Header("Root")]
     [SerializeField] private GameObject root;
+
+    [Header("Item List")]
     [SerializeField] private Transform itemsContainer;
     [SerializeField] private ShopItemButtonUI itemButtonPrefab;
-    [SerializeField] private TextMeshProUGUI statusText;
 
-    [Header("Optional")]
-    [SerializeField] private Inventory playerInventory;
+    [Header("Status")]
+    [SerializeField] private TMP_Text statusText;
+
+    [Header("Optional Player Refs")]
     [SerializeField] private Player player;
+    [SerializeField] private Inventory playerInventory;
 
     private readonly List<GameObject> spawned = new();
     private ShopCatalog currentCatalog;
@@ -23,123 +27,108 @@ public sealed class ShopUI : MonoBehaviour
     private void Awake()
     {
         if (root == null)
-        {
             root = gameObject;
-        }
 
-        ResolvePlayerRefs();
-        SetOpen(false);
-    }
+        if (root != null)
+            root.SetActive(false);
 
-    private void Update()
-    {
-        if (!root.activeSelf)
-        {
-            return;
-        }
-
-        Keyboard kb = Keyboard.current;
-        if (kb != null && kb[Key.Escape].wasPressedThisFrame)
-        {
-            Close();
-        }
-    }
-
-    public void Toggle(ShopCatalog catalog)
-    {
-        if (root.activeSelf)
-        {
-            Close();
-        }
-        else
-        {
-            Open(catalog);
-        }
+        IsAnyOpen = false;
+        SetStatus(string.Empty);
     }
 
     public void Open(ShopCatalog catalog)
     {
         currentCatalog = catalog;
-        ResolvePlayerRefs();
+
+        if (root != null)
+            root.SetActive(true);
+
+        IsAnyOpen = true;
+
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
         Rebuild();
-        SetStatus(string.Empty);
-        SetOpen(true);
     }
 
     public void Close()
     {
-        SetOpen(false);
-        currentCatalog = null;
+        if (root != null)
+            root.SetActive(false);
+
+        IsAnyOpen = false;
+
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+
         SetStatus(string.Empty);
     }
 
-    public void CloseFromButton()
+    public void Toggle(ShopCatalog catalog)
     {
-        Close();
+        if (IsOpen())
+            Close();
+        else
+            Open(catalog);
     }
 
-    private void ResolvePlayerRefs()
+    public bool IsOpen()
     {
-        if (player == null)
-        {
-            Player[] players = FindObjectsByType<Player>(FindObjectsSortMode.None);
-            foreach (Player p in players)
-            {
-                if (p != null && p.isLocalPlayer())
-                {
-                    player = p;
-                    break;
-                }
-            }
-
-            if (player == null && players.Length > 0)
-            {
-                player = players[0];
-            }
-        }
-
-        if (playerInventory == null && player != null)
-        {
-            playerInventory = player.GetComponent<Inventory>();
-
-            if (playerInventory == null)
-            {
-                playerInventory = player.GetComponentInParent<Inventory>();
-            }
-
-            if (playerInventory == null)
-            {
-                playerInventory = player.GetComponentInChildren<Inventory>(true);
-            }
-        }
-
-        if (playerInventory == null)
-        {
-            playerInventory = FindFirstObjectByType<Inventory>();
-        }
+        return root != null && root.activeSelf;
     }
 
-    private void Rebuild()
+    public void Rebuild()
     {
         Clear();
 
-        if (currentCatalog == null || itemsContainer == null || itemButtonPrefab == null)
+        if (currentCatalog == null)
         {
+            SetStatus("No shop catalog assigned.");
             return;
         }
 
-        var items = currentCatalog.ItemsForSale;
-        foreach (SO_ItemData item in items)
+        if (itemsContainer == null)
         {
+            SetStatus("Items container is missing.");
+            return;
+        }
+
+        if (itemButtonPrefab == null)
+        {
+            SetStatus("Item button prefab is missing.");
+            return;
+        }
+
+        IReadOnlyList<SO_ItemData> items = currentCatalog.ItemsForSale;
+        if (items == null || items.Count == 0)
+        {
+            SetStatus("No items for sale.");
+            return;
+        }
+
+        for (int i = 0; i < items.Count; i++)
+        {
+            SO_ItemData item = items[i];
             if (item == null)
-            {
                 continue;
-            }
 
             ShopItemButtonUI entry = Instantiate(itemButtonPrefab, itemsContainer);
             entry.Bind(item, TryBuy);
             spawned.Add(entry.gameObject);
         }
+
+        SetStatus(string.Empty);
+    }
+
+    public void Clear()
+    {
+        for (int i = 0; i < spawned.Count; i++)
+        {
+            if (spawned[i] != null)
+                Destroy(spawned[i]);
+        }
+
+        spawned.Clear();
     }
 
     private void TryBuy(SO_ItemData item)
@@ -164,55 +153,62 @@ public sealed class ShopUI : MonoBehaviour
             return;
         }
 
-        if (!playerInventory.CanAddItem(item, 1))
-        {
-            SetStatus(item.stackable ? "Inventory full." : "Already owned.");
-            return;
-        }
-
         if (!player.TrySpendGold(item.cost))
         {
             SetStatus("Not enough gold.");
             return;
         }
 
-        bool ok = playerInventory.AddItem(item, 1);
-        if (!ok)
+        bool added = playerInventory.AddItem(item, 1);
+        if (!added)
         {
             player.IncreaseGoldTotal(item.cost);
-            SetStatus(item.stackable ? "Inventory full." : "Already owned.");
+
+            if (!item.stackable && playerInventory.HasItem(item))
+                SetStatus("Already owned.");
+            else
+                SetStatus("Inventory full.");
+
             return;
         }
 
         SetStatus($"Bought: {item.itemName} (-{item.cost}g)");
     }
 
-    private void Clear()
+    private void ResolvePlayerRefs()
     {
-        foreach (var go in spawned)
+        if (player == null)
         {
-            if (go != null)
+            Player[] players = FindObjectsByType<Player>(FindObjectsSortMode.None);
+            for (int i = 0; i < players.Length; i++)
             {
-                Destroy(go);
+                if (players[i] != null && players[i].isLocalPlayer())
+                {
+                    player = players[i];
+                    break;
+                }
             }
         }
 
-        spawned.Clear();
+        if (playerInventory == null && player != null)
+        {
+            playerInventory = player.GetComponent<Inventory>();
+            if (playerInventory == null)
+                playerInventory = player.GetComponentInChildren<Inventory>(true);
+            if (playerInventory == null)
+                playerInventory = player.GetComponentInParent<Inventory>();
+        }
     }
 
-    private void SetOpen(bool open)
-    {
-        IsAnyOpen = open;
-        root.SetActive(open);
-        Cursor.visible = open;
-        Cursor.lockState = open ? CursorLockMode.None : CursorLockMode.Locked;
-    }
-
-    private void SetStatus(string msg)
+    private void SetStatus(string message)
     {
         if (statusText != null)
-        {
-            statusText.text = msg ?? string.Empty;
-        }
+            statusText.text = message;
+    }
+
+    private void OnDisable()
+    {
+        if (IsAnyOpen)
+            IsAnyOpen = false;
     }
 }

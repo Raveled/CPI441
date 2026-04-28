@@ -321,6 +321,10 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
         // Sync stats from Player component in case they were updated (e.g., from leveling up or buffs)
         LoadStatsFromPlayer();
     }
+    private bool IsGameplayInputBlocked()
+    {
+        return ShopUI.IsAnyOpen;
+    }
 
     private static Collider[] groundColliders = new Collider[8];
     private bool CheckGrounded(Vector3 statePosition)
@@ -333,13 +337,26 @@ public class PredictedPlayerMovement : PredictedIdentity<PredictedPlayerMovement
 
     protected override void UpdateInput(ref MoveInput input)
     {
-        input.jump |= jumpAction.WasPressedThisFrame(); // If jump is pressed this frame or jump was already true, keep it true
+        if (IsGameplayInputBlocked())
+        {
+            input.jump = false;
+            return;
+        }
+
+        input.jump |= jumpAction != null && jumpAction.WasPressedThisFrame(); // If jump is pressed this frame or jump was already true, keep it true
     }
 
     protected override void GetFinalInput(ref MoveInput input)
     {
-        input.moveDirection = moveAction.ReadValue<Vector2>(); 
-        input.cameraForward = _playerCamera.forward;
+        if (IsGameplayInputBlocked())
+        {
+            input.moveDirection = Vector2.zero;
+            input.cameraForward = transform.forward;
+            return;
+        }
+
+        input.moveDirection = moveAction != null ? moveAction.ReadValue<Vector2>() : Vector2.zero;
+        input.cameraForward = _playerCamera != null ? _playerCamera.forward : transform.forward;
     }
 
     protected override void SanitizeInput(ref MoveInput input)

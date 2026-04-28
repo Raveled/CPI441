@@ -163,7 +163,26 @@ public class Player : Entity
 
         UpdateHealthBars();
     }
+    private StatModifiers inventoryModifiers = new StatModifiers
+    {
+        healthBonus = 0,
+        attackDamageBonus = 0,
+        attackSpeedMultiplier = 1f,
+        movementSpeedMultiplier = 1f,
+        defenseBonus = 0
+    };
 
+    private void RecalculateStatsFromInventory()
+    {
+        // These assignments may need to target your real runtime stat fields in Entity.
+        // Replace these with the actual fields/properties your combat code reads.
+
+        maximumHitPoints.value = GetEntityStatblock().BaseHitPoints + inventoryModifiers.healthBonus;
+        currentHitPoints.value = Mathf.Min(currentHitPoints.value, maximumHitPoints.value);
+
+        // If your damage / defense / speed live in Entity runtime fields,
+        // update those exact fields here.
+    }
     [ObserversRpc(bufferLast: true)]
     private void RPC_InitializePlayerLocals()
     {

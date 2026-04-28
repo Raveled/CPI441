@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 474019472368586846}
   - component: {fileID: -5748678838735300178}
   - component: {fileID: 5829367201672132988}
+  - component: {fileID: -2577134956483992429}
   m_Layer: 6
   m_Name: PlayerRootBeetle
   m_TagString: Player
@@ -119,6 +120,20 @@ MonoBehaviour:
     _ownerAuth: 0
     _sendIntervalInSeconds: 0
   enemyTeams: 
+  baseMaximumHitPoints: 0
+  baseMoveSpeed: 0
+  baseAcceleration: 0
+  basePlanarDamping: 0
+  baseJumpForce: 0
+  baseJumpCooldown: 0
+  baseAttackPower: 0
+  baseDefaultAttackCooldown: 0
+  inventoryHealthBonus: 0
+  inventoryAttackPowerBonus: 0
+  inventoryMoveSpeedMultiplier: 1
+  inventoryAttackCooldownMultiplier: 1
+  temporaryAttackPowerMultiplier: 1
+  temporaryMoveSpeedMultiplier: 1
   playerLevel:
     _value: 1
     _ownerAuth: 0
@@ -156,6 +171,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
   items: []
+  maxSlots: 6
 --- !u!114 &474019472368586846
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -187,8 +203,7 @@ MonoBehaviour:
   startMandibleCooldownLocallyOnInput: 1
   enableMandibleDebugLogs: 1
   hornImpaleDamage: 25
-  hornDashDistance: 4
-  hornDashDuration: 0.4
+  hornImpaleRange: 3
   hornSlowAmount: 0.5
   hornSlowDuration: 2
   hornCooldown: 8
@@ -203,10 +218,9 @@ MonoBehaviour:
   startSwaggerCooldownLocallyOnInput: 1
   enableSwaggerDebugLogs: 1
   rollDamage: 15
-  rollSpeed: 15
+  rollRange: 3
   rollKnockbackForce: 8
   rollCooldown: 12
-  rollDuration: 1
   rollAbilityBarIndex: 2
   startRollCooldownLocallyOnInput: 1
   enableRollDebugLogs: 1
@@ -260,6 +274,20 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.46, y: 3.37, z: 5}
   m_Center: {x: 0, y: 1.56, z: 0.44}
+--- !u!114 &-2577134956483992429
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3921032179608766505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25aaa8968ebad8e44b78b0ae23890c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryStatApplier
+  inventory: {fileID: 7316770039380160885}
+  player: {fileID: 4751865395330377205}
 --- !u!1 &4535052338675763460
 GameObject:
   m_ObjectHideFlags: 0
