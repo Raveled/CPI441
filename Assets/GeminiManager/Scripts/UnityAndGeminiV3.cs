@@ -4,50 +4,7 @@ using UnityEngine.Networking;
 using System.Collections.Generic;
 using TMPro;
 
-[System.Serializable]
-public class UnityAndGeminiKey
-{
-    public string key;
-}
 
-// Text-only part
-[System.Serializable]
-public class TextPart
-{
-    public string text;
-}
-
-[System.Serializable]
-public class TextContent
-{
-    public string role;
-    public TextPart[] parts;
-}
-
-[System.Serializable]
-public class TextCandidate
-{
-    public TextContent content;
-}
-
-[System.Serializable]
-public class TextResponse
-{
-    public TextCandidate[] candidates;
-}
-
-// For text requests
-[System.Serializable]
-public class ChatRequest
-{
-    public TextContent[] contents;
-    public TextContent system_instruction;
-}
-
-[System.Serializable]
-public class KeyResponse {
-    public string apiKey;
-}
 public class UnityAndGeminiV3: MonoBehaviour
 {
     [Header("JSON API Configuration")]
