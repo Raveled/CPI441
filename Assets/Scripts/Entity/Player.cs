@@ -50,7 +50,7 @@ public class Player : Entity
 
     private IEnumerator DelayedSpawn(bool asServer)
     {
-        yield return new WaitUntil(() => predictedMovement != null);
+        yield return new WaitForSeconds(0.05f);
 
         base.OnSpawned(asServer);
 
@@ -156,8 +156,6 @@ public class Player : Entity
         {
             if (GetTeam() == t.GetTeam()) friendlyTowers.Add(t);
         }
-
-        Debug.Log($"[Client] Player {GetPlayerID()} locals initialized, team: {GetTeam()}");
     }
 
     public override bool TakeDamage(int damage, Entity damageOrigin) {

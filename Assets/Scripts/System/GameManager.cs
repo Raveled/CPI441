@@ -110,19 +110,21 @@ public class GameManager : NetworkBehaviour
     public struct PlayerInfo
     {
         public PlayerID playerID;
+        public ulong? steamID;
         public Team team;
         public string character;
 
-        public PlayerInfo(PlayerID playerID, Team team, string character)
+        public PlayerInfo(PlayerID playerID, ulong? steamID,Team team, string character)
         {
             this.playerID = playerID;
+            this.steamID = steamID;
             this.team = team;
             this.character = character;
         }
 
         public void DebugLog()
         {
-            Debug.Log($"[PlayerInfo] PlayerID: {playerID} | Team: {team} | Character: {character}");
+            Debug.Log($"[PlayerInfo] PlayerID: {playerID} | SteamID: {steamID} | Team: {team} | Character: {character}");
         }
     }
     public SyncList<PlayerID?> playerIDs = new SyncList<PlayerID?>();
@@ -537,7 +539,7 @@ public class GameManager : NetworkBehaviour
         }
 
         playerIDs.Add(player);
-        playersInfo.Add(new PlayerInfo(player, playerTeam, playerCharacter));
+        playersInfo.Add(new PlayerInfo(player, hasSteamID? steamID : null, playerTeam, playerCharacter));
 
         return (playerTeam, playerCharacter);
     }
@@ -555,6 +557,11 @@ public class GameManager : NetworkBehaviour
         }
 
         return null;
+    }
+
+    public List<PlayerInfo> GetPlayerInfos()
+    {
+        return new List<PlayerInfo>(playersInfo);
     }
 
     public void DebugPrintPlayersInfo()
