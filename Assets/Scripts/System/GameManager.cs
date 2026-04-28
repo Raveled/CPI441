@@ -369,14 +369,16 @@ public class GameManager : NetworkBehaviour
     }
     //Called by AIManager once AI stats are given back
     [ObserversRpc]
-    public void RPC_LoadLobbyScene()
+    void RPC_LoadLobbyScene()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
     public void SendToLobby()
     {
-        RPC_LoadLobbyScene();
-        Destroy(gameObject);
+        if (isServer)
+        {
+            RPC_LoadLobbyScene();
+        }
     }
     public void ShowGameResult(Entity.Team result)
     {
