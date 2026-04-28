@@ -1,76 +1,76 @@
 {
   "entityStats": {
     "Core": {
-      "baseHitPoints": 300,
+      "baseHitPoints": 10,
       "baseMoveSpeed": 0.0,
       "baseAcceleration": 0.0,
       "basePlanarDamping": 0.0,
       "baseJumpForce": 0.0,
       "baseJumpCooldown": 0.0,
-      "baseAttackPower": 10,
-      "baseDefaultAttackCooldown": 5.0,
+      "baseAttackPower": 150,
+      "baseDefaultAttackCooldown": 3.0,
       "rewardGold": 0,
       "rewardXP": 0
     },
     "Minion": {
-      "baseHitPoints": 100,
+      "baseHitPoints": 120,
       "baseMoveSpeed": 7.0,
       "baseAcceleration": 0.0,
       "basePlanarDamping": 0.0,
       "baseJumpForce": 0.0,
       "baseJumpCooldown": 0.0,
-      "baseAttackPower": 35,
+      "baseAttackPower": 30,
       "baseDefaultAttackCooldown": 2.0,
       "rewardGold": 10,
       "rewardXP": 10
     },
     "Tower": {
-      "baseHitPoints": 200,
+      "baseHitPoints": 3500,
       "baseMoveSpeed": 0.0,
       "baseAcceleration": 0.0,
       "basePlanarDamping": 0.0,
       "baseJumpForce": 0.0,
       "baseJumpCooldown": 0.0,
-      "baseAttackPower": 50,
-      "baseDefaultAttackCooldown": 2.0,
+      "baseAttackPower": 140,
+      "baseDefaultAttackCooldown": 1.5,
+      "rewardGold": 75,
+      "rewardXP": 75
+    },
+    "Beetle": {
+      "baseHitPoints": 350,
+      "baseMoveSpeed": 10.0,
+      "baseAcceleration": 20.0,
+      "basePlanarDamping": 10.0,
+      "baseJumpForce": 10.0,
+      "baseJumpCooldown": 0.25,
+      "baseAttackPower": 40,
+      "baseDefaultAttackCooldown": 2.5,
       "rewardGold": 50,
       "rewardXP": 50
     },
-    "Beetle": {
-      "baseHitPoints": 100,
-      "baseMoveSpeed": 10.0,
-      "baseAcceleration": 20.0,
-      "basePlanarDamping": 10.0,
-      "baseJumpForce": 10.0,
-      "baseJumpCooldown": 0.25,
-      "baseAttackPower": 10,
-      "baseDefaultAttackCooldown": 5.0,
-      "rewardGold": 30,
-      "rewardXP": 30
-    },
     "Mosquito": {
-      "baseHitPoints": 100,
+      "baseHitPoints": 150,
       "baseMoveSpeed": 10.0,
       "baseAcceleration": 20.0,
       "basePlanarDamping": 10.0,
       "baseJumpForce": 10.0,
       "baseJumpCooldown": 0.25,
-      "baseAttackPower": 10,
-      "baseDefaultAttackCooldown": 5.0,
-      "rewardGold": 30,
-      "rewardXP": 30
+      "baseAttackPower": 25,
+      "baseDefaultAttackCooldown": 1.2,
+      "rewardGold": 35,
+      "rewardXP": 35
     },
     "Butterfly": {
-      "baseHitPoints": 100,
+      "baseHitPoints": 140,
       "baseMoveSpeed": 10.0,
       "baseAcceleration": 20.0,
       "basePlanarDamping": 10.0,
       "baseJumpForce": 10.0,
       "baseJumpCooldown": 0.25,
-      "baseAttackPower": 10,
-      "baseDefaultAttackCooldown": 5.0,
-      "rewardGold": 30,
-      "rewardXP": 30
+      "baseAttackPower": 60,
+      "baseDefaultAttackCooldown": 1.8,
+      "rewardGold": 60,
+      "rewardXP": 60
     }
   }
 }

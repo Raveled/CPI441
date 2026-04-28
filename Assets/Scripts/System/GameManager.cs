@@ -152,7 +152,12 @@ public class GameManager : NetworkBehaviour
         if (LoadJSONOnStart)LoadEntityJSON();
 
         //Get APIKey in
+        //if (isServer)
+        //{
+        //    aiManager.FetchApiKey();
+        //}
         aiManager.FetchApiKey();
+
     }
     void Start() {
         //Init
@@ -215,23 +220,23 @@ public class GameManager : NetworkBehaviour
         }
 
         //Debug
-        if (canPause) {
-            if (Keyboard.current.pKey.wasPressedThisFrame) {
-                TogglePauseGame();
-            }
-        }
-        if (Keyboard.current.lKey.wasPressedThisFrame) {
-            GenerateMatchJSON();
-        }
-        if (Keyboard.current.kKey.wasPressedThisFrame) {
-            LoadMatchJSON();
-        }
-        if (Keyboard.current.mKey.wasPressedThisFrame) {
-            GenerateEntityJSON();
-        }
-        if (Keyboard.current.nKey.wasPressedThisFrame) {
-            LoadEntityJSON();
-        }
+        //if (canPause) {
+        //    if (Keyboard.current.pKey.wasPressedThisFrame) {
+        //        TogglePauseGame();
+        //    }
+        //}
+        //if (Keyboard.current.lKey.wasPressedThisFrame) {
+        //    GenerateMatchJSON();
+        //}
+        //if (Keyboard.current.kKey.wasPressedThisFrame) {
+        //    LoadMatchJSON();
+        //}
+        //if (Keyboard.current.mKey.wasPressedThisFrame) {
+        //    GenerateEntityJSON();
+        //}
+        //if (Keyboard.current.nKey.wasPressedThisFrame) {
+        //    LoadEntityJSON();
+        //}
         if (Keyboard.current.yKey.wasPressedThisFrame) {
             bool check = true;
             Core[] cores = FindObjectsByType<Core>(FindObjectsSortMode.None);
@@ -344,10 +349,23 @@ public class GameManager : NetworkBehaviour
         GenerateMatchJSON();
 
         if (!aiprompted) {
+            Debug.Log("calling ai balance");
             aiManager.AskAIForBalance();
             aiprompted = true;
+        } else
+        {
+            Debug.Log("could not ask ai for balance");
+            SendToLobby();
         }
 
+    }
+    [ObserversRpc]
+    public void RPC_ApplyBalance(string json)
+    {
+        Debug.Log("Client received balance update");
+
+        entityData.LoadFromJSONString(json);
+        entityData.SaveToJSON();
     }
     //Called by AIManager once AI stats are given back
     public void SendToLobby()
@@ -423,6 +441,8 @@ public class GameManager : NetworkBehaviour
             e.Freeze(freeze);
         }
     }
+
+    
     #region JSON
     //Get A Team's total killcount
     public int ComputeTeamKillTotal(Player[] team) {

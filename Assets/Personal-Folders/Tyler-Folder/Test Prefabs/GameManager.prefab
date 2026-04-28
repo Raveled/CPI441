@@ -1603,6 +1603,10 @@ PrefabInstance:
       propertyPath: entityData
       value: 
       objectReference: {fileID: 4234075273946786129}
+    - target: {fileID: 4268357716925106502, guid: 939afb7b9e95a0e4392506ee53d12df2, type: 3}
+      propertyPath: gameManager
+      value: 
+      objectReference: {fileID: 3604123774642722008}
     - target: {fileID: 5543195314949916608, guid: 939afb7b9e95a0e4392506ee53d12df2, type: 3}
       propertyPath: m_LocalPosition.x
       value: -25.03805
