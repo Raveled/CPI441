@@ -10,7 +10,7 @@ using UnityEngine.Rendering;
 public class TabList : NetworkBehaviour
 {
     [SerializeField] private TabListEntry tabListEntryPrefab;
-    [SerializeField] private int startY = 25;
+    [SerializeField] private int startY = 35;
 
     public SyncList<TabListEntry> entries = new SyncList<TabListEntry>();
 
@@ -91,11 +91,11 @@ public class TabList : NetworkBehaviour
 
     public void SortEntries()
     {
-        var sortedEntries = entries.OrderBy(e => e.team).ThenBy(e => e.character).ToList();
+        var sortedEntries = entries.OrderBy(e => e.team.value).ThenBy(e => e.character.value).ToList();
         for (int i = 0; i < sortedEntries.Count; i++)
         {
             var entry = sortedEntries[i];
-            entry.transform.localPosition = new Vector3(0, startY - (i * entry.GetHeight()), 0);
+            entry.transform.localPosition = new Vector3(0, startY - (i * (entry.GetHeight()+2)), 0);
         }
     }
 
@@ -127,6 +127,7 @@ public class TabList : NetworkBehaviour
             entry.Init(null, info.playerID, info.playerID.ToString(), null, (int) info.team, info.character);
 
             entries.Add(entry);
+            SortEntries();
         }
     }
 
@@ -140,15 +141,5 @@ public class TabList : NetworkBehaviour
                 canvasGroup.alpha = isVisible ? 0f : 1f;
             }
         };
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        foreach (TabListEntry entry in entries)
-        {
-            if (entry == null) continue;
-            entry.UpdateEntry();
-        }
     }
 }

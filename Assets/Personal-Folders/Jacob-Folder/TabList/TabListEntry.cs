@@ -39,11 +39,19 @@ public class TabListEntry : NetworkBehaviour
 
     private void Update()
     {
-        if (isServer) ServerUpdate();
-    }
+        if (isServer)
+        {
+            Player[] players = FindObjectsByType<Player>(FindObjectsSortMode.None);
+            foreach (Player p in players)
+            {
+                if (p.playerID == this.playerID.value)
+                {
+                    kills.value = p.GetPlayerInfoSO().KillCount;
+                    deaths.value = p.GetPlayerInfoSO().DeathCount;
+                }
+            }
+        }
 
-    private void ServerUpdate()
-    {
         displayNameText.text = displayName.value;
         avatarImage.sprite = avatar.value != null ? Sprite.Create(avatar.value, new Rect(0, 0, avatar.value.width, avatar.value.height), new Vector2(0.5f, 0.5f)) : null;
         switch(character.value.ToLower())
@@ -78,16 +86,6 @@ public class TabListEntry : NetworkBehaviour
         teamColor.a = 0.5f;
         backgroundImage.color = teamColor;
 
-        Player[] players = FindObjectsByType<Player>(FindObjectsSortMode.None);
-        foreach (Player p in players)
-        {
-            if (p.playerID == this.playerID.value)
-            {
-                kills.value = p.GetPlayerInfoSO().KillCount;
-                deaths.value = p.GetPlayerInfoSO().DeathCount;
-            }
-        }
-
         killsText.text = $"Kills: {kills}";
         deathsText.text = $"Deaths: {deaths}";
     }
@@ -95,11 +93,5 @@ public class TabListEntry : NetworkBehaviour
     public float GetHeight()
     {
         return backgroundImage.rectTransform.rect.height;
-    }
-
-    [ObserversRpc (bufferLast: true)]
-    public void UpdateEntry()
-    {
-        
     }
 }
