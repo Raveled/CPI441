@@ -166,8 +166,13 @@ public class Beetle : NetworkBehaviour
 
     private void UpdateAbilityBarCooldown(int index, float cooldown)
     {
-        if (abilityBar != null && player != null && player.isLocalPlayer())
-            abilityBar.UseAbility(index, cooldown);
+        if (abilityBar == null || player == null || !player.isLocalPlayer())
+            return;
+
+        if (index < 0)
+            return;
+
+        abilityBar.UseAbility(index, cooldown);
     }
 
     private void UpdateIsMovingAnimation()

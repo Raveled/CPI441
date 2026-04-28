@@ -115,14 +115,40 @@ public sealed class CharacterAbilityIconLoader : MonoBehaviour
         }
 
         abilityBar.SetIcons(set.ability1, set.ability2, set.ability3, set.ability4);
+        ApplyKeyLabels(resolvedCharacter);
         appliedCharacterKey = resolvedCharacter;
-
+        bool isMosquito = resolvedCharacter == "mosquito";
+        abilityBar.SetSlotPassiveMode(0, isMosquito);
+       
         Debug.Log(
             $"[CharacterAbilityIconLoader] Applied icons for '{resolvedCharacter}' " +
             $"from bound player '{boundPlayer.gameObject.name}'."
         );
     }
+    private void ApplyKeyLabels(string resolvedCharacter)
+    {
+        if (abilityBar == null)
+            return;
 
+        switch (resolvedCharacter)
+        {
+            case "mosquito":
+                abilityBar.SetKeybinds("Passive", "E", "Q", "R");
+                break;
+
+            case "butterfly":
+                abilityBar.SetKeybinds("E", "Q", "Shift", "R");
+                break;
+
+            case "beetle":
+                abilityBar.SetKeybinds("Q", "Shift", "E", "R");
+                break;
+
+            default:
+                abilityBar.SetKeybinds("E", "Q", "Shift", "R");
+                break;
+        }
+    }
     private CharacterAbilitySet FindSet(string normalizedCharacterName)
     {
         if (characterSets == null)
@@ -150,6 +176,7 @@ public sealed class CharacterAbilityIconLoader : MonoBehaviour
             return "butterfly";
 
         if (player.GetComponentInChildren<Mosquito>(true) != null)
+
             return "mosquito";
 
         if (player.GetComponentInChildren<Beetle>(true) != null)

@@ -30,6 +30,7 @@ public class Mosquito : NetworkBehaviour
     [SerializeField] private float bloodMeterGainOnPlayerHit = 10f;
     [SerializeField] private float bloodMeterDecayPerSecond = 0f;
     [SerializeField] private float extraDamagePerBloodUnit = 0.1f;
+    private float lastBloodNormalized = -1f;
 
     [Header("Quick Poke - Ability 2")]
     [SerializeField] private int quickPokeBaseDamage = 5;
@@ -202,8 +203,13 @@ public class Mosquito : NetworkBehaviour
 
     private void UpdateAbilityBarCooldown(int index, float cooldown)
     {
-        if (abilityBar != null && player != null && player.isLocalPlayer())
-            abilityBar.UseAbility(index, cooldown);
+        if (abilityBar == null || player == null || !player.isLocalPlayer())
+            return;
+
+        if (index < 0)
+            return;
+
+        abilityBar.UseAbility(index, cooldown);
     }
 
     // Helper to get current cooldown based on Amp Up state
@@ -358,10 +364,22 @@ public class Mosquito : NetworkBehaviour
         Debug.Log($"[Mosquito] OnBasicAttackHit before gain: {currentBloodMeter:F1}");
 
         ModifyBloodMeter(gain);
-
+        UpdateBloodAbilityUI();
         Debug.Log($"[Mosquito] Blood gained: +{gain:F1} - current blood: {currentBloodMeter:F1}/{maxBloodMeter}");
+    
     }
+    private void UpdateBloodAbilityUI()
+    {
+        if (abilityBar == null || player == null || !player.isLocalPlayer())
+            return;
 
+        float normalizedBlood = Mathf.Clamp01(currentBloodMeter / maxBloodMeter);
+        if (Mathf.Approximately(normalizedBlood, lastBloodNormalized))
+            return;
+
+        lastBloodNormalized = normalizedBlood;
+        abilityBar.SetPassiveFill(0, normalizedBlood);
+    }
     // ========== QUICK POKE - ABILITY 2 ==========
     public bool TryQuickPoke()
     {
