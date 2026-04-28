@@ -1366,11 +1366,11 @@ MonoBehaviour:
   - {fileID: 4378048839524894691}
   - {fileID: 2221630867754063606}
   - {fileID: 4524921500119811135}
-  minionWaveSpawnInterval: 10
+  minionWaveSpawnInterval: 15
   navMeshSurface: {fileID: 9083819392621653564}
   maxWaves: -1
   numMinionsInWave: 5
-  spawnWaveOnStart: 1
+  spawnWaveOnStart: 0
   spawnCharactersOnStart: 1
   bakeOnStart: 0
   gameState: 0

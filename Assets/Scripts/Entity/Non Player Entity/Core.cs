@@ -15,7 +15,7 @@ public class Core : NonPlayerEntity
     [SerializeField] List<Transform> waypoints_Path1 = new List<Transform>();
     [SerializeField] List<Transform> waypoints_Path2 = new List<Transform>();
     [SerializeField] Core enemyCore = null;
-    bool canSpawnMinions = true;
+    [SerializeField] bool canSpawnMinions = true;
 
     Vector3 basePOSThis;
     Vector3 basePOSTarget;

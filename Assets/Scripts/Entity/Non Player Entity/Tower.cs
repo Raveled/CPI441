@@ -9,7 +9,7 @@ public class Tower : NonPlayerEntity
 {
     [Header("Tower Setup")]
     [SerializeField] GameObject towerProjectilePrefab = null;
-    [SerializeField] SyncVar<float> projectileSpeed = new(5f);
+    [SerializeField] SyncVar<float> projectileSpeed = new(10f);
     [SerializeField] Transform projectileOrigin = null;
     protected override void Start() {
         base.Start();
