@@ -55,6 +55,8 @@ public class AIManager : MonoBehaviour
     }
     //Called from UnityAndGeminiV3 for the ai's reponse
     public void ResponseReceived(string response) {
+        Debug.Log("AI BALACNING DONE, SENDING TO LOBBY");
+
         if (ai_enabled)
         {
             this.response = response;
@@ -63,7 +65,10 @@ public class AIManager : MonoBehaviour
             entityData.LoadFromJSONString(response);
             entityData.SaveToJSON();
         }
-        
+        FindFirstObjectByType<GameManager>().SendToLobby();
+    }
+    public void ErrorReceived() {
+        Debug.Log("AI ERROR RECEIVED");
         FindFirstObjectByType<GameManager>().SendToLobby();
     }
 

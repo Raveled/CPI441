@@ -11,6 +11,7 @@ using Steamworks;
 using PurrLobby;
 using UnityEngine.SceneManagement;
 
+
 public class GameManager : NetworkBehaviour
 {
     public enum GameState : int { NULL = 0, INPROGRESS = 1, PAUSED = 2, END = 3}
@@ -338,7 +339,6 @@ public class GameManager : NetworkBehaviour
         ChangeGameState(GameState.END);
         GenerateMatchJSON();
 
-        //WIP
         if (!aiprompted) {
             FindFirstObjectByType<AIManager>().AskAIForBalance();
             aiprompted = true;
