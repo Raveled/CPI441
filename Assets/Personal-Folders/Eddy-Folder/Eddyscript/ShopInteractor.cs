@@ -1,67 +1,63 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(Collider))]
-public sealed class ShopInteractor : MonoBehaviour
+public class ShopInteractor : MonoBehaviour
 {
     [SerializeField] private ShopCatalog catalog;
     [SerializeField] private ShopUI shopUI;
-    [Header("New Input System Key")]
     [SerializeField] private Key interactKey = Key.G;
 
-    private bool canInteract;
-
-    private void Awake()
-    {
-        if (catalog == null)
-        {
-            catalog = GetComponent<ShopCatalog>();
-        }
-
-        if (shopUI == null)
-        {
-            shopUI = FindFirstObjectByType<ShopUI>();
-        }
-
-        Collider col = GetComponent<Collider>();
-        col.isTrigger = true;
-    }
-
-    private void Update()
-    {
-        if (!canInteract || shopUI == null || catalog == null)
-        {
-            return;
-        }
-
-        Keyboard kb = Keyboard.current;
-        if (kb == null)
-        {
-            return;
-        }
-
-        if (kb[interactKey].wasPressedThisFrame)
-        {
-            shopUI.Toggle(catalog);
-        }
-    }
+    private Player localPlayerInRange;
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
-        {
-            canInteract = true;
-        }
+        Player player = other.GetComponentInParent<Player>();
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        localPlayerInRange = player;
+        Debug.Log($"[ShopInteractor] Player entered shop: {player.name} via collider {other.name}");
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (!other.CompareTag("Player"))
-        {
+        Player player = other.GetComponentInParent<Player>();
+        if (player == null)
             return;
-        }
 
-        canInteract = false;
-        shopUI?.Close();
+        if (localPlayerInRange == player)
+        {
+            localPlayerInRange = null;
+            Debug.Log($"[ShopInteractor] Player exited shop: {player.name} via collider {other.name}");
+        }
+    }
+
+    private void Update()
+    {
+        if (localPlayerInRange == null || shopUI == null || catalog == null)
+            return;
+
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard == null)
+            return;
+
+        if (IsInteractPressed(keyboard))
+        {
+            shopUI.Open(catalog);
+            Debug.Log($"[ShopInteractor] Opened shop for {localPlayerInRange.name}");
+        }
+    }
+
+    private bool IsInteractPressed(Keyboard keyboard)
+    {
+        return interactKey switch
+        {
+            Key.G => keyboard.gKey.wasPressedThisFrame,
+            Key.E => keyboard.eKey.wasPressedThisFrame,
+            Key.Q => keyboard.qKey.wasPressedThisFrame,
+            Key.R => keyboard.rKey.wasPressedThisFrame,
+            Key.F => keyboard.fKey.wasPressedThisFrame,
+            _ => false
+        };
     }
 }
