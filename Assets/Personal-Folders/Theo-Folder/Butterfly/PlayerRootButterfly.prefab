@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 4812959287127913440}
   - component: {fileID: 7316770039380160885}
   - component: {fileID: 5768127001242758441}
+  - component: {fileID: -3681331029624801275}
   m_Layer: 6
   m_Name: PlayerRootButterfly
   m_TagString: Player
@@ -119,6 +120,20 @@ MonoBehaviour:
     _ownerAuth: 0
     _sendIntervalInSeconds: 0
   enemyTeams: 
+  baseMaximumHitPoints: 0
+  baseMoveSpeed: 0
+  baseAcceleration: 0
+  basePlanarDamping: 0
+  baseJumpForce: 0
+  baseJumpCooldown: 0
+  baseAttackPower: 0
+  baseDefaultAttackCooldown: 0
+  inventoryHealthBonus: 0
+  inventoryAttackPowerBonus: 0
+  inventoryMoveSpeedMultiplier: 1
+  inventoryAttackCooldownMultiplier: 1
+  temporaryAttackPowerMultiplier: 1
+  temporaryMoveSpeedMultiplier: 1
   playerLevel:
     _value: 1
     _ownerAuth: 0
@@ -246,6 +261,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
   items: []
+  maxSlots: 6
 --- !u!65 &5768127001242758441
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -267,6 +283,20 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.27, y: 5.03, z: 2.5}
   m_Center: {x: 0, y: 3.6, z: 0.32}
+--- !u!114 &-3681331029624801275
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3921032179608766505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25aaa8968ebad8e44b78b0ae23890c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryStatApplier
+  inventory: {fileID: 7316770039380160885}
+  player: {fileID: 4751865395330377205}
 --- !u!1 &4535052338675763460
 GameObject:
   m_ObjectHideFlags: 0

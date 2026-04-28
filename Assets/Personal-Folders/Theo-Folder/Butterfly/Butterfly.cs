@@ -160,14 +160,18 @@ public class Butterfly : NetworkBehaviour
 
         abilityBar.UseAbility(index, cooldown);
     }
-
+    private float GetFinalCooldown(float baseCooldown)
+    {
+        return player != null ? player.GetModifiedAbilityCooldown(baseCooldown) : baseCooldown;
+    }
     #region Basic Attack - Wind Burst
 
     public void CastWindBurst()
     {
         if (player == null) return;
         if (!player.isLocalPlayer()) return;
-
+        if (ShopUI.IsAnyOpen)
+            return;
         if (windBurstCooldownTimer > 0f)
         {
             if (enableWindBurstDebugLogs)
@@ -183,7 +187,7 @@ public class Butterfly : NetworkBehaviour
         }
 
         if (startWindBurstCooldownLocallyOnInput)
-            StartWindBurstCooldownClient(windBurstCooldown);
+            StartWindBurstCooldownClient(GetFinalCooldown(windBurstCooldown));
 
         // Trigger animation locally
         if (animator != null)
@@ -229,14 +233,16 @@ public class Butterfly : NetworkBehaviour
             return;
         }
 
-        windBurstNextAllowedTimeServer = serverTime + windBurstCooldown;
+        float finalCooldown = GetFinalCooldown(windBurstCooldown);
+        windBurstNextAllowedTimeServer = serverTime + finalCooldown;
 
         // Play animation on all observers
         PlayAnimationObserversRpc("WindBurst");
 
         Debug.Log($"[Butterfly] ServerSpawnWindBurstRpc received on server. damage={damage} player id={player.GetPlayerID()}");
         ServerSpawnWindBurst(position, rotation, damage);
-        SyncWindBurstCooldownClientRpc(windBurstCooldown);
+        SyncWindBurstCooldownClientRpc(finalCooldown);
+
     }
 
     [ObserversRpc]
@@ -309,6 +315,7 @@ public class Butterfly : NetworkBehaviour
 
     public void CastDustWave()
     {
+        float finalCooldown = GetFinalCooldown(dustWaveCooldown);
         if (player == null) return;
         if (!player.isLocalPlayer()) return;
 
@@ -327,7 +334,7 @@ public class Butterfly : NetworkBehaviour
         }
 
         if (startDustWaveCooldownLocallyOnInput)
-            StartDustWaveCooldownClient(dustWaveCooldown);
+            StartDustWaveCooldownClient(GetFinalCooldown(dustWaveCooldown));
 
         if (animator != null)
             animator.SetTrigger("DustStorm");
@@ -355,7 +362,7 @@ public class Butterfly : NetworkBehaviour
     private void ServerSpawnDustWaveRpc(Vector3 position, Quaternion rotation, int damage)
     {
         if (!isServer) return;
-
+        float finalCooldown = GetFinalCooldown(dustWaveCooldown);
         float serverTime = Time.time;
         float remaining = dustWaveNextAllowedTimeServer - serverTime;
 
@@ -370,14 +377,14 @@ public class Butterfly : NetworkBehaviour
             return;
         }
 
-        dustWaveNextAllowedTimeServer = serverTime + dustWaveCooldown;
+        dustWaveNextAllowedTimeServer = serverTime + finalCooldown;
 
         // Play animation on all observers
         PlayAnimationObserversRpc("DustStorm");
 
         Debug.Log($"[Butterfly] ServerSpawnDustWaveRpc received on server. damage={damage} player id={player.GetPlayerID()}");
         ServerSpawnDustWave(position, rotation, damage);
-        SyncDustWaveCooldownClientRpc(dustWaveCooldown);
+        SyncDustWaveCooldownClientRpc(finalCooldown);
     }
 
     [ObserversRpc]
@@ -468,7 +475,7 @@ public class Butterfly : NetworkBehaviour
         }
 
         if (startDazzlingWaveCooldownLocallyOnInput)
-            StartDazzlingWaveCooldownClient(dazzlingWaveCooldown);
+            StartDazzlingWaveCooldownClient(GetFinalCooldown(dazzlingWaveCooldown));
 
         if (animator != null)
             animator.SetTrigger("DazzlingWave");
@@ -496,7 +503,7 @@ public class Butterfly : NetworkBehaviour
     private void ServerSpawnDazzlingWaveRpc(Vector3 position, Quaternion rotation, int damage)
     {
         if (!isServer) return;
-
+        float finalCooldown = GetFinalCooldown(dazzlingWaveCooldown);
         float serverTime = Time.time;
         float remaining = dazzlingWaveNextAllowedTimeServer - serverTime;
 
@@ -511,14 +518,14 @@ public class Butterfly : NetworkBehaviour
             return;
         }
 
-        dazzlingWaveNextAllowedTimeServer = serverTime + dazzlingWaveCooldown;
+        dazzlingWaveNextAllowedTimeServer = serverTime + finalCooldown;
 
         // Play animation on all observers
         PlayAnimationObserversRpc("DazzlingWave");
 
         Debug.Log($"[Butterfly] ServerSpawnDazzlingWaveRpc received on server. damage={damage} player id={player.GetPlayerID()}");
         ServerSpawnDazzlingWave(position, rotation, damage);
-        SyncDazzlingWaveCooldownClientRpc(dazzlingWaveCooldown);
+        SyncDazzlingWaveCooldownClientRpc(finalCooldown);
     }
 
     [ObserversRpc]
@@ -621,7 +628,7 @@ public class Butterfly : NetworkBehaviour
         }
 
         if (startFlyCooldownLocallyOnInput)
-            StartFlyCooldownClient(flyCooldown);
+            StartFlyCooldownClient(GetFinalCooldown(flyCooldown));
 
         if (animator != null)
             animator.SetTrigger("Fly");
@@ -649,7 +656,7 @@ public class Butterfly : NetworkBehaviour
     private void ServerStartFlyRpc(Vector3 direction)
     {
         if (!isServer) return;
-
+        float finalCooldown = GetFinalCooldown(flyCooldown);
         float serverTime = Time.time;
         float remaining = flyNextAllowedTimeServer - serverTime;
 
@@ -676,7 +683,7 @@ public class Butterfly : NetworkBehaviour
             return;
         }
 
-        flyNextAllowedTimeServer = serverTime + flyCooldown;
+        flyNextAllowedTimeServer = serverTime + finalCooldown;
 
         // Play animation on all observers
         PlayAnimationObserversRpc("Fly");
@@ -693,7 +700,7 @@ public class Butterfly : NetworkBehaviour
         Debug.Log($"[Butterfly] Server starting Fly. Remaining charges={flyCurrentCharges}");
 
         BeginFlyObserversRpc(finalDirection);
-        SyncFlyCooldownClientRpc(flyCooldown);
+        SyncFlyCooldownClientRpc(finalCooldown);
 
         if (predictedMovement != null)
             predictedMovement.StartButterflyFly(finalDirection, flyDashDistance, flyDashDuration);
@@ -838,7 +845,7 @@ public class Butterfly : NetworkBehaviour
         }
 
         if (startTornadoCooldownLocallyOnInput)
-            StartTornadoCooldownClient(tornadoCooldown);
+            StartTornadoCooldownClient(GetFinalCooldown(tornadoCooldown));
 
         // Trigger animation locally
         if (animator != null)
@@ -865,7 +872,7 @@ public class Butterfly : NetworkBehaviour
     private void ServerSpawnTornadoRpc(Vector3 position, Vector3 forwardDirection)
     {
         if (!isServer) return;
-
+        float finalCooldown = GetFinalCooldown(tornadoCooldown);
         float serverTime = Time.time;
         float remaining = tornadoNextAllowedTimeServer - serverTime;
 
@@ -880,14 +887,14 @@ public class Butterfly : NetworkBehaviour
             return;
         }
 
-        tornadoNextAllowedTimeServer = serverTime + tornadoCooldown;
+        tornadoNextAllowedTimeServer = serverTime + finalCooldown;
 
         // Play animation on all observers
         PlayAnimationObserversRpc("Tornado");
 
         Debug.Log($"[Butterfly] ServerSpawnTornadoRpc received on server. player id={player.GetPlayerID()}");
         ServerSpawnTornado(position, forwardDirection);
-        SyncTornadoCooldownClientRpc(tornadoCooldown);
+        SyncTornadoCooldownClientRpc(finalCooldown);
     }
 
     [ObserversRpc]

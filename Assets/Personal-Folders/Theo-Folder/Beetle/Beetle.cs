@@ -185,7 +185,10 @@ public class Beetle : NetworkBehaviour
         isMovingAnimState = shouldBeMoving;
         SetIsMovingObserversRpc(shouldBeMoving);
     }
-
+    private float GetFinalCooldown(float baseCooldown)
+    {
+        return player != null ? player.GetModifiedAbilityCooldown(baseCooldown) : baseCooldown;
+    }
     [ObserversRpc]
     private void SetIsMovingObserversRpc(bool moving)
     {
@@ -199,7 +202,8 @@ public class Beetle : NetworkBehaviour
     public void CastMandibleAttack()
     {
         if (!isController) return;
-
+        if (ShopUI.IsAnyOpen)
+            return;
         if (mandibleCooldownTimer > 0f)
         {
             if (enableMandibleDebugLogs)
@@ -212,7 +216,7 @@ public class Beetle : NetworkBehaviour
         Debug.Log($"Beetle CastMandibleAttack on {gameObject.name} isController:{isController}");
 
         if (startMandibleCooldownLocallyOnInput)
-            StartMandibleCooldownClient(mandibleCooldown);
+            StartMandibleCooldownClient(GetFinalCooldown(mandibleCooldown));
 
         PlayMandibleAnimServerRpc();
 
@@ -244,7 +248,7 @@ public class Beetle : NetworkBehaviour
     {
         if (!isServer) return;
         if (player == null) return;
-
+        float finalCooldown = GetFinalCooldown(mandibleCooldown);
         float serverTime = Time.time;
         float remaining = mandibleNextAllowedTimeServer - serverTime;
 
@@ -259,10 +263,10 @@ public class Beetle : NetworkBehaviour
             return;
         }
 
-        mandibleNextAllowedTimeServer = serverTime + mandibleCooldown;
+        mandibleNextAllowedTimeServer = serverTime + finalCooldown;
 
         ApplyMandibleAttack();
-        SyncMandibleCooldownClientRpc(mandibleCooldown);
+        SyncMandibleCooldownClientRpc(finalCooldown);
     }
 
     private void ApplyMandibleAttack()
@@ -346,7 +350,7 @@ public class Beetle : NetworkBehaviour
         }
 
         if (startHornImpaleCooldownLocallyOnInput)
-            StartHornImpaleCooldownClient(hornCooldown);
+            StartHornImpaleCooldownClient(GetFinalCooldown(hornCooldown));
 
         PlayHornImpaleAnimServerRpc();
         RequestHornImpaleServerRpc();
@@ -377,7 +381,7 @@ public class Beetle : NetworkBehaviour
     {
         if (!isServer) return;
         if (player == null) return;
-
+        float finalCooldown = GetFinalCooldown(hornCooldown);
         float serverTime = Time.time;
         float remaining = hornImpaleNextAllowedTimeServer - serverTime;
 
@@ -392,10 +396,11 @@ public class Beetle : NetworkBehaviour
             return;
         }
 
-        hornImpaleNextAllowedTimeServer = serverTime + hornCooldown;
+        hornImpaleNextAllowedTimeServer = serverTime + finalCooldown;
 
         ApplyHornImpale();
-        SyncHornImpaleCooldownClientRpc(hornCooldown);
+        SyncHornImpaleCooldownClientRpc(finalCooldown);
+
     }
 
     private void ApplyHornImpale()
@@ -482,7 +487,7 @@ public class Beetle : NetworkBehaviour
         }
 
         if (startSwaggerCooldownLocallyOnInput)
-            StartSwaggerCooldownClient(swaggerCooldown);
+            StartSwaggerCooldownClient(GetFinalCooldown(swaggerCooldown));
 
         PlaySwaggerAnimServerRpc();
         RequestSwaggerServerRpc();
@@ -513,7 +518,7 @@ public class Beetle : NetworkBehaviour
     {
         if (!isServer) return;
         if (player == null) return;
-
+        float finalCooldown = GetFinalCooldown(swaggerCooldown);
         float serverTime = Time.time;
         float remaining = swaggerNextAllowedTimeServer - serverTime;
 
@@ -534,12 +539,12 @@ public class Beetle : NetworkBehaviour
             return;
         }
 
-        swaggerNextAllowedTimeServer = serverTime + swaggerCooldown;
+        swaggerNextAllowedTimeServer = serverTime + finalCooldown;
         swaggerTimer = swaggerDuration;
         isSwaggerActive = true;
 
         ApplySwagger();
-        SyncSwaggerCooldownClientRpc(swaggerCooldown);
+        SyncSwaggerCooldownClientRpc(finalCooldown);
     }
 
     private void ApplySwagger()
@@ -616,7 +621,7 @@ public class Beetle : NetworkBehaviour
         }
 
         if (startRollCooldownLocallyOnInput)
-            StartRollCooldownClient(rollCooldown);
+            StartRollCooldownClient(GetFinalCooldown(rollCooldown));
 
         PlayRollAnimServerRpc();
         RequestRollServerRpc();
@@ -659,7 +664,7 @@ public class Beetle : NetworkBehaviour
     {
         if (!isServer) return;
         if (player == null) return;
-
+        float finalCooldown = GetFinalCooldown(rollCooldown);
         float serverTime = Time.time;
         float remaining = rollNextAllowedTimeServer - serverTime;
 
@@ -676,11 +681,11 @@ public class Beetle : NetworkBehaviour
 
         if (rollCooldownTimer > 0f) return;
 
-        rollNextAllowedTimeServer = serverTime + rollCooldown;
+        rollNextAllowedTimeServer = serverTime + finalCooldown;
         rollCooldownTimer = rollCooldown;
 
         ApplyRollHit();
-        SyncRollCooldownClientRpc(rollCooldown);
+        SyncRollCooldownClientRpc(finalCooldown);
     }
 
     private void ApplyRollHit()
@@ -766,7 +771,7 @@ public class Beetle : NetworkBehaviour
         }
 
         if (startStompCooldownLocallyOnInput)
-            StartStompCooldownClient(stompCooldown);
+            StartStompCooldownClient(GetFinalCooldown(stompCooldown));
 
         PlayStompAnimServerRpc();
         RequestGroundStompServerRpc();
@@ -797,7 +802,7 @@ public class Beetle : NetworkBehaviour
     {
         if (!isServer) return;
         if (player == null) return;
-
+        float finalCooldown = GetFinalCooldown(stompCooldown);
         float serverTime = Time.time;
         float remaining = stompNextAllowedTimeServer - serverTime;
 
@@ -812,10 +817,10 @@ public class Beetle : NetworkBehaviour
             return;
         }
 
-        stompNextAllowedTimeServer = serverTime + stompCooldown;
+        stompNextAllowedTimeServer = serverTime + finalCooldown;
 
         ApplyGroundStomp();
-        SyncStompCooldownClientRpc(stompCooldown);
+        SyncStompCooldownClientRpc(finalCooldown);
     }
 
     private void ApplyGroundStomp()

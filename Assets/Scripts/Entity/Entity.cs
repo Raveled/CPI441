@@ -50,6 +50,26 @@ public class Entity : NetworkBehaviour
     //Setup
     [SerializeField] protected List<Team> enemyTeams = null;
 
+    [Header("Runtime Base Stats")]
+    [SerializeField] protected int baseMaximumHitPoints = 0;
+    [SerializeField] protected float baseMoveSpeed = 0f;
+    [SerializeField] protected float baseAcceleration = 0f;
+    [SerializeField] protected float basePlanarDamping = 0f;
+    [SerializeField] protected float baseJumpForce = 0f;
+    [SerializeField] protected float baseJumpCooldown = 0f;
+    [SerializeField] protected int baseAttackPower = 0;
+    [SerializeField] protected float baseDefaultAttackCooldown = 0f;
+
+    [Header("Persistent Modifiers")]
+    [SerializeField] protected int inventoryHealthBonus = 0;
+    [SerializeField] protected int inventoryAttackPowerBonus = 0;
+    [SerializeField] protected float inventoryMoveSpeedMultiplier = 1f;
+    [SerializeField] protected float inventoryAttackCooldownMultiplier = 1f;
+
+    [Header("Temporary Modifiers")]
+    [SerializeField] protected float temporaryAttackPowerMultiplier = 1f;
+    [SerializeField] protected float temporaryMoveSpeedMultiplier = 1f;
+
     //In subclasses, MUST use "base.Start()" line to call this
     protected virtual void Start()
     {
@@ -116,17 +136,101 @@ public class Entity : NetworkBehaviour
 
         //Debug.Log($"Applying stats for {entityName} on team {team.value}");
 
-        maximumHitPoints.value = statBlock.BaseHitPoints;
-        currentHitPoints.value = maximumHitPoints.value;
-        moveSpeed.value = statBlock.BaseMoveSpeed;
-        acceleration.value = statBlock.BaseAcceleration;
-        planarDamping.value = statBlock.BasePlanarDamping;
-        jumpForce.value = statBlock.BaseJumpForce;
-        jumpCooldown.value = statBlock.BaseJumpCooldown;
-        attackPower.value = statBlock.BaseAttackPower;
-        defaultAttackCooldown.value = statBlock.BaseDefaultAttackCooldown;
+        baseMaximumHitPoints = statBlock.BaseHitPoints;
+        baseMoveSpeed = statBlock.BaseMoveSpeed;
+        baseAcceleration = statBlock.BaseAcceleration;
+        basePlanarDamping = statBlock.BasePlanarDamping;
+        baseJumpForce = statBlock.BaseJumpForce;
+        baseJumpCooldown = statBlock.BaseJumpCooldown;
+        baseAttackPower = statBlock.BaseAttackPower;
+        baseDefaultAttackCooldown = statBlock.BaseDefaultAttackCooldown;
+
         reward_Gold.value = statBlock.RewardGold;
         reward_XP.value = statBlock.RewardXP;
+
+        RecalculateDerivedStats(true);
+    }
+
+    public void ApplyInventoryModifiers(StatModifiers modifiers)
+    {
+        if (!isServer)
+        {
+            ApplyInventoryModifiersServerRpc(
+                modifiers.healthBonus,
+                modifiers.attackDamageBonus,
+                modifiers.movementSpeedMultiplier,
+                modifiers.attackSpeedMultiplier
+            );
+            return;
+        }
+
+        ApplyInventoryModifiersServer(
+            modifiers.healthBonus,
+            modifiers.attackDamageBonus,
+            modifiers.movementSpeedMultiplier,
+            modifiers.attackSpeedMultiplier
+        );
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private void ApplyInventoryModifiersServerRpc(
+        int healthBonus,
+        int attackDamageBonus,
+        float movementSpeedMultiplier,
+        float attackSpeedMultiplier)
+    {
+        ApplyInventoryModifiersServer(
+            healthBonus,
+            attackDamageBonus,
+            movementSpeedMultiplier,
+            attackSpeedMultiplier
+        );
+    }
+
+    private void ApplyInventoryModifiersServer(
+        int healthBonus,
+        int attackDamageBonus,
+        float movementSpeedMultiplier,
+        float attackSpeedMultiplier)
+    {
+        if (!isServer)
+            return;
+
+        inventoryHealthBonus = healthBonus;
+        inventoryAttackPowerBonus = attackDamageBonus;
+        inventoryMoveSpeedMultiplier = Mathf.Max(0f, movementSpeedMultiplier);
+        inventoryAttackCooldownMultiplier = attackSpeedMultiplier <= 0f ? 1f : 1f / attackSpeedMultiplier;
+
+        RecalculateDerivedStats(false);
+    }
+
+    private void RecalculateDerivedStats(bool refillHealth)
+    {
+        int oldMaxHealth = Mathf.Max(1, maximumHitPoints.value);
+
+        maximumHitPoints.value = Mathf.Max(1, baseMaximumHitPoints + inventoryHealthBonus);
+        attackPower.value = Mathf.Max(0, Mathf.RoundToInt((baseAttackPower + inventoryAttackPowerBonus) * temporaryAttackPowerMultiplier));
+        moveSpeed.value = Mathf.Max(0.01f, baseMoveSpeed * inventoryMoveSpeedMultiplier * temporaryMoveSpeedMultiplier);
+
+        acceleration.value = baseAcceleration;
+        planarDamping.value = basePlanarDamping;
+        jumpForce.value = baseJumpForce;
+        jumpCooldown.value = baseJumpCooldown;
+
+        float finalAttackSpeedMultiplier = Mathf.Max(0.01f, inventoryAttackCooldownMultiplier);
+        defaultAttackCooldown.value = Mathf.Max(0.01f, baseDefaultAttackCooldown / finalAttackSpeedMultiplier);
+
+        if (refillHealth)
+        {
+            currentHitPoints.value = maximumHitPoints.value;
+        }
+        else
+        {
+            float ratio = oldMaxHealth > 0 ? (float)currentHitPoints.value / oldMaxHealth : 1f;
+            currentHitPoints.value = Mathf.Clamp(Mathf.RoundToInt(maximumHitPoints.value * ratio), 0, maximumHitPoints.value);
+        }
+
+        NotifyHealthChanged(currentHitPoints.value);
     }
 
     //Basic logic for entity taking damage. Returns true on death, false on no death
@@ -198,7 +302,7 @@ public class Entity : NetworkBehaviour
         }
 
         // Notify all clients of health update
-        if(!GetIsDead())NotifyHealthChanged(currentHitPoints.value);
+        if (!GetIsDead()) NotifyHealthChanged(currentHitPoints.value);
 
         return;
     }
@@ -268,10 +372,8 @@ public class Entity : NetworkBehaviour
         if (isDead.value || !isServer)
             return;
 
-        maximumHitPoints.value += maxHealthAmount;
-        currentHitPoints.value += maxHealthAmount;
-
-        NotifyHealthChanged(currentHitPoints.value);
+        baseMaximumHitPoints += maxHealthAmount;
+        RecalculateDerivedStats(false);
     }
 
     //************************************************************************//
@@ -296,13 +398,20 @@ public class Entity : NetworkBehaviour
 
     private IEnumerator ModifyAttackPowerCoroutine(float multiplier, float duration)
     {
-        int originalAttackPower = attackPower.value;
-        attackPower.value = Mathf.RoundToInt(originalAttackPower * multiplier);
+        temporaryAttackPowerMultiplier *= multiplier;
+        RecalculateDerivedStats(false);
 
         yield return new WaitForSeconds(duration);
 
         if (!isDead.value) // only restore if still alive
-            attackPower.value = originalAttackPower;
+        {
+            if (Mathf.Abs(multiplier) > 0.0001f)
+                temporaryAttackPowerMultiplier /= multiplier;
+            else
+                temporaryAttackPowerMultiplier = 1f;
+
+            RecalculateDerivedStats(false);
+        }
     }
 
     // *** Move Speed Buff / Debuff / Stun *** //
@@ -324,16 +433,21 @@ public class Entity : NetworkBehaviour
 
     private IEnumerator ModifyMoveSpeedCoroutine(float multiplier, float duration)
     {
-        float originalMoveSpeed = moveSpeed.value;
-        moveSpeed.value *= multiplier;
+        temporaryMoveSpeedMultiplier *= multiplier;
+        RecalculateDerivedStats(false);
 
         yield return new WaitForSeconds(duration);
 
         if (!isDead.value)
-            moveSpeed.value = originalMoveSpeed;
+        {
+            if (Mathf.Abs(multiplier) > 0.0001f)
+                temporaryMoveSpeedMultiplier /= multiplier;
+            else
+                temporaryMoveSpeedMultiplier = 1f;
+
+            RecalculateDerivedStats(false);
+        }
     }
-
-
 
     //************************************************************************//
 
@@ -446,16 +560,17 @@ public class Entity : NetworkBehaviour
     {
         return t switch
         {
-            Team.TEAM1   => GameManager.Instance.team1Color,
-            Team.TEAM2   => GameManager.Instance.team2Color,
+            Team.TEAM1 => GameManager.Instance.team1Color,
+            Team.TEAM2 => GameManager.Instance.team2Color,
             Team.NEUTRAL => Color.yellow,
-            _            => Color.white,
+            _ => Color.white,
         };
     }
 
     protected virtual void OnDrawGizmos()
     {
-        if (showRewardRange) {
+        if (showRewardRange)
+        {
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, rewardRange);
         }
@@ -473,6 +588,76 @@ public class Entity : NetworkBehaviour
     }
     #endregion
     #region Getters
+
+    public float GetMoveSpeed()
+    {
+        return moveSpeed.value;
+    }
+
+    public float GetAcceleration()
+    {
+        return acceleration.value;
+    }
+
+    public float GetPlanarDamping()
+    {
+        return planarDamping.value;
+    }
+
+    public float GetJumpForce()
+    {
+        return jumpForce.value;
+    }
+
+    public float GetJumpCooldown()
+    {
+        return jumpCooldown.value;
+    }
+
+    public int GetMaximumHitPoints()
+    {
+        return maximumHitPoints.value;
+    }
+
+    public int GetCurrentHitPoints()
+    {
+        return currentHitPoints.value;
+    }
+    public void SetInventoryModifiers(StatModifiers modifiers)
+    {
+        ApplyInventoryModifiers(modifiers);
+    }
+    public float GetAttackSpeedMultiplier()
+    {
+        float current = Mathf.Max(0.01f, defaultAttackCooldown.value);
+        float baseValue = Mathf.Max(0.01f, baseDefaultAttackCooldown);
+        return baseValue / current;
+    }
+
+    public float GetModifiedAbilityCooldown(float baseCooldown)
+    {
+        return Mathf.Max(0.01f, baseCooldown / GetAttackSpeedMultiplier());
+    }
+    public int GetAttackPower()
+    {
+        return attackPower.value;
+    }
+    public float GetCooldownMultiplier()
+    {
+        float baseAttackCd = Mathf.Max(0.01f, baseDefaultAttackCooldown);
+        float currentAttackCd = Mathf.Max(0.01f, defaultAttackCooldown.value);
+        return currentAttackCd / baseAttackCd;
+    }
+
+    public float GetModifiedCooldown(float baseCooldown)
+    {
+        return Mathf.Max(0.01f, baseCooldown * GetCooldownMultiplier());
+    }
+    public float GetDefaultAttackCooldown()
+    {
+        return defaultAttackCooldown.value;
+    }
+
     public Team GetTeam()
     {
         return team.value;
@@ -488,10 +673,6 @@ public class Entity : NetworkBehaviour
     public bool GetIsDead()
     {
         return isDead.value;
-    }
-    public float GetMoveSpeed()
-    {
-        return moveSpeed.value;
     }
     public SO_EntityStatBlock GetEntityStatblock()
     {
@@ -514,7 +695,7 @@ public class Entity : NetworkBehaviour
         return null;
     }
 
-    public static Entity GetEntityFromCollider(Collider other) 
+    public static Entity GetEntityFromCollider(Collider other)
     {
         if (other.TryGetComponent<Entity>(out Entity e)) return e;
         else if (other.GetComponentInChildren<Entity>() != null) return other.GetComponentInChildren<Entity>();

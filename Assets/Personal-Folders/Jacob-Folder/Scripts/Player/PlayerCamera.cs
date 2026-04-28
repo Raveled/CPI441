@@ -15,6 +15,9 @@ public class PlayerCamera : MonoBehaviour
 
     public Vector2 lookInput;
     public InputAction lookAction;
+    private int ignoreLookFrames = 0;
+    private bool wasShopOpenLastFrame = false;
+
 
     private void Awake()
     {
@@ -36,6 +39,31 @@ public class PlayerCamera : MonoBehaviour
 
     void LateUpdate()
     {
+        bool shopOpen = ShopUI.IsAnyOpen;
+
+        if (wasShopOpenLastFrame && !shopOpen)
+        {
+            ignoreLookFrames = 2;
+        }
+
+        wasShopOpenLastFrame = shopOpen;
+
+        if (shopOpen)
+        {
+            return;
+        }
+
+        if (ignoreLookFrames > 0)
+        {
+            ignoreLookFrames--;
+            return;
+        }
+
+        if (lookAction == null)
+        {
+            return;
+        }
+
         lookInput = lookAction.ReadValue<Vector2>();
 
         float mouseX = lookInput.x * lookSensitivity;

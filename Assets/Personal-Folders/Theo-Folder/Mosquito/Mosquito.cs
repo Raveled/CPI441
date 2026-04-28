@@ -211,7 +211,10 @@ public class Mosquito : NetworkBehaviour
 
         abilityBar.UseAbility(index, cooldown);
     }
-
+    private float GetFinalCooldown(float baseCooldown)
+    {
+        return player != null ? player.GetModifiedAbilityCooldown(baseCooldown) : baseCooldown;
+    }
     // Helper to get current cooldown based on Amp Up state
     private float GetCurrentBloodShotCooldown()
     {
@@ -233,7 +236,8 @@ public class Mosquito : NetworkBehaviour
     {
         if (!ValidateLocalAbilityCast("Blood Shot", bloodShotFirePoint))
             return;
-
+        if (ShopUI.IsAnyOpen)
+            return;
         if (bloodShotCooldownTimer > 0f)
         {
             if (enableBloodShotDebugLogs)
@@ -251,7 +255,7 @@ public class Mosquito : NetworkBehaviour
         float currentCooldown = GetCurrentBloodShotCooldown();
 
         if (startBloodShotCooldownLocallyOnInput)
-            StartBloodShotCooldownClient(currentCooldown);
+            StartBloodShotCooldownClient(GetFinalCooldown(bloodShotCooldown));
 
         PlayBloodShotAnimServerRpc();
         RequestBloodShotServerRpc(bloodShotFirePoint.position, bloodShotFirePoint.rotation);
@@ -414,7 +418,7 @@ public class Mosquito : NetworkBehaviour
 
     private void StartQuickPokeCooldownClient(float cooldown)
     {
-        quickPokeCooldownTimer = cooldown;
+        quickPokeCooldownTimer = GetFinalCooldown(quickPokeCooldown);
         UpdateAbilityBarCooldown(quickPokeAbilityBarIndex, cooldown);
 
         if (enableQuickPokeDebugLogs)
@@ -545,7 +549,7 @@ public class Mosquito : NetworkBehaviour
         float currentCooldown = GetCurrentGlobShotCooldown();
 
         if (startGlobShotCooldownLocallyOnInput)
-            StartGlobShotCooldownClient(currentCooldown);
+            StartGlobShotCooldownClient(GetFinalCooldown(globShotCooldown));
 
         PlayGlobShotAnimServerRpc();
         RequestGlobShotServerRpc(globFirePoint.position, globFirePoint.rotation);

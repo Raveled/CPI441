@@ -107,10 +107,21 @@ public sealed class InventoryFixedSlotsUI : MonoBehaviour
             if (slotButtons[i] == null && i < slotIcons.Length && slotIcons[i] != null)
             {
                 slotButtons[i] = slotIcons[i].GetComponent<Button>();
+
+                if (slotButtons[i] == null)
+                {
+                    slotButtons[i] = slotIcons[i].GetComponentInParent<Button>();
+                }
+
+                if (slotButtons[i] == null)
+                {
+                    slotButtons[i] = slotIcons[i].GetComponentInChildren<Button>(true);
+                }
             }
 
             if (slotButtons[i] == null)
             {
+                Debug.LogWarning($"[InventoryFixedSlotsUI] No button found for slot {i}.");
                 continue;
             }
 
@@ -156,6 +167,7 @@ public sealed class InventoryFixedSlotsUI : MonoBehaviour
 
     private void SellSlot(int index)
     {
+        Debug.Log($"[InventoryFixedSlotsUI] SellSlot({index})");
         ResolveRefs();
 
         if (inventory == null || player == null)
