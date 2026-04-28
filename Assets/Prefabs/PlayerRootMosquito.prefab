@@ -270,6 +270,8 @@ MonoBehaviour:
     _sendIntervalInSeconds: 0
   minimapTracker: {fileID: 744782267048424256}
   healthBar: {fileID: 1583765836965131365}
+  abilityBarUI: {fileID: 0}
+  abilityIconLoader: {fileID: 0}
   predictedMovement: {fileID: 0}
   character:
     _value: 
@@ -299,6 +301,7 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
+  abilityBar: {fileID: 0}
   bloodShotProjectilePrefab: {fileID: 2440982292386426808, guid: db618fa92a4755d4b9dfe8aaf99e759a, type: 3}
   bloodShotFirePoint: {fileID: 0}
   bloodShotBaseDamage: 8
@@ -322,6 +325,7 @@ MonoBehaviour:
   globMaxMeterUsageFraction: 0.5
   globDamagePerBloodUnit: 0.3
   globSizePerBloodUnit: 0.01
+  globShotCooldown: 5
   globShotMinBloodThreshold: 10
   ampUpDuration: 5
   ampUpInitialMoveMult: 2
@@ -380,8 +384,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.92, y: 2.58, z: 1.94}
-  m_Center: {x: 0, y: 1.29, z: 0.07}
+  m_Size: {x: 1.94, y: 5, z: 2.25}
+  m_Center: {x: 0, y: 2, z: 1.58}
 --- !u!1001 &1496728147115558914
 PrefabInstance:
   m_ObjectHideFlags: 0
