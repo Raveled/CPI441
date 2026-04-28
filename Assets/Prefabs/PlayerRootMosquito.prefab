@@ -543,6 +543,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NPE Health Bar
       objectReference: {fileID: 0}
+    - target: {fileID: 3638462808540575202, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
+      propertyPath: m_PresetInfoIsWorld
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3937284958113983709, guid: 292bf5569ef4ce946b9a632d08c400bc, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
