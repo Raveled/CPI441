@@ -486,11 +486,9 @@ public class Mosquito : NetworkBehaviour
             return;
         }
 
-        if (currentBloodMeter < globShotMinBloodThreshold)
-        {
-            Debug.Log($"[Mosquito] Glob Shot blocked - insufficient blood: {currentBloodMeter:F1}/{globShotMinBloodThreshold}");
-            return;
-        }
+        // REMOVED: Client-side blood check - let server validate instead
+        // This ensures clients don't block Glob Shot due to unsynced blood meter
+        // The server will reject if blood is insufficient
 
         if (enableGlobShotDebugLogs)
         {
@@ -541,9 +539,11 @@ public class Mosquito : NetworkBehaviour
             return;
         }
 
+        // Server-side blood validation - this is the authoritative check
         if (currentBloodMeter < globShotMinBloodThreshold)
         {
             Debug.Log($"[Mosquito] Glob Shot rejected on server - insufficient blood: {currentBloodMeter:F1}/{globShotMinBloodThreshold}");
+            RejectGlobShotCooldownClientRpc(Mathf.Max(0f, remaining));
             return;
         }
 
