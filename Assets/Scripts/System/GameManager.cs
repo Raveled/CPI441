@@ -368,9 +368,14 @@ public class GameManager : NetworkBehaviour
         entityData.SaveToJSON();
     }
     //Called by AIManager once AI stats are given back
-    public void SendToLobby()
+    [ObserversRpc]
+    public void RPC_LoadLobbyScene()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+    }
+    public void SendToLobby()
+    {
+        RPC_LoadLobbyScene();
         Destroy(gameObject);
     }
     public void ShowGameResult(Entity.Team result)
