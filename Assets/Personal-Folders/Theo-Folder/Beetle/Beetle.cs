@@ -1,4 +1,4 @@
-// Beetle.cs - FULLY ADAPTED TO MOSQUITO STRUCTURE
+// Beetle.cs - ADAPTED WITH MOSQUITO COOLDOWN BEHAVIOR
 using PurrNet;
 using System.Collections;
 using UnityEngine;
@@ -16,7 +16,9 @@ public class Beetle : NetworkBehaviour
     [SerializeField] private int mandibleBaseDamage = 12;
     [SerializeField] private float mandibleRange = 2.5f;
     [SerializeField] private float mandibleCooldown = 1.2f;
-    private float mandibleCooldownTimer = 0f;
+    [SerializeField] private int mandibleAbilityBarIndex = 0;
+    [SerializeField] private bool startMandibleCooldownLocallyOnInput = true;
+    [SerializeField] private bool enableMandibleDebugLogs = true;
 
     [Header("Horn Impale - Ability 1")]
     [SerializeField] private int hornImpaleDamage = 25;
@@ -25,12 +27,18 @@ public class Beetle : NetworkBehaviour
     [SerializeField] private float hornSlowAmount = 0.5f;
     [SerializeField] private float hornSlowDuration = 2f;
     [SerializeField] private float hornCooldown = 8f;
-    private float hornCooldownTimer = 0f;
+    [SerializeField] private int hornImpaleAbilityBarIndex = 0;
+    [SerializeField] private bool startHornImpaleCooldownLocallyOnInput = true;
+    [SerializeField] private bool enableHornImpaleDebugLogs = true;
 
     [Header("Swagger - Ability 2")]
     [SerializeField] private float swaggerMoveSpeedMult = 0.6f;
     [SerializeField] private float swaggerDamageReduction = 0.4f;
     [SerializeField] private float swaggerDuration = 6f;
+    [SerializeField] private float swaggerCooldown = 12f;
+    [SerializeField] private int swaggerAbilityBarIndex = 1;
+    [SerializeField] private bool startSwaggerCooldownLocallyOnInput = true;
+    [SerializeField] private bool enableSwaggerDebugLogs = true;
     private float swaggerTimer = 0f;
     private bool isSwaggerActive = false;
 
@@ -39,8 +47,10 @@ public class Beetle : NetworkBehaviour
     [SerializeField] private float rollSpeed = 15f;
     [SerializeField] private float rollKnockbackForce = 8f;
     [SerializeField] private float rollCooldown = 12f;
-    private float rollCooldownTimer = 0f;
-    private bool isRolling = false;
+    [SerializeField] private float rollDuration = 1.0f;
+    [SerializeField] private int rollAbilityBarIndex = 2;
+    [SerializeField] private bool startRollCooldownLocallyOnInput = true;
+    [SerializeField] private bool enableRollDebugLogs = true;
 
     [Header("Ground Stomp - Ultimate")]
     [SerializeField] private GameObject stompPrefab;
@@ -49,6 +59,10 @@ public class Beetle : NetworkBehaviour
     [SerializeField] private float stompDuration = 3f;
     [SerializeField] private float stompTickInterval = 0.5f;
     [SerializeField] private float stompStunDuration = 1.5f;
+    [SerializeField] private float stompCooldown = 20f;
+    [SerializeField] private int stompAbilityBarIndex = 3;
+    [SerializeField] private bool startStompCooldownLocallyOnInput = true;
+    [SerializeField] private bool enableStompDebugLogs = true;
 
     [Header("Animator")]
     [SerializeField] private Animator animator;
@@ -65,8 +79,22 @@ public class Beetle : NetworkBehaviour
     private Vector3 currentHornDirection = Vector3.forward;
 
     private Vector3 currentRollDirection = Vector3.forward;
-    [SerializeField] private float rollDuration = 1.0f;
     private bool isMovingAnimState = false;
+    private bool isRolling = false;
+
+    // Local cooldown timers
+    private float mandibleCooldownTimer = 0f;
+    private float hornCooldownTimer = 0f;
+    private float swaggerCooldownTimer = 0f;
+    private float rollCooldownTimer = 0f;
+    private float stompCooldownTimer = 0f;
+
+    // Server authoritative cooldown times
+    private float mandibleNextAllowedTimeServer = 0f;
+    private float hornImpaleNextAllowedTimeServer = 0f;
+    private float swaggerNextAllowedTimeServer = 0f;
+    private float rollNextAllowedTimeServer = 0f;
+    private float stompNextAllowedTimeServer = 0f;
 
     private void Awake()
     {
@@ -74,7 +102,6 @@ public class Beetle : NetworkBehaviour
         beetleRB = GetComponentInParent<Rigidbody>();
         predictedMovement = GetComponentInParent<PredictedPlayerMovement>();
         if (meshRenderer != null) originalColor = meshRenderer.material.color;
-        //if (animator == null) animator = GetComponentInChildren<Animator>();
     }
 
     protected override void OnSpawned(bool asServer)
@@ -94,7 +121,7 @@ public class Beetle : NetworkBehaviour
 
         predictedMovement = GetComponentInParent<PredictedPlayerMovement>();
 
-        if (inputTester == null) 
+        if (inputTester == null)
         {
             inputTester = GetComponent<BeetleInputTester>();
         }
@@ -108,10 +135,21 @@ public class Beetle : NetworkBehaviour
 
     private void Update()
     {
-        // Cooldowns
-        if (mandibleCooldownTimer > 0f) mandibleCooldownTimer -= Time.deltaTime;
-        if (hornCooldownTimer > 0f) hornCooldownTimer -= Time.deltaTime;
-        if (rollCooldownTimer > 0f) rollCooldownTimer -= Time.deltaTime;
+        // Update local cooldown timers
+        if (mandibleCooldownTimer > 0f)
+            mandibleCooldownTimer -= Time.deltaTime;
+
+        if (hornCooldownTimer > 0f)
+            hornCooldownTimer -= Time.deltaTime;
+
+        if (swaggerCooldownTimer > 0f)
+            swaggerCooldownTimer -= Time.deltaTime;
+
+        if (rollCooldownTimer > 0f)
+            rollCooldownTimer -= Time.deltaTime;
+
+        if (stompCooldownTimer > 0f)
+            stompCooldownTimer -= Time.deltaTime;
 
         if (abilityBar == null && player != null && player.isLocalPlayer())
             abilityBar = FindFirstObjectByType<AbilityBarUI>();
@@ -124,6 +162,12 @@ public class Beetle : NetworkBehaviour
         }
 
         UpdateIsMovingAnimation();
+    }
+
+    private void UpdateAbilityBarCooldown(int index, float cooldown)
+    {
+        if (abilityBar != null && player != null && player.isLocalPlayer())
+            abilityBar.UseAbility(index, cooldown);
     }
 
     private void UpdateIsMovingAnimation()
@@ -156,13 +200,36 @@ public class Beetle : NetworkBehaviour
     public void CastMandibleAttack()
     {
         if (!isController) return;
+
+        if (mandibleCooldownTimer > 0f)
+        {
+            if (enableMandibleDebugLogs)
+            {
+                Debug.Log($"[Beetle] Mandible Attack blocked locally | remaining={Mathf.Max(0f, mandibleCooldownTimer):F2}s | playerId={player.GetPlayerID()}");
+            }
+            return;
+        }
+
         Debug.Log($"Beetle CastMandibleAttack on {gameObject.name} isController:{isController}");
 
+        if (startMandibleCooldownLocallyOnInput)
+            StartMandibleCooldownClient(mandibleCooldown);
+
         PlayMandibleAnimServerRpc();
-        mandibleCooldownTimer = mandibleCooldown;
 
         if (isServer) ApplyMandibleAttack();
         else ApplyMandibleAttackServerRpc();
+    }
+
+    private void StartMandibleCooldownClient(float cooldown)
+    {
+        mandibleCooldownTimer = cooldown;
+        UpdateAbilityBarCooldown(mandibleAbilityBarIndex, cooldown);
+
+        if (enableMandibleDebugLogs)
+        {
+            Debug.Log($"[Beetle] Mandible Attack local cooldown started | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     [ServerRpc(requireOwnership: false)]
@@ -181,6 +248,22 @@ public class Beetle : NetworkBehaviour
     {
         if (player == null) return;
 
+        float serverTime = Time.time;
+        float remaining = mandibleNextAllowedTimeServer - serverTime;
+
+        if (enableMandibleDebugLogs)
+        {
+            Debug.Log($"[Beetle] Mandible Attack on server | playerId={player.GetPlayerID()} | serverTime={serverTime:F2} | nextAllowed={mandibleNextAllowedTimeServer:F2} | remaining={Mathf.Max(0f, remaining):F2}s");
+        }
+
+        if (serverTime < mandibleNextAllowedTimeServer)
+        {
+            RejectMandibleCooldownClientRpc(Mathf.Max(0f, remaining));
+            return;
+        }
+
+        mandibleNextAllowedTimeServer = serverTime + mandibleCooldown;
+
         Collider[] hits = Physics.OverlapSphere(transform.position + transform.forward * mandibleRange, mandibleRange);
         foreach (var hit in hits)
         {
@@ -191,15 +274,59 @@ public class Beetle : NetworkBehaviour
             }
         }
         Debug.Log("Mandible Attack! - Beetle.cs");
+
+        SyncMandibleCooldownClientRpc(mandibleCooldown);
+    }
+
+    [ObserversRpc]
+    private void SyncMandibleCooldownClientRpc(float cooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        mandibleCooldownTimer = Mathf.Max(mandibleCooldownTimer, cooldown);
+        UpdateAbilityBarCooldown(mandibleAbilityBarIndex, cooldown);
+
+        if (enableMandibleDebugLogs)
+        {
+            Debug.Log($"[Beetle] Mandible Attack cooldown synced | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
+    }
+
+    [ObserversRpc]
+    private void RejectMandibleCooldownClientRpc(float remainingCooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        mandibleCooldownTimer = Mathf.Max(mandibleCooldownTimer, remainingCooldown);
+
+        if (remainingCooldown > 0f)
+            UpdateAbilityBarCooldown(mandibleAbilityBarIndex, remainingCooldown);
+
+        if (enableMandibleDebugLogs)
+        {
+            Debug.Log($"[Beetle] Mandible Attack rejected by server | remaining={remainingCooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     // ABILITY 1 - HORN IMPALE
     public bool TryHornImpale()
     {
         if (!isController) return false;
-        if (hornCooldownTimer > 0f || player == null || isHornImpaling)
+
+        if (hornCooldownTimer > 0f)
         {
-            Debug.Log($"Horn Impale blocked - cooldown {hornCooldownTimer:F2}s remaining or already active");
+            if (enableHornImpaleDebugLogs)
+            {
+                Debug.Log($"[Beetle] Horn Impale blocked locally | remaining={Mathf.Max(0f, hornCooldownTimer):F2}s | playerId={player.GetPlayerID()}");
+            }
+            return false;
+        }
+
+        if (player == null || isHornImpaling)
+        {
+            Debug.Log($"Horn Impale blocked - player null or already active");
             return false;
         }
 
@@ -207,13 +334,29 @@ public class Beetle : NetworkBehaviour
         if (dashDirection.sqrMagnitude <= 0.001f)
             dashDirection = Vector3.forward;
 
+        if (enableHornImpaleDebugLogs)
+        {
+            Debug.Log($"[Beetle] Horn Impale requested locally | playerId={player.GetPlayerID()} | localTimer={hornCooldownTimer:F2}s");
+        }
+
+        if (startHornImpaleCooldownLocallyOnInput)
+            StartHornImpaleCooldownClient(hornCooldown);
+
         PlayHornImpaleAnimServerRpc();
         ServerStartHornImpaleRpc(dashDirection);
 
-        if (abilityBar != null && player != null && player.isLocalPlayer())
-            abilityBar.UseAbility(0, hornCooldown);
-
         return true;
+    }
+
+    private void StartHornImpaleCooldownClient(float cooldown)
+    {
+        hornCooldownTimer = cooldown;
+        UpdateAbilityBarCooldown(hornImpaleAbilityBarIndex, cooldown);
+
+        if (enableHornImpaleDebugLogs)
+        {
+            Debug.Log($"[Beetle] Horn Impale local cooldown started | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     [ServerRpc(requireOwnership: false)]
@@ -230,17 +373,34 @@ public class Beetle : NetworkBehaviour
     {
         if (!isServer) return;
         if (player == null) return;
+
+        float serverTime = Time.time;
+        float remaining = hornImpaleNextAllowedTimeServer - serverTime;
+
+        if (enableHornImpaleDebugLogs)
+        {
+            Debug.Log($"[Beetle] Horn Impale request on server | playerId={player.GetPlayerID()} | serverTime={serverTime:F2} | nextAllowed={hornImpaleNextAllowedTimeServer:F2} | remaining={Mathf.Max(0f, remaining):F2}s");
+        }
+
+        if (serverTime < hornImpaleNextAllowedTimeServer)
+        {
+            RejectHornImpaleCooldownClientRpc(Mathf.Max(0f, remaining));
+            return;
+        }
+
         if (hornCooldownTimer > 0f || isHornImpaling) return;
 
         Vector3 finalDirection = direction.normalized;
         if (finalDirection.sqrMagnitude <= 0.001f)
             finalDirection = transform.forward;
 
+        hornImpaleNextAllowedTimeServer = serverTime + hornCooldown;
         hornCooldownTimer = hornCooldown;
         isHornImpaling = true;
         currentHornDirection = finalDirection;
 
         BeginHornImpaleObserversRpc(finalDirection);
+        SyncHornImpaleCooldownClientRpc(hornCooldown);
 
         if (predictedMovement != null)
             predictedMovement.StartBeetleHornImpale(finalDirection, hornDashDistance, hornDashDuration);
@@ -259,6 +419,38 @@ public class Beetle : NetworkBehaviour
 
         if (!isServer && predictedMovement != null)
             predictedMovement.StartBeetleHornImpale(currentHornDirection, hornDashDistance, hornDashDuration);
+    }
+
+    [ObserversRpc]
+    private void SyncHornImpaleCooldownClientRpc(float cooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        hornCooldownTimer = Mathf.Max(hornCooldownTimer, cooldown);
+        UpdateAbilityBarCooldown(hornImpaleAbilityBarIndex, cooldown);
+
+        if (enableHornImpaleDebugLogs)
+        {
+            Debug.Log($"[Beetle] Horn Impale cooldown synced | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
+    }
+
+    [ObserversRpc]
+    private void RejectHornImpaleCooldownClientRpc(float remainingCooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        hornCooldownTimer = Mathf.Max(hornCooldownTimer, remainingCooldown);
+
+        if (remainingCooldown > 0f)
+            UpdateAbilityBarCooldown(hornImpaleAbilityBarIndex, remainingCooldown);
+
+        if (enableHornImpaleDebugLogs)
+        {
+            Debug.Log($"[Beetle] Horn Impale rejected by server | remaining={remainingCooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     public void NotifyHornImpaleEndedFromMovement()
@@ -310,25 +502,45 @@ public class Beetle : NetworkBehaviour
     public void ActivateSwagger()
     {
         if (!isController) return;
+
+        if (swaggerCooldownTimer > 0f)
+        {
+            if (enableSwaggerDebugLogs)
+            {
+                Debug.Log($"[Beetle] Swagger blocked locally by cooldown | remaining={Mathf.Max(0f, swaggerCooldownTimer):F2}s | playerId={player.GetPlayerID()}");
+            }
+            return;
+        }
+
         if (swaggerTimer > 0f)
         {
             Debug.Log("Swagger blocked - already active.");
             return;
         }
 
-        PlaySwaggerAnimServerRpc();
-        swaggerTimer = swaggerDuration;
-        isSwaggerActive = true;
+        if (enableSwaggerDebugLogs)
+        {
+            Debug.Log($"[Beetle] Swagger requested locally | playerId={player.GetPlayerID()} | localTimer={swaggerCooldownTimer:F2}s");
+        }
 
-        if (meshRenderer != null) meshRenderer.material.color = Color.yellow;
+        if (startSwaggerCooldownLocallyOnInput)
+            StartSwaggerCooldownClient(swaggerCooldown);
+
+        PlaySwaggerAnimServerRpc();
 
         if (isServer) ApplySwagger();
         else ApplySwaggerServerRpc();
+    }
 
-        if (abilityBar != null && player != null && player.isLocalPlayer())
-            abilityBar.UseAbility(1, swaggerDuration);
+    private void StartSwaggerCooldownClient(float cooldown)
+    {
+        swaggerCooldownTimer = cooldown;
+        UpdateAbilityBarCooldown(swaggerAbilityBarIndex, cooldown);
 
-        Debug.Log("Swagger ACTIVATED! - Beetle.cs");
+        if (enableSwaggerDebugLogs)
+        {
+            Debug.Log($"[Beetle] Swagger local cooldown started | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     [ServerRpc(requireOwnership: false)]
@@ -345,9 +557,70 @@ public class Beetle : NetworkBehaviour
 
     private void ApplySwagger()
     {
-        if (player != null)
+        if (player == null) return;
+
+        float serverTime = Time.time;
+        float remaining = swaggerNextAllowedTimeServer - serverTime;
+
+        if (enableSwaggerDebugLogs)
         {
-            player.ModifyMoveSpeedMultiplier(swaggerMoveSpeedMult, swaggerDuration);
+            Debug.Log($"[Beetle] Swagger request on server | playerId={player.GetPlayerID()} | serverTime={serverTime:F2} | nextAllowed={swaggerNextAllowedTimeServer:F2} | remaining={Mathf.Max(0f, remaining):F2}s");
+        }
+
+        if (serverTime < swaggerNextAllowedTimeServer)
+        {
+            RejectSwaggerCooldownClientRpc(Mathf.Max(0f, remaining));
+            return;
+        }
+
+        if (swaggerTimer > 0f)
+        {
+            Debug.Log("[Beetle] Swagger blocked on server - already active.");
+            return;
+        }
+
+        swaggerNextAllowedTimeServer = serverTime + swaggerCooldown;
+        swaggerTimer = swaggerDuration;
+        isSwaggerActive = true;
+
+        if (meshRenderer != null) meshRenderer.material.color = Color.yellow;
+
+        player.ModifyMoveSpeedMultiplier(swaggerMoveSpeedMult, swaggerDuration);
+
+        SyncSwaggerCooldownClientRpc(swaggerCooldown);
+
+        Debug.Log("Swagger ACTIVATED! - Beetle.cs");
+    }
+
+    [ObserversRpc]
+    private void SyncSwaggerCooldownClientRpc(float cooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        swaggerCooldownTimer = Mathf.Max(swaggerCooldownTimer, cooldown);
+        UpdateAbilityBarCooldown(swaggerAbilityBarIndex, cooldown);
+
+        if (enableSwaggerDebugLogs)
+        {
+            Debug.Log($"[Beetle] Swagger cooldown synced | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
+    }
+
+    [ObserversRpc]
+    private void RejectSwaggerCooldownClientRpc(float remainingCooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        swaggerCooldownTimer = Mathf.Max(swaggerCooldownTimer, remainingCooldown);
+
+        if (remainingCooldown > 0f)
+            UpdateAbilityBarCooldown(swaggerAbilityBarIndex, remainingCooldown);
+
+        if (enableSwaggerDebugLogs)
+        {
+            Debug.Log($"[Beetle] Swagger rejected by server | remaining={remainingCooldown:F2}s | playerId={player.GetPlayerID()}");
         }
     }
 
@@ -362,9 +635,19 @@ public class Beetle : NetworkBehaviour
     public bool TryRoll()
     {
         if (!isController) return false;
-        if (rollCooldownTimer > 0f || isRolling || player == null)
+
+        if (rollCooldownTimer > 0f)
         {
-            Debug.Log("Roll blocked - cooldown or already rolling");
+            if (enableRollDebugLogs)
+            {
+                Debug.Log($"[Beetle] Roll blocked locally | remaining={Mathf.Max(0f, rollCooldownTimer):F2}s | playerId={player.GetPlayerID()}");
+            }
+            return false;
+        }
+
+        if (isRolling || player == null)
+        {
+            Debug.Log("Roll blocked - already rolling");
             return false;
         }
 
@@ -372,14 +655,30 @@ public class Beetle : NetworkBehaviour
         if (finalDirection.sqrMagnitude <= 0.001f)
             finalDirection = Vector3.forward;
 
+        if (enableRollDebugLogs)
+        {
+            Debug.Log($"[Beetle] Roll requested locally | playerId={player.GetPlayerID()} | localTimer={rollCooldownTimer:F2}s");
+        }
+
+        if (startRollCooldownLocallyOnInput)
+            StartRollCooldownClient(rollCooldown);
+
         PlayRollAnimServerRpc();
         ServerStartRollRpc(finalDirection);
 
-        if (abilityBar != null && player != null && player.isLocalPlayer())
-            abilityBar.UseAbility(2, rollCooldown);
-
         Debug.Log("Roll requested! - Beetle.cs");
         return true;
+    }
+
+    private void StartRollCooldownClient(float cooldown)
+    {
+        rollCooldownTimer = cooldown;
+        UpdateAbilityBarCooldown(rollAbilityBarIndex, cooldown);
+
+        if (enableRollDebugLogs)
+        {
+            Debug.Log($"[Beetle] Roll local cooldown started | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     [ServerRpc(requireOwnership: false)]
@@ -396,17 +695,34 @@ public class Beetle : NetworkBehaviour
     {
         if (!isServer) return;
         if (player == null) return;
+
+        float serverTime = Time.time;
+        float remaining = rollNextAllowedTimeServer - serverTime;
+
+        if (enableRollDebugLogs)
+        {
+            Debug.Log($"[Beetle] Roll request on server | playerId={player.GetPlayerID()} | serverTime={serverTime:F2} | nextAllowed={rollNextAllowedTimeServer:F2} | remaining={Mathf.Max(0f, remaining):F2}s");
+        }
+
+        if (serverTime < rollNextAllowedTimeServer)
+        {
+            RejectRollCooldownClientRpc(Mathf.Max(0f, remaining));
+            return;
+        }
+
         if (rollCooldownTimer > 0f || isRolling) return;
 
         Vector3 finalDirection = direction.normalized;
         if (finalDirection.sqrMagnitude <= 0.001f)
             finalDirection = transform.forward;
 
+        rollNextAllowedTimeServer = serverTime + rollCooldown;
         rollCooldownTimer = rollCooldown;
         isRolling = true;
         currentRollDirection = finalDirection;
 
         BeginRollObserversRpc(finalDirection);
+        SyncRollCooldownClientRpc(rollCooldown);
 
         if (predictedMovement != null)
             predictedMovement.StartBeetleRoll(finalDirection, rollSpeed, rollDuration);
@@ -427,6 +743,38 @@ public class Beetle : NetworkBehaviour
 
         if (!isServer && predictedMovement != null)
             predictedMovement.StartBeetleRoll(currentRollDirection, rollSpeed, rollDuration);
+    }
+
+    [ObserversRpc]
+    private void SyncRollCooldownClientRpc(float cooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        rollCooldownTimer = Mathf.Max(rollCooldownTimer, cooldown);
+        UpdateAbilityBarCooldown(rollAbilityBarIndex, cooldown);
+
+        if (enableRollDebugLogs)
+        {
+            Debug.Log($"[Beetle] Roll cooldown synced | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
+    }
+
+    [ObserversRpc]
+    private void RejectRollCooldownClientRpc(float remainingCooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        rollCooldownTimer = Mathf.Max(rollCooldownTimer, remainingCooldown);
+
+        if (remainingCooldown > 0f)
+            UpdateAbilityBarCooldown(rollAbilityBarIndex, remainingCooldown);
+
+        if (enableRollDebugLogs)
+        {
+            Debug.Log($"[Beetle] Roll rejected by server | remaining={remainingCooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     public void NotifyRollEndedFromMovement()
@@ -469,10 +817,38 @@ public class Beetle : NetworkBehaviour
     {
         if (!isController) return;
 
+        if (stompCooldownTimer > 0f)
+        {
+            if (enableStompDebugLogs)
+            {
+                Debug.Log($"[Beetle] Ground Stomp blocked locally | remaining={Mathf.Max(0f, stompCooldownTimer):F2}s | playerId={player.GetPlayerID()}");
+            }
+            return;
+        }
+
+        if (enableStompDebugLogs)
+        {
+            Debug.Log($"[Beetle] Ground Stomp requested locally | playerId={player.GetPlayerID()} | localTimer={stompCooldownTimer:F2}s");
+        }
+
+        if (startStompCooldownLocallyOnInput)
+            StartStompCooldownClient(stompCooldown);
+
         PlayStompAnimServerRpc();
 
         if (isServer) ApplyGroundStomp();
         else GroundStompServerRpc();
+    }
+
+    private void StartStompCooldownClient(float cooldown)
+    {
+        stompCooldownTimer = cooldown;
+        UpdateAbilityBarCooldown(stompAbilityBarIndex, cooldown);
+
+        if (enableStompDebugLogs)
+        {
+            Debug.Log($"[Beetle] Ground Stomp local cooldown started | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     [ServerRpc(requireOwnership: false)]
@@ -492,6 +868,22 @@ public class Beetle : NetworkBehaviour
         if (stompPrefab == null) { Debug.LogError("[Beetle] stompPrefab is NULL!"); return; }
         if (player == null) { Debug.LogError("[Beetle] player is NULL!"); return; }
         if (networkManager == null) { Debug.LogError("[Beetle] networkManager is NULL!"); return; }
+
+        float serverTime = Time.time;
+        float remaining = stompNextAllowedTimeServer - serverTime;
+
+        if (enableStompDebugLogs)
+        {
+            Debug.Log($"[Beetle] Ground Stomp request on server | playerId={player.GetPlayerID()} | serverTime={serverTime:F2} | nextAllowed={stompNextAllowedTimeServer:F2} | remaining={Mathf.Max(0f, remaining):F2}s");
+        }
+
+        if (serverTime < stompNextAllowedTimeServer)
+        {
+            RejectStompCooldownClientRpc(Mathf.Max(0f, remaining));
+            return;
+        }
+
+        stompNextAllowedTimeServer = serverTime + stompCooldown;
 
         GameObject stompGO = Instantiate(stompPrefab, transform.position, Quaternion.identity);
 
@@ -514,7 +906,41 @@ public class Beetle : NetworkBehaviour
             stompStunDuration
         );
 
+        SyncStompCooldownClientRpc(stompCooldown);
+
         Debug.Log($"[Beetle] Ground Stomp spawned at {transform.position}");
+    }
+
+    [ObserversRpc]
+    private void SyncStompCooldownClientRpc(float cooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        stompCooldownTimer = Mathf.Max(stompCooldownTimer, cooldown);
+        UpdateAbilityBarCooldown(stompAbilityBarIndex, cooldown);
+
+        if (enableStompDebugLogs)
+        {
+            Debug.Log($"[Beetle] Ground Stomp cooldown synced | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
+    }
+
+    [ObserversRpc]
+    private void RejectStompCooldownClientRpc(float remainingCooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        stompCooldownTimer = Mathf.Max(stompCooldownTimer, remainingCooldown);
+
+        if (remainingCooldown > 0f)
+            UpdateAbilityBarCooldown(stompAbilityBarIndex, remainingCooldown);
+
+        if (enableStompDebugLogs)
+        {
+            Debug.Log($"[Beetle] Ground Stomp rejected by server | remaining={remainingCooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     public float GetMoveSpeedMultiplier()
