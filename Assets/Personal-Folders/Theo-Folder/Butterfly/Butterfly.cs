@@ -17,6 +17,10 @@ public class Butterfly : NetworkBehaviour
     [SerializeField] private int windBurstBaseDamage = 4;
     [SerializeField] private float windBurstSpeed = 10f;
     [SerializeField] private float windBurstRange = 6f;
+    [SerializeField] private float windBurstCooldown = 0.3f;
+    [SerializeField] private int windBurstAbilityBarIndex = 0;
+    [SerializeField] private bool startWindBurstCooldownLocallyOnInput = true;
+    [SerializeField] private bool enableWindBurstDebugLogs = true;
 
     [Header("Dust Wave - Ability 1")]
     [SerializeField] private GameObject dustWavePrefab;
@@ -24,7 +28,9 @@ public class Butterfly : NetworkBehaviour
     [SerializeField] private int dustWaveBaseDamage = 3;
     [SerializeField] private float dustWaveRadius = 4f;
     [SerializeField] private float dustWaveCooldown = 5f;
-    private float dustWaveCooldownTimer = 0f;
+    [SerializeField] private int dustWaveAbilityBarIndex = 0;
+    [SerializeField] private bool startDustWaveCooldownLocallyOnInput = true;
+    [SerializeField] private bool enableDustWaveDebugLogs = true;
 
     [Header("Dazzling Wave - Ability 2")]
     [SerializeField] private GameObject dazzlingWavePrefab;
@@ -35,7 +41,9 @@ public class Butterfly : NetworkBehaviour
     [SerializeField] private float dazzlingWaveCooldown = 6f;
     [SerializeField] private bool dazzlingWaveUpgradeReducedDamage = false;
     [SerializeField] private float dazzlingWaveDamageReductionMultiplier = 0.7f;
-    private float dazzlingWaveCooldownTimer = 0f;
+    [SerializeField] private int dazzlingWaveAbilityBarIndex = 1;
+    [SerializeField] private bool startDazzlingWaveCooldownLocallyOnInput = true;
+    [SerializeField] private bool enableDazzlingWaveDebugLogs = true;
 
     [Header("Fly - Ability 3")]
     [SerializeField] private float flyDashDistance = 8f;
@@ -44,6 +52,9 @@ public class Butterfly : NetworkBehaviour
     [SerializeField] private bool flyUpgradeTwoCharges = false;
     [SerializeField] private int flyMaxChargesBase = 1;
     [SerializeField] private int flyMaxChargesUpgraded = 2;
+    [SerializeField] private int flyAbilityBarIndex = 2;
+    [SerializeField] private bool startFlyCooldownLocallyOnInput = true;
+    [SerializeField] private bool enableFlyDebugLogs = true;
 
     [Header("Tornado - Ultimate")]
     [SerializeField] private GameObject tornadoPrefab;
@@ -52,13 +63,30 @@ public class Butterfly : NetworkBehaviour
     [SerializeField] private int tornadoBaseDamagePerTick = 2;
     [SerializeField] private float tornadoTickInterval = 0.5f;
     [SerializeField] private float tornadoGroupForce = 10f;
+    [SerializeField] private float tornadoCooldown = 30f;
+    [SerializeField] private int tornadoAbilityBarIndex = 3;
+    [SerializeField] private bool startTornadoCooldownLocallyOnInput = true;
+    [SerializeField] private bool enableTornadoDebugLogs = true;
 
     [Header("Animator")]
     [SerializeField] private Animator animator;
 
+    // Local cooldown timers
+    private float windBurstCooldownTimer = 0f;
+    private float dustWaveCooldownTimer = 0f;
+    private float dazzlingWaveCooldownTimer = 0f;
+    private float flyCooldownTimer = 0f;
+    private float tornadoCooldownTimer = 0f;
+
+    // Server authoritative cooldown times
+    private float windBurstNextAllowedTimeServer = 0f;
+    private float dustWaveNextAllowedTimeServer = 0f;
+    private float dazzlingWaveNextAllowedTimeServer = 0f;
+    private float flyNextAllowedTimeServer = 0f;
+    private float tornadoNextAllowedTimeServer = 0f;
+
     private int flyCurrentCharges = 0;
     private bool isFlying = false;
-    private float flyCooldownTimer = 0f;
     private Vector3 currentFlyDirection = Vector3.forward;
     private PredictedPlayerMovement predictedMovement;
 
@@ -83,7 +111,7 @@ public class Butterfly : NetworkBehaviour
 
         if (windBurstFirePoint == null)
             windBurstFirePoint = parentObject.GetComponent<PredictedPlayerMovement>().firingPoint.transform;
-        
+
         if (abilityBar == null && player != null && player.isLocalPlayer())
             abilityBar = FindFirstObjectByType<AbilityBarUI>();
 
@@ -102,14 +130,30 @@ public class Butterfly : NetworkBehaviour
 
     private void Update()
     {
+        // Update local cooldown timers
+        if (windBurstCooldownTimer > 0f)
+            windBurstCooldownTimer -= Time.deltaTime;
+
         if (dustWaveCooldownTimer > 0f)
             dustWaveCooldownTimer -= Time.deltaTime;
 
         if (dazzlingWaveCooldownTimer > 0f)
             dazzlingWaveCooldownTimer -= Time.deltaTime;
 
+        if (flyCooldownTimer > 0f)
+            flyCooldownTimer -= Time.deltaTime;
+
+        if (tornadoCooldownTimer > 0f)
+            tornadoCooldownTimer -= Time.deltaTime;
+
         if (isServer)
             HandleFlyChargeRecharge();
+    }
+
+    private void UpdateAbilityBarCooldown(int index, float cooldown)
+    {
+        if (abilityBar != null && player != null && player.isLocalPlayer())
+            abilityBar.UseAbility(index, cooldown);
     }
 
     #region Basic Attack - Wind Burst
@@ -118,6 +162,23 @@ public class Butterfly : NetworkBehaviour
     {
         if (player == null) return;
         if (!player.isLocalPlayer()) return;
+
+        if (windBurstCooldownTimer > 0f)
+        {
+            if (enableWindBurstDebugLogs)
+            {
+                Debug.Log($"[Butterfly] Wind Burst blocked locally | remaining={Mathf.Max(0f, windBurstCooldownTimer):F2}s | playerId={player.GetPlayerID()}");
+            }
+            return;
+        }
+
+        if (enableWindBurstDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Wind Burst requested locally | playerId={player.GetPlayerID()} | localTimer={windBurstCooldownTimer:F2}s");
+        }
+
+        if (startWindBurstCooldownLocallyOnInput)
+            StartWindBurstCooldownClient(windBurstCooldown);
 
         // Trigger animation locally
         if (animator != null)
@@ -131,16 +192,76 @@ public class Butterfly : NetworkBehaviour
         ServerSpawnWindBurstRpc(windBurstFirePoint.position, windBurstFirePoint.rotation, damage);
     }
 
+    private void StartWindBurstCooldownClient(float cooldown)
+    {
+        windBurstCooldownTimer = cooldown;
+        UpdateAbilityBarCooldown(windBurstAbilityBarIndex, cooldown);
+
+        if (enableWindBurstDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Wind Burst local cooldown started | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
+    }
+
     [ServerRpc(requireOwnership: false)]
     private void ServerSpawnWindBurstRpc(Vector3 position, Quaternion rotation, int damage)
     {
         if (!isServer) return;
+
+        float serverTime = Time.time;
+        float remaining = windBurstNextAllowedTimeServer - serverTime;
+
+        if (enableWindBurstDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Wind Burst request on server | playerId={player.GetPlayerID()} | serverTime={serverTime:F2} | nextAllowed={windBurstNextAllowedTimeServer:F2} | remaining={Mathf.Max(0f, remaining):F2}s");
+        }
+
+        if (serverTime < windBurstNextAllowedTimeServer)
+        {
+            RejectWindBurstCooldownClientRpc(Mathf.Max(0f, remaining));
+            return;
+        }
+
+        windBurstNextAllowedTimeServer = serverTime + windBurstCooldown;
 
         // Play animation on all observers
         PlayAnimationObserversRpc("WindBurst");
 
         Debug.Log($"[Butterfly] ServerSpawnWindBurstRpc received on server. damage={damage} player id={player.GetPlayerID()}");
         ServerSpawnWindBurst(position, rotation, damage);
+        SyncWindBurstCooldownClientRpc(windBurstCooldown);
+    }
+
+    [ObserversRpc]
+    private void SyncWindBurstCooldownClientRpc(float cooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        windBurstCooldownTimer = Mathf.Max(windBurstCooldownTimer, cooldown);
+        UpdateAbilityBarCooldown(windBurstAbilityBarIndex, cooldown);
+
+        if (enableWindBurstDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Wind Burst cooldown synced | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
+    }
+
+    [ObserversRpc]
+    private void RejectWindBurstCooldownClientRpc(float remainingCooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        windBurstCooldownTimer = Mathf.Max(windBurstCooldownTimer, remainingCooldown);
+
+        if (remainingCooldown > 0f)
+            UpdateAbilityBarCooldown(windBurstAbilityBarIndex, remainingCooldown);
+
+        if (enableWindBurstDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Wind Burst rejected by server | remaining={remainingCooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     private void ServerSpawnWindBurst(Vector3 position, Quaternion rotation, int damage)
@@ -183,7 +304,23 @@ public class Butterfly : NetworkBehaviour
     {
         if (player == null) return;
         if (!player.isLocalPlayer()) return;
-        if (dustWaveCooldownTimer > 0f) return;
+
+        if (dustWaveCooldownTimer > 0f)
+        {
+            if (enableDustWaveDebugLogs)
+            {
+                Debug.Log($"[Butterfly] Dust Wave blocked locally | remaining={Mathf.Max(0f, dustWaveCooldownTimer):F2}s | playerId={player.GetPlayerID()}");
+            }
+            return;
+        }
+
+        if (enableDustWaveDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Dust Wave requested locally | playerId={player.GetPlayerID()} | localTimer={dustWaveCooldownTimer:F2}s");
+        }
+
+        if (startDustWaveCooldownLocallyOnInput)
+            StartDustWaveCooldownClient(dustWaveCooldown);
 
         if (animator != null)
             animator.SetTrigger("DustStorm");
@@ -194,10 +331,17 @@ public class Butterfly : NetworkBehaviour
         Debug.Log("[Butterfly] Sending DustWave ServerRpc.");
 
         ServerSpawnDustWaveRpc(dustWaveOrigin.position, dustWaveOrigin.rotation, damage);
-        dustWaveCooldownTimer = dustWaveCooldown;
+    }
 
-        if (abilityBar != null)
-            abilityBar.UseAbility(0, dustWaveCooldown);
+    private void StartDustWaveCooldownClient(float cooldown)
+    {
+        dustWaveCooldownTimer = cooldown;
+        UpdateAbilityBarCooldown(dustWaveAbilityBarIndex, cooldown);
+
+        if (enableDustWaveDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Dust Wave local cooldown started | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     [ServerRpc(requireOwnership: false)]
@@ -205,11 +349,60 @@ public class Butterfly : NetworkBehaviour
     {
         if (!isServer) return;
 
+        float serverTime = Time.time;
+        float remaining = dustWaveNextAllowedTimeServer - serverTime;
+
+        if (enableDustWaveDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Dust Wave request on server | playerId={player.GetPlayerID()} | serverTime={serverTime:F2} | nextAllowed={dustWaveNextAllowedTimeServer:F2} | remaining={Mathf.Max(0f, remaining):F2}s");
+        }
+
+        if (serverTime < dustWaveNextAllowedTimeServer)
+        {
+            RejectDustWaveCooldownClientRpc(Mathf.Max(0f, remaining));
+            return;
+        }
+
+        dustWaveNextAllowedTimeServer = serverTime + dustWaveCooldown;
+
         // Play animation on all observers
         PlayAnimationObserversRpc("DustStorm");
 
         Debug.Log($"[Butterfly] ServerSpawnDustWaveRpc received on server. damage={damage} player id={player.GetPlayerID()}");
         ServerSpawnDustWave(position, rotation, damage);
+        SyncDustWaveCooldownClientRpc(dustWaveCooldown);
+    }
+
+    [ObserversRpc]
+    private void SyncDustWaveCooldownClientRpc(float cooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        dustWaveCooldownTimer = Mathf.Max(dustWaveCooldownTimer, cooldown);
+        UpdateAbilityBarCooldown(dustWaveAbilityBarIndex, cooldown);
+
+        if (enableDustWaveDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Dust Wave cooldown synced | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
+    }
+
+    [ObserversRpc]
+    private void RejectDustWaveCooldownClientRpc(float remainingCooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        dustWaveCooldownTimer = Mathf.Max(dustWaveCooldownTimer, remainingCooldown);
+
+        if (remainingCooldown > 0f)
+            UpdateAbilityBarCooldown(dustWaveAbilityBarIndex, remainingCooldown);
+
+        if (enableDustWaveDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Dust Wave rejected by server | remaining={remainingCooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     private void ServerSpawnDustWave(Vector3 position, Quaternion rotation, int damage)
@@ -252,7 +445,23 @@ public class Butterfly : NetworkBehaviour
     {
         if (player == null) return;
         if (!player.isLocalPlayer()) return;
-        if (dazzlingWaveCooldownTimer > 0f) return;
+
+        if (dazzlingWaveCooldownTimer > 0f)
+        {
+            if (enableDazzlingWaveDebugLogs)
+            {
+                Debug.Log($"[Butterfly] Dazzling Wave blocked locally | remaining={Mathf.Max(0f, dazzlingWaveCooldownTimer):F2}s | playerId={player.GetPlayerID()}");
+            }
+            return;
+        }
+
+        if (enableDazzlingWaveDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Dazzling Wave requested locally | playerId={player.GetPlayerID()} | localTimer={dazzlingWaveCooldownTimer:F2}s");
+        }
+
+        if (startDazzlingWaveCooldownLocallyOnInput)
+            StartDazzlingWaveCooldownClient(dazzlingWaveCooldown);
 
         if (animator != null)
             animator.SetTrigger("DazzlingWave");
@@ -263,10 +472,17 @@ public class Butterfly : NetworkBehaviour
         Debug.Log("[Butterfly] Sending DazzlingWave ServerRpc.");
 
         ServerSpawnDazzlingWaveRpc(dazzlingWaveOrigin.position, dazzlingWaveOrigin.rotation, damage);
-        dazzlingWaveCooldownTimer = dazzlingWaveCooldown;
+    }
 
-        if (abilityBar != null)
-            abilityBar.UseAbility(1, dazzlingWaveCooldown);
+    private void StartDazzlingWaveCooldownClient(float cooldown)
+    {
+        dazzlingWaveCooldownTimer = cooldown;
+        UpdateAbilityBarCooldown(dazzlingWaveAbilityBarIndex, cooldown);
+
+        if (enableDazzlingWaveDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Dazzling Wave local cooldown started | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     [ServerRpc(requireOwnership: false)]
@@ -274,11 +490,60 @@ public class Butterfly : NetworkBehaviour
     {
         if (!isServer) return;
 
+        float serverTime = Time.time;
+        float remaining = dazzlingWaveNextAllowedTimeServer - serverTime;
+
+        if (enableDazzlingWaveDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Dazzling Wave request on server | playerId={player.GetPlayerID()} | serverTime={serverTime:F2} | nextAllowed={dazzlingWaveNextAllowedTimeServer:F2} | remaining={Mathf.Max(0f, remaining):F2}s");
+        }
+
+        if (serverTime < dazzlingWaveNextAllowedTimeServer)
+        {
+            RejectDazzlingWaveCooldownClientRpc(Mathf.Max(0f, remaining));
+            return;
+        }
+
+        dazzlingWaveNextAllowedTimeServer = serverTime + dazzlingWaveCooldown;
+
         // Play animation on all observers
         PlayAnimationObserversRpc("DazzlingWave");
 
         Debug.Log($"[Butterfly] ServerSpawnDazzlingWaveRpc received on server. damage={damage} player id={player.GetPlayerID()}");
         ServerSpawnDazzlingWave(position, rotation, damage);
+        SyncDazzlingWaveCooldownClientRpc(dazzlingWaveCooldown);
+    }
+
+    [ObserversRpc]
+    private void SyncDazzlingWaveCooldownClientRpc(float cooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        dazzlingWaveCooldownTimer = Mathf.Max(dazzlingWaveCooldownTimer, cooldown);
+        UpdateAbilityBarCooldown(dazzlingWaveAbilityBarIndex, cooldown);
+
+        if (enableDazzlingWaveDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Dazzling Wave cooldown synced | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
+    }
+
+    [ObserversRpc]
+    private void RejectDazzlingWaveCooldownClientRpc(float remainingCooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        dazzlingWaveCooldownTimer = Mathf.Max(dazzlingWaveCooldownTimer, remainingCooldown);
+
+        if (remainingCooldown > 0f)
+            UpdateAbilityBarCooldown(dazzlingWaveAbilityBarIndex, remainingCooldown);
+
+        if (enableDazzlingWaveDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Dazzling Wave rejected by server | remaining={remainingCooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     private void ServerSpawnDazzlingWave(Vector3 position, Quaternion rotation, int damage)
@@ -334,6 +599,23 @@ public class Butterfly : NetworkBehaviour
             return;
         }
 
+        if (flyCooldownTimer > 0f)
+        {
+            if (enableFlyDebugLogs)
+            {
+                Debug.Log($"[Butterfly] Fly blocked locally by cooldown | remaining={Mathf.Max(0f, flyCooldownTimer):F2}s | playerId={player.GetPlayerID()}");
+            }
+            return;
+        }
+
+        if (enableFlyDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Fly requested locally | playerId={player.GetPlayerID()} | localTimer={flyCooldownTimer:F2}s");
+        }
+
+        if (startFlyCooldownLocallyOnInput)
+            StartFlyCooldownClient(flyCooldown);
+
         if (animator != null)
             animator.SetTrigger("Fly");
 
@@ -343,15 +625,37 @@ public class Butterfly : NetworkBehaviour
 
         Debug.Log($"[Butterfly] StartFly requested by local player. dir={finalDirection}");
         ServerStartFlyRpc(finalDirection);
+    }
 
-        if (abilityBar != null)
-            abilityBar.UseAbility(2, flyCooldown);
+    private void StartFlyCooldownClient(float cooldown)
+    {
+        flyCooldownTimer = cooldown;
+        UpdateAbilityBarCooldown(flyAbilityBarIndex, cooldown);
+
+        if (enableFlyDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Fly local cooldown started | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     [ServerRpc(requireOwnership: false)]
     private void ServerStartFlyRpc(Vector3 direction)
     {
         if (!isServer) return;
+
+        float serverTime = Time.time;
+        float remaining = flyNextAllowedTimeServer - serverTime;
+
+        if (enableFlyDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Fly request on server | playerId={player.GetPlayerID()} | serverTime={serverTime:F2} | nextAllowed={flyNextAllowedTimeServer:F2} | remaining={Mathf.Max(0f, remaining):F2}s");
+        }
+
+        if (serverTime < flyNextAllowedTimeServer)
+        {
+            RejectFlyCooldownClientRpc(Mathf.Max(0f, remaining));
+            return;
+        }
 
         if (isFlying)
         {
@@ -364,6 +668,8 @@ public class Butterfly : NetworkBehaviour
             Debug.Log("[Butterfly] ServerStartFlyRpc blocked - no charges.");
             return;
         }
+
+        flyNextAllowedTimeServer = serverTime + flyCooldown;
 
         // Play animation on all observers
         PlayAnimationObserversRpc("Fly");
@@ -380,9 +686,42 @@ public class Butterfly : NetworkBehaviour
         Debug.Log($"[Butterfly] Server starting Fly. Remaining charges={flyCurrentCharges}");
 
         BeginFlyObserversRpc(finalDirection);
+        SyncFlyCooldownClientRpc(flyCooldown);
 
         if (predictedMovement != null)
             predictedMovement.StartButterflyFly(finalDirection, flyDashDistance, flyDashDuration);
+    }
+
+    [ObserversRpc]
+    private void SyncFlyCooldownClientRpc(float cooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        flyCooldownTimer = Mathf.Max(flyCooldownTimer, cooldown);
+        UpdateAbilityBarCooldown(flyAbilityBarIndex, cooldown);
+
+        if (enableFlyDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Fly cooldown synced | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
+    }
+
+    [ObserversRpc]
+    private void RejectFlyCooldownClientRpc(float remainingCooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        flyCooldownTimer = Mathf.Max(flyCooldownTimer, remainingCooldown);
+
+        if (remainingCooldown > 0f)
+            UpdateAbilityBarCooldown(flyAbilityBarIndex, remainingCooldown);
+
+        if (enableFlyDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Fly rejected by server | remaining={remainingCooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     [ObserversRpc]
@@ -477,6 +816,23 @@ public class Butterfly : NetworkBehaviour
         if (player == null) return;
         if (!player.isLocalPlayer()) return;
 
+        if (tornadoCooldownTimer > 0f)
+        {
+            if (enableTornadoDebugLogs)
+            {
+                Debug.Log($"[Butterfly] Tornado blocked locally | remaining={Mathf.Max(0f, tornadoCooldownTimer):F2}s | playerId={player.GetPlayerID()}");
+            }
+            return;
+        }
+
+        if (enableTornadoDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Tornado requested locally | playerId={player.GetPlayerID()} | localTimer={tornadoCooldownTimer:F2}s");
+        }
+
+        if (startTornadoCooldownLocallyOnInput)
+            StartTornadoCooldownClient(tornadoCooldown);
+
         // Trigger animation locally
         if (animator != null)
             animator.SetTrigger("Tornado");
@@ -487,16 +843,76 @@ public class Butterfly : NetworkBehaviour
         ServerSpawnTornadoRpc(position, player.transform.forward);
     }
 
+    private void StartTornadoCooldownClient(float cooldown)
+    {
+        tornadoCooldownTimer = cooldown;
+        UpdateAbilityBarCooldown(tornadoAbilityBarIndex, cooldown);
+
+        if (enableTornadoDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Tornado local cooldown started | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
+    }
+
     [ServerRpc(requireOwnership: false)]
     private void ServerSpawnTornadoRpc(Vector3 position, Vector3 forwardDirection)
     {
         if (!isServer) return;
+
+        float serverTime = Time.time;
+        float remaining = tornadoNextAllowedTimeServer - serverTime;
+
+        if (enableTornadoDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Tornado request on server | playerId={player.GetPlayerID()} | serverTime={serverTime:F2} | nextAllowed={tornadoNextAllowedTimeServer:F2} | remaining={Mathf.Max(0f, remaining):F2}s");
+        }
+
+        if (serverTime < tornadoNextAllowedTimeServer)
+        {
+            RejectTornadoCooldownClientRpc(Mathf.Max(0f, remaining));
+            return;
+        }
+
+        tornadoNextAllowedTimeServer = serverTime + tornadoCooldown;
 
         // Play animation on all observers
         PlayAnimationObserversRpc("Tornado");
 
         Debug.Log($"[Butterfly] ServerSpawnTornadoRpc received on server. player id={player.GetPlayerID()}");
         ServerSpawnTornado(position, forwardDirection);
+        SyncTornadoCooldownClientRpc(tornadoCooldown);
+    }
+
+    [ObserversRpc]
+    private void SyncTornadoCooldownClientRpc(float cooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        tornadoCooldownTimer = Mathf.Max(tornadoCooldownTimer, cooldown);
+        UpdateAbilityBarCooldown(tornadoAbilityBarIndex, cooldown);
+
+        if (enableTornadoDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Tornado cooldown synced | cooldown={cooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
+    }
+
+    [ObserversRpc]
+    private void RejectTornadoCooldownClientRpc(float remainingCooldown)
+    {
+        if (player == null || !player.isLocalPlayer())
+            return;
+
+        tornadoCooldownTimer = Mathf.Max(tornadoCooldownTimer, remainingCooldown);
+
+        if (remainingCooldown > 0f)
+            UpdateAbilityBarCooldown(tornadoAbilityBarIndex, remainingCooldown);
+
+        if (enableTornadoDebugLogs)
+        {
+            Debug.Log($"[Butterfly] Tornado rejected by server | remaining={remainingCooldown:F2}s | playerId={player.GetPlayerID()}");
+        }
     }
 
     private void ServerSpawnTornado(Vector3 position, Vector3 forwardDirection)

@@ -68,6 +68,7 @@ MonoBehaviour:
     _sendIntervalInSeconds: 0
   canMove: 1
   canDefaultAttack: 1
+  showRewardRange: 1
   rewardRange: 50
   currentHitPoints:
     _value: 0
@@ -183,16 +184,24 @@ MonoBehaviour:
   _visitiblityRules: {fileID: 0}
   player: {fileID: 4751865395330377205}
   inputTester: {fileID: -8601327763796926948}
+  abilityBar: {fileID: 0}
   windBurstProjectilePrefab: {fileID: 7660528519338353513, guid: b499944282f2c7b4c99f69d1c1224545, type: 3}
   windBurstFirePoint: {fileID: 0}
   windBurstBaseDamage: 4
   windBurstSpeed: 10
   windBurstRange: 6
+  windBurstCooldown: 1
+  windBurstAbilityBarIndex: 0
+  startWindBurstCooldownLocallyOnInput: 1
+  enableWindBurstDebugLogs: 1
   dustWavePrefab: {fileID: 6924391199545212785, guid: b819ec516e52b894eb2cbc8b3bbca4a7, type: 3}
   dustWaveOrigin: {fileID: 0}
   dustWaveBaseDamage: 3
   dustWaveRadius: 4
   dustWaveCooldown: 5
+  dustWaveAbilityBarIndex: 0
+  startDustWaveCooldownLocallyOnInput: 1
+  enableDustWaveDebugLogs: 1
   dazzlingWavePrefab: {fileID: 4794335687598033782, guid: cb2d8024a613aec4da309fd4e12cd1af, type: 3}
   dazzlingWaveOrigin: {fileID: 0}
   dazzlingWaveBaseDamage: 2
@@ -201,18 +210,28 @@ MonoBehaviour:
   dazzlingWaveCooldown: 6
   dazzlingWaveUpgradeReducedDamage: 0
   dazzlingWaveDamageReductionMultiplier: 0.7
+  dazzlingWaveAbilityBarIndex: 1
+  startDazzlingWaveCooldownLocallyOnInput: 1
+  enableDazzlingWaveDebugLogs: 1
   flyDashDistance: 8
   flyDashDuration: 0.35
   flyCooldown: 7
   flyUpgradeTwoCharges: 0
   flyMaxChargesBase: 1
   flyMaxChargesUpgraded: 2
+  flyAbilityBarIndex: 2
+  startFlyCooldownLocallyOnInput: 1
+  enableFlyDebugLogs: 1
   tornadoPrefab: {fileID: 5316606323292454938, guid: 4df3dc496d02c134cad6c07df09a6112, type: 3}
   tornadoRadius: 5
   tornadoDuration: 10
   tornadoBaseDamagePerTick: 2
   tornadoTickInterval: 0.5
   tornadoGroupForce: 10
+  tornadoCooldown: 30
+  tornadoAbilityBarIndex: 3
+  startTornadoCooldownLocallyOnInput: 1
+  enableTornadoDebugLogs: 1
   animator: {fileID: 0}
 --- !u!114 &7316770039380160885
 MonoBehaviour:
