@@ -41,6 +41,10 @@ public class TabList : NetworkBehaviour
             {
                 StartCoroutine(ClientInitialize());
             }
+            else
+            {
+                SortEntries();
+            }
         }
 
         tabAction = InputSystem.actions.FindAction("Tab");
@@ -50,7 +54,7 @@ public class TabList : NetworkBehaviour
 
     private IEnumerator<WaitForSeconds> ServerInitialize()
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(5f);
 
         Debug.Log("Initializing Tab List on Server...");
 
@@ -101,7 +105,7 @@ public class TabList : NetworkBehaviour
 
     private IEnumerator<WaitForSeconds> ClientInitialize()
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(5f);
 
         if (!isServer)
         {
