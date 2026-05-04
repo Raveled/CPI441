@@ -18,6 +18,7 @@ public class GameManager : NetworkBehaviour
 
     //GameManager
     [Header("GameManager Setup")]
+    [SerializeField] public AIManager aiManager = null;
     [SerializeField] Transform[] spawnpoints_Team1 = null;
     [SerializeField] Transform[] spawnpoints_Team2 = null;
     [Tooltip("Time In Seconds")][SerializeField] float minionWaveSpawnInterval = 5f;
@@ -148,6 +149,8 @@ public class GameManager : NetworkBehaviour
         matchData = GetComponent<JSON_MatchData>();
         entityData = GetComponent<JSON_EntityData>();
         if (LoadJSONOnStart)LoadEntityJSON();
+
+        aiManager.FetchApiKey();
     }
     void Start() {
         //Init
@@ -340,7 +343,7 @@ public class GameManager : NetworkBehaviour
 
         //WIP
         if (!aiprompted) {
-            FindFirstObjectByType<AIManager>().AskAIForBalance();
+            aiManager.AskAIForBalance();
             aiprompted = true;
         }
 

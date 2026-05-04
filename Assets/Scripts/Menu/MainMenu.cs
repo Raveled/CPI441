@@ -9,6 +9,8 @@ public class MainMenu : MonoBehaviour
         if(settingsMenu)settingsMenu.SetActive(false);
         if(creditsMenu)creditsMenu.SetActive(false);
         if(characterInfoMenu)characterInfoMenu.SetActive(false);
+
+        Cursor.visible = true;
     }
     public void QuitGame() {
         Application.Quit();
